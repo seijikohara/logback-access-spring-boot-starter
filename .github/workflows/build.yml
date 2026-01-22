@@ -30,20 +30,15 @@ jobs:
       - name: Build the project
         run: ./mvnw clean install
       - name: Build the "examples/webmvc-tomcat-java" project
-        run: ./mvnw -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
-        working-directory: examples/webmvc-tomcat-java
+        run: ./mvnw -f examples/webmvc-tomcat-java/pom.xml -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
       - name: Build the "examples/webmvc-tomcat-kotlin" project
-        run: ./mvnw -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
-        working-directory: examples/webmvc-tomcat-kotlin
+        run: ./mvnw -f examples/webmvc-tomcat-kotlin/pom.xml -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
       - name: Build the "examples/webmvc-jetty-java" project
-        run: ./mvnw -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
-        working-directory: examples/webmvc-jetty-java
+        run: ./mvnw -f examples/webmvc-jetty-java/pom.xml -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
       - name: Build the "examples/webflux-tomcat-java" project
-        run: ./mvnw -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
-        working-directory: examples/webflux-tomcat-java
+        run: ./mvnw -f examples/webflux-tomcat-java/pom.xml -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
       - name: Build the "examples/webflux-jetty-java" project
-        run: ./mvnw -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
-        working-directory: examples/webflux-jetty-java
+        run: ./mvnw -f examples/webflux-jetty-java/pom.xml -Dlogback-access-spring-boot-starter.version=$PROJECT_VERSION clean install
       - name: Upload the coverage report to Codecov
         uses: codecov/codecov-action@v5.5.1
         with:
