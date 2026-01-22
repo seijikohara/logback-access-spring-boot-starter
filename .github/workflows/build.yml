@@ -48,3 +48,18 @@ jobs:
         uses: codecov/codecov-action@v5.5.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-24.04
+    needs: build
+    if: always()
+    steps:
+      - name: Check build results
+        run: |
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "All builds passed successfully"
+            exit 0
+          else
+            echo "Some builds failed"
+            exit 1
+          fi
