@@ -2,7 +2,6 @@ package io.github.seijikohara.logback.access.jetty
 
 import ch.qos.logback.access.common.AccessConstants.LB_INPUT_BUFFER
 import ch.qos.logback.access.common.AccessConstants.LB_OUTPUT_BUFFER
-import ch.qos.logback.access.common.servlet.Util.isFormUrlEncoded
 import ch.qos.logback.access.common.servlet.Util.isImageResponse
 import ch.qos.logback.access.jetty.JettyModernServerAdapter
 import ch.qos.logback.access.jetty.RequestWrapper
@@ -19,7 +18,6 @@ import org.eclipse.jetty.server.Response
 import org.eclipse.jetty.session.DefaultSessionIdManager
 import java.lang.System.currentTimeMillis
 import java.lang.Thread.currentThread
-import java.net.URLEncoder.encode
 import java.util.Collections.unmodifiableList
 import java.util.Collections.unmodifiableMap
 import kotlin.text.Charsets.UTF_8
@@ -138,12 +136,6 @@ class LogbackAccessJettyEventSource(
     override val requestContent: String? by lazy(LazyThreadSafetyMode.NONE) {
         overriddenRequestBody(request)?.also { return@lazy it }
         val bytes = request.getAttribute(LB_INPUT_BUFFER) as ByteArray?
-        if (bytes == null && isFormUrlEncoded(request)) {
-            return@lazy requestParameterMap.asSequence()
-                .flatMap { (key, values) -> values.asSequence().map { key to it } }
-                .map { (key, value) -> encode(key, UTF_8.name()) to encode(value, UTF_8.name()) }
-                .joinToString("&") { (key, value) -> "$key=$value" }
-        }
         bytes?.let { String(it, UTF_8) }
     }
 

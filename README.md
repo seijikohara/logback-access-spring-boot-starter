@@ -214,6 +214,7 @@ logback.access:
     # Defaults to the presence of RemoteIpValve enabled by the property "server.forward-headers-strategy=native".
     request-attributes-enabled: true
   # The properties for the tee filter.
+  # The tee filter is required to log request and response bodies.
   tee-filter:
     # Whether to enable the tee filter.
     # Defaults to false.
@@ -224,6 +225,42 @@ logback.access:
     # The host names to deactivate.
     # By default, all hosts are activated.
     excludes: your-production-host
+```
+
+### Request and Response Body Logging
+
+To log request and response bodies, you must enable the tee filter.
+
+```yaml
+logback.access:
+  tee-filter:
+    enabled: true
+```
+
+**Important Notes:**
+
+* Without the tee filter enabled, request and response bodies will not be logged.
+* The tee filter increases memory usage as it buffers the entire request and response bodies.
+* Consider enabling the tee filter only in development or testing environments.
+
+#### Body Capture Support Matrix
+
+|                          | Servlet Stack (with TeeFilter) | Reactive Stack |
+|:-------------------------|:------------------------------:|:--------------:|
+| `application/json`       |               ✅               |       ❌       |
+| `text/plain`             |               ✅               |       ❌       |
+| `application/xml`        |               ✅               |       ❌       |
+| `application/x-www-form-urlencoded` |        ❌ (※)          |       ❌       |
+| `multipart/form-data`    |               ❌               |       ❌       |
+
+※ `application/x-www-form-urlencoded` request bodies cannot be captured due to Servlet specification constraints.
+The Servlet container consumes the request body for parameter parsing before the tee filter can capture it.
+Use `%requestParameter{name}` pattern or access `requestParameterMap` for form data instead.
+
+Example Logback-access pattern to include request body:
+
+```xml
+<pattern>%h %l %u %t "%r" %s %b "%requestContent"</pattern>
 ```
 
 ## API Reference
