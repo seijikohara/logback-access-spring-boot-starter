@@ -120,6 +120,19 @@ class MockController {
         return response
     }
 
+    /**
+     * Posts the JSON data.
+     *
+     * @param posted The posted JSON data.
+     * @return A text.
+     */
+    @PostMapping("/json", consumes = ["application/json"])
+    fun postJson(@RequestBody posted: JsonData): String {
+        val response = "mock-text"
+        log.debug("Posting the JSON: {} => {}", posted, response)
+        return response
+    }
+
     companion object {
 
         /**
@@ -136,4 +149,12 @@ class MockController {
      * @property c The string value.
      */
     data class FormData(val a: String?, val b: List<String>?, val c: String?)
+
+    /**
+     * The JSON data.
+     *
+     * @property name The name.
+     * @property value The value.
+     */
+    data class JsonData(val name: String?, val value: Int?)
 }
