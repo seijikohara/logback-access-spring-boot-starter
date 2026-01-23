@@ -41,7 +41,6 @@ sealed class SequenceNumberTest {
         }
         capture.map { it.sequenceNumber }.shouldBeUnique().shouldBeSorted()
     }
-
 }
 
 /**

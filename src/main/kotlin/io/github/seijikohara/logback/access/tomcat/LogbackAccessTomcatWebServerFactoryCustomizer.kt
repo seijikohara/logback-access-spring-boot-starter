@@ -33,7 +33,5 @@ class LogbackAccessTomcatWebServerFactoryCustomizer(
          * The logger.
          */
         private val log: Logger = getLogger(LogbackAccessTomcatWebServerFactoryCustomizer::class.java)
-
     }
-
 }

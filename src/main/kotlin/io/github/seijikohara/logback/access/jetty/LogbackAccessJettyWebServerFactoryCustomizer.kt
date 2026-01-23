@@ -48,7 +48,5 @@ class LogbackAccessJettyWebServerFactoryCustomizer(
          * The logger.
          */
         private val log: Logger = getLogger(LogbackAccessJettyWebServerFactoryCustomizer::class.java)
-
     }
-
 }

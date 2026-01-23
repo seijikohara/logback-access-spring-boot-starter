@@ -33,5 +33,4 @@ class LogbackAccessJoranSpringPropertyModelHandler(
         val value = environment.getProperty(source, defaultValue)
         setProperty(ic, name, value, scope)
     }
-
 }

@@ -61,7 +61,6 @@ sealed class BasicTest {
         val regex = Regex("""^127\.0\.0\.1 - - \[.+] "GET /mock-controller/text HTTP/1\.1" 200 9$""")
         assertLogbackAccessEventsEventually { capture.out.lines().shouldHaveSingleElement { it matches regex } }
     }
-
 }
 
 /**

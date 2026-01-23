@@ -28,7 +28,6 @@ sealed class InactiveTest {
     ) {
         logbackAccessContext.shouldBeNull()
     }
-
 }
 
 /**

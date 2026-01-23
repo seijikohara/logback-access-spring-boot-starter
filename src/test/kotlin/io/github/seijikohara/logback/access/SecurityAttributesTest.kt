@@ -64,37 +64,40 @@ sealed class SecurityAttributesTest(
             event.remoteUser.shouldBe("-")
         }
     }
-
 }
 
 /**
  * Tests the [SecurityAttributesTest] using the Tomcat servlet web server.
  */
 @TomcatServletWebTest
-class TomcatServletWebSecurityAttributesTest : SecurityAttributesTest(
-    supportsRemoteUsers = true,
-)
+class TomcatServletWebSecurityAttributesTest :
+    SecurityAttributesTest(
+        supportsRemoteUsers = true,
+    )
 
 /**
  * Tests the [SecurityAttributesTest] using the Tomcat reactive web server.
  */
 @TomcatReactiveWebTest
-class TomcatReactiveWebSecurityAttributesTest : SecurityAttributesTest(
-    supportsRemoteUsers = false,
-)
+class TomcatReactiveWebSecurityAttributesTest :
+    SecurityAttributesTest(
+        supportsRemoteUsers = false,
+    )
 
 /**
  * Tests the [SecurityAttributesTest] using the Jetty servlet web server.
  */
 @JettyServletWebTest
-class JettyServletWebSecurityAttributesTest : SecurityAttributesTest(
-    supportsRemoteUsers = true,
-)
+class JettyServletWebSecurityAttributesTest :
+    SecurityAttributesTest(
+        supportsRemoteUsers = true,
+    )
 
 /**
  * Tests the [SecurityAttributesTest] using the Jetty reactive web server.
  */
 @JettyReactiveWebTest
-class JettyReactiveWebSecurityAttributesTest : SecurityAttributesTest(
-    supportsRemoteUsers = false,
-)
+class JettyReactiveWebSecurityAttributesTest :
+    SecurityAttributesTest(
+        supportsRemoteUsers = false,
+    )

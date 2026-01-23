@@ -30,5 +30,4 @@ class LogbackAccessJoranSpringProfileModelHandler(
             model.deepMarkAsSkipped()
         }
     }
-
 }

@@ -43,7 +43,5 @@ class LogbackAccessJettyRequestLog(
          * The logger.
          */
         private val log: Logger = getLogger(LogbackAccessJettyRequestLog::class.java)
-
     }
-
 }
