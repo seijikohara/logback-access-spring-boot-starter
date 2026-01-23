@@ -303,18 +303,6 @@
                 <groupId>com.github.ozsie</groupId>
                 <artifactId>detekt-maven-plugin</artifactId>
                 <version>1.23.8</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>io.gitlab.arturbosch.detekt</groupId>
-                        <artifactId>detekt-cli</artifactId>
-                        <version>1.23.8</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>io.gitlab.arturbosch.detekt</groupId>
-                        <artifactId>detekt-formatting</artifactId>
-                        <version>1.23.8</version>
-                    </dependency>
-                </dependencies>
                 <configuration>
                     <buildUponDefaultConfig>true</buildUponDefaultConfig>
                     <config>.detekt/config.yml</config>

@@ -221,10 +221,7 @@ sealed class BasicEventTest(
     }
 
     @Test
-    fun `Appends a Logback-access event with a session`(
-        @Autowired rest: TestRestTemplate,
-        capture: EventsCapture,
-    ) {
+    fun `Appends a Logback-access event with a session`(@Autowired rest: TestRestTemplate, capture: EventsCapture) {
         val request = RequestEntity.get("/mock-controller/text-with-session").build()
         val response = rest.exchange<String>(request)
         response.statusCode.value().shouldBe(200)

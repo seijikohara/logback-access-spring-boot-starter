@@ -43,9 +43,7 @@ import org.springframework.test.context.TestPropertySource
  */
 @ExtendWith(EventsCaptureExtension::class)
 @TestPropertySource(properties = ["logback.access.config=classpath:logback-access-test.capture.xml"])
-sealed class InvalidAccessEventTest(
-    private val queryString: String,
-) {
+sealed class InvalidAccessEventTest(private val queryString: String) {
 
     @Test
     fun `Appends a Logback-access event with an invalid URL`(

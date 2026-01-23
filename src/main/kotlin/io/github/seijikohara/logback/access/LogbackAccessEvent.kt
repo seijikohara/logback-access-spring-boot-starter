@@ -72,7 +72,9 @@ class LogbackAccessEvent(private var source: LogbackAccessEventSource) :
 
     override fun getCookie(key: String): String = source.cookieMap[key] ?: NA
 
-    override fun getRequestParameterMap(): Map<String, Array<String>> = source.requestParameterMap.mapValues { it.value.toTypedArray() }
+    override fun getRequestParameterMap(): Map<String, Array<String>> = source.requestParameterMap.mapValues {
+        it.value.toTypedArray()
+    }
 
     override fun getRequestParameter(key: String): Array<String> {
         val values = source.requestParameterMap[key] ?: return arrayOf(NA)

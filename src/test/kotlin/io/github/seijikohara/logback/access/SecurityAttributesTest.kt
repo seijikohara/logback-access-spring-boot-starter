@@ -45,9 +45,7 @@ import org.springframework.test.context.TestPropertySource
         "logback.access.config=classpath:logback-access-test.capture.xml",
     ],
 )
-sealed class SecurityAttributesTest(
-    private val supportsRemoteUsers: Boolean,
-) {
+sealed class SecurityAttributesTest(private val supportsRemoteUsers: Boolean) {
 
     @Test
     fun `Rewrites the remote user of the appended Logback-access event with Spring Security`(

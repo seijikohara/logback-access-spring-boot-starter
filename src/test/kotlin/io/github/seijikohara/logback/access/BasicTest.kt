@@ -50,10 +50,7 @@ sealed class BasicTest {
     }
 
     @Test
-    fun `Appends a Logback-access event`(
-        @Autowired rest: TestRestTemplate,
-        capture: CapturedOutput,
-    ) {
+    fun `Appends a Logback-access event`(@Autowired rest: TestRestTemplate, capture: CapturedOutput) {
         val request = RequestEntity.get("/mock-controller/text").build()
         val response = rest.exchange<String>(request)
         response.statusCode.value().shouldBe(200)

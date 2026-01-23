@@ -18,9 +18,8 @@ import org.slf4j.LoggerFactory.getLogger
  * @see org.apache.catalina.valves.AccessLogValve
  * @see ch.qos.logback.access.tomcat.LogbackValve
  */
-class LogbackAccessTomcatValve(
-    private val logbackAccessContext: LogbackAccessContext,
-) : ValveBase(true),
+class LogbackAccessTomcatValve(private val logbackAccessContext: LogbackAccessContext) :
+    ValveBase(true),
     AccessLog {
 
     /**

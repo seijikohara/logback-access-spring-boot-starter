@@ -62,13 +62,11 @@ sealed class TeeFilterInactiveTest(
  * @property supportsRequestContents Whether to support request contents.
  * @property supportsResponseContents Whether to support response contents.
  */
-sealed class TeeFilterHostNotIncludedTest(
-    supportsRequestContents: Boolean,
-    supportsResponseContents: Boolean,
-) : TeeFilterInactiveTest(
-    supportsRequestContents = supportsRequestContents,
-    supportsResponseContents = supportsResponseContents,
-) {
+sealed class TeeFilterHostNotIncludedTest(supportsRequestContents: Boolean, supportsResponseContents: Boolean) :
+    TeeFilterInactiveTest(
+        supportsRequestContents = supportsRequestContents,
+        supportsResponseContents = supportsResponseContents,
+    ) {
 
     companion object {
 
@@ -132,13 +130,11 @@ class JettyReactiveWebTeeFilterHostNotIncludedTest :
  * @property supportsRequestContents Whether to support request contents.
  * @property supportsResponseContents Whether to support response contents.
  */
-sealed class TeeFilterHostExcludedTest(
-    supportsRequestContents: Boolean,
-    supportsResponseContents: Boolean,
-) : TeeFilterInactiveTest(
-    supportsRequestContents = supportsRequestContents,
-    supportsResponseContents = supportsResponseContents,
-) {
+sealed class TeeFilterHostExcludedTest(supportsRequestContents: Boolean, supportsResponseContents: Boolean) :
+    TeeFilterInactiveTest(
+        supportsRequestContents = supportsRequestContents,
+        supportsResponseContents = supportsResponseContents,
+    ) {
 
     companion object {
 
