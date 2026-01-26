@@ -133,6 +133,31 @@ class MockController {
         return response
     }
 
+    /**
+     * Gets a large response body for testing large payload handling.
+     *
+     * @return A 1MB string response.
+     */
+    @GetMapping("/large-response")
+    fun getLargeResponse(): String {
+        val response = "x".repeat(1_000_000)
+        log.debug("Getting a large response: {} bytes", response.length)
+        return response
+    }
+
+    /**
+     * Posts a large request body for testing large payload handling.
+     *
+     * @param body The posted large request body.
+     * @return A confirmation message with the received size.
+     */
+    @PostMapping("/large-request")
+    fun postLargeRequest(@RequestBody body: String): String {
+        val response = "received: ${body.length} bytes"
+        log.debug("Posting a large request: {} bytes => {}", body.length, response)
+        return response
+    }
+
     companion object {
 
         /**

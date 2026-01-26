@@ -4,6 +4,7 @@ import ch.qos.logback.access.common.spi.IAccessEvent
 import io.github.seijikohara.logback.access.value.LogbackAccessLocalPortStrategy
 import org.apache.catalina.valves.RemoteIpValve
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.util.unit.DataSize
 
 /**
  * The configuration properties for Logback-access.
@@ -88,6 +89,14 @@ constructor(
      * @property excludes
      *  The host names to deactivate.
      *  By default, all hosts are activated.
+     * @property maxRequestBodySize
+     *  The maximum size of the captured request body.
+     *  Content exceeding this limit will be truncated with a "[TRUNCATED]" indicator.
+     *  Defaults to 64KB.
+     * @property maxResponseBodySize
+     *  The maximum size of the captured response body.
+     *  Content exceeding this limit will be truncated with a "[TRUNCATED]" indicator.
+     *  Defaults to 64KB.
      */
     data class TeeFilter
     @JvmOverloads
@@ -95,5 +104,17 @@ constructor(
         val enabled: Boolean = false,
         val includes: String? = null,
         val excludes: String? = null,
-    )
+        val maxRequestBodySize: DataSize = DEFAULT_BODY_SIZE,
+        val maxResponseBodySize: DataSize = DEFAULT_BODY_SIZE,
+    ) {
+        companion object {
+            /**
+             * The default maximum body size for request and response capture.
+             */
+            @JvmField
+            val DEFAULT_BODY_SIZE: DataSize = DataSize.ofKilobytes(DEFAULT_BODY_SIZE_KB)
+
+            private const val DEFAULT_BODY_SIZE_KB = 64L
+        }
+    }
 }

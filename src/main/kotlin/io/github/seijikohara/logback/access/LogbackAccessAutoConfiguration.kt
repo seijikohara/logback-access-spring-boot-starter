@@ -1,11 +1,13 @@
 package io.github.seijikohara.logback.access
 
+import io.github.seijikohara.logback.access.aot.LogbackAccessRuntimeHints
 import io.github.seijikohara.logback.access.jetty.LogbackAccessJettyConfiguration
 import io.github.seijikohara.logback.access.netty.LogbackAccessNettyConfiguration
 import io.github.seijikohara.logback.access.security.LogbackAccessSecurityServletFilterConfiguration
 import io.github.seijikohara.logback.access.tee.LogbackAccessTeeServletFilterConfiguration
 import io.github.seijikohara.logback.access.tomcat.LogbackAccessTomcatConfiguration
 import io.github.seijikohara.logback.access.tracing.LogbackAccessTracingServletFilterConfiguration
+import io.github.seijikohara.logback.access.tracing.LogbackAccessTracingWebFilterConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.autoconfigure.AutoConfigureBefore
@@ -18,6 +20,7 @@ import org.springframework.boot.web.server.autoconfigure.servlet.ServletWebServe
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.ImportRuntimeHints
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ResourceLoader
 
@@ -29,6 +32,7 @@ import org.springframework.core.io.ResourceLoader
 @ConditionalOnProperty(prefix = "logback.access", name = ["enabled"], havingValue = "true", matchIfMissing = true)
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(LogbackAccessProperties::class)
+@ImportRuntimeHints(LogbackAccessRuntimeHints::class)
 @Import(
     LogbackAccessTomcatConfiguration::class,
     LogbackAccessJettyConfiguration::class,
@@ -36,6 +40,7 @@ import org.springframework.core.io.ResourceLoader
     LogbackAccessSecurityServletFilterConfiguration::class,
     LogbackAccessTeeServletFilterConfiguration::class,
     LogbackAccessTracingServletFilterConfiguration::class,
+    LogbackAccessTracingWebFilterConfiguration::class,
 )
 class LogbackAccessAutoConfiguration {
 

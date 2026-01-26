@@ -5,6 +5,7 @@ import io.github.seijikohara.logback.access.test.configuration.TracingTestConfig
 import io.github.seijikohara.logback.access.test.extension.EventsCapture
 import io.github.seijikohara.logback.access.test.extension.EventsCaptureExtension
 import io.github.seijikohara.logback.access.test.type.JettyServletWebTest
+import io.github.seijikohara.logback.access.test.type.NettyReactiveWebTest
 import io.github.seijikohara.logback.access.test.type.TomcatServletWebTest
 import io.github.seijikohara.logback.access.tracing.LogbackAccessTracingServletFilter.Companion.SPAN_ID_ATTRIBUTE
 import io.github.seijikohara.logback.access.tracing.LogbackAccessTracingServletFilter.Companion.TRACE_ID_ATTRIBUTE
@@ -72,6 +73,15 @@ class TomcatServletWebTracingAttributesTest :
  */
 @JettyServletWebTest
 class JettyServletWebTracingAttributesTest :
+    TracingAttributesTest(
+        supportsTracing = true,
+    )
+
+/**
+ * Tests the [TracingAttributesTest] using the Netty reactive web server.
+ */
+@NettyReactiveWebTest
+class NettyReactiveWebTracingAttributesTest :
     TracingAttributesTest(
         supportsTracing = true,
     )

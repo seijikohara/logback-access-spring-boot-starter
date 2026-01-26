@@ -41,6 +41,20 @@
       "description": "The strategy to change the behavior of IAccessEvent.getLocalPort."
     },
     {
+      "name": "logback.access.exclude-patterns",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties",
+      "description": "The URI patterns to exclude from access logging. Supports Ant-style path patterns (e.g., /actuator/**, /health).",
+      "defaultValue": []
+    },
+    {
+      "name": "logback.access.exclude-successful-only",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties",
+      "description": "When true, only exclude requests that return successful status codes (2xx). When false (default), exclude all requests matching the patterns regardless of status.",
+      "defaultValue": false
+    },
+    {
       "name": "logback.access.tomcat.request-attributes-enabled",
       "type": "java.lang.Boolean",
       "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties$Tomcat",
@@ -64,8 +78,35 @@
       "type": "java.lang.String",
       "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties$TeeFilter",
       "description": "The host names to deactivate. By default, all hosts are activated."
+    },
+    {
+      "name": "logback.access.tee-filter.max-request-body-size",
+      "type": "org.springframework.util.unit.DataSize",
+      "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties$TeeFilter",
+      "description": "Maximum size of captured request body. Content exceeding this limit will be truncated with a [TRUNCATED] indicator.",
+      "defaultValue": "64KB"
+    },
+    {
+      "name": "logback.access.tee-filter.max-response-body-size",
+      "type": "org.springframework.util.unit.DataSize",
+      "sourceType": "io.github.seijikohara.logback.access.LogbackAccessProperties$TeeFilter",
+      "description": "Maximum size of captured response body. Content exceeding this limit will be truncated with a [TRUNCATED] indicator.",
+      "defaultValue": "64KB"
     }
   ],
   "hints": [
+    {
+      "name": "logback.access.local-port-strategy",
+      "values": [
+        {
+          "value": "local",
+          "description": "Returns the port number of the interface on which the request was received."
+        },
+        {
+          "value": "server",
+          "description": "Returns the port number to which the request was sent."
+        }
+      ]
+    }
   ]
 }

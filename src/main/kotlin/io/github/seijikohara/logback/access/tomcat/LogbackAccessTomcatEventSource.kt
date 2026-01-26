@@ -9,6 +9,7 @@ import io.github.seijikohara.logback.access.LogbackAccessEventSource
 import io.github.seijikohara.logback.access.LogbackAccessHackyLoggingOverrides.overriddenRequestBody
 import io.github.seijikohara.logback.access.LogbackAccessHackyLoggingOverrides.overriddenResponseBody
 import io.github.seijikohara.logback.access.security.LogbackAccessSecurityServletFilter.Companion.REMOTE_USER_ATTRIBUTE
+import io.github.seijikohara.logback.access.tee.TeeFilterBodyTruncator
 import io.github.seijikohara.logback.access.value.LogbackAccessLocalPortStrategy
 import org.apache.catalina.AccessLog.PROTOCOL_ATTRIBUTE
 import org.apache.catalina.AccessLog.REMOTE_ADDR_ATTRIBUTE
@@ -131,7 +132,10 @@ class LogbackAccessTomcatEventSource(
     override val requestContent: String? by lazy(LazyThreadSafetyMode.NONE) {
         overriddenRequestBody(request)?.also { return@lazy it }
         val bytes = request.getAttribute(LB_INPUT_BUFFER) as ByteArray?
-        bytes?.let { String(it, UTF_8) }
+        TeeFilterBodyTruncator.truncateToString(
+            bytes,
+            logbackAccessContext.properties.teeFilter.maxRequestBodySize,
+        )
     }
 
     override val statusCode: Int by lazy(LazyThreadSafetyMode.NONE) {
@@ -152,7 +156,10 @@ class LogbackAccessTomcatEventSource(
         overriddenResponseBody(request, response)?.also { return@lazy it }
         if (isImageResponse(response)) return@lazy "[IMAGE CONTENTS SUPPRESSED]"
         val bytes = request.getAttribute(LB_OUTPUT_BUFFER) as ByteArray?
-        bytes?.let { String(it, UTF_8) }
+        TeeFilterBodyTruncator.truncateToString(
+            bytes,
+            logbackAccessContext.properties.teeFilter.maxResponseBodySize,
+        )
     }
 
     /**
