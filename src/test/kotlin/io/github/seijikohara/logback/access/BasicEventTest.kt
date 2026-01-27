@@ -393,7 +393,7 @@ class JettyReactiveWebBasicEventTest :
 class NettyReactiveWebBasicEventTest :
     BasicEventTest(
         supportsRequestParametersByFormData = false,
-        supportsRequestAttributes = false,
+        supportsRequestAttributes = true,
         supportsSessionIDs = false,
         canForwardRequests = false,
     )

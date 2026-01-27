@@ -42,7 +42,13 @@ class LogbackAccessNettyWebFilter(
                 try {
                     logAccess(decoratedExchange, startTime, bytesWritten.get())
                 } catch (e: Exception) {
-                    log.warn("Failed to log access event", e)
+                    log.warn(
+                        "Failed to log access event for {} {} - {}",
+                        decoratedExchange.request.method,
+                        decoratedExchange.request.uri.path,
+                        e.message,
+                        e,
+                    )
                 }
             }
     }
@@ -65,6 +71,7 @@ class LogbackAccessNettyWebFilter(
             serverHttpResponse = response,
             startTime = startTime,
             responseContentLength = bytesWritten,
+            exchangeAttributes = exchange.attributes,
         )
         val event = LogbackAccessEvent(source)
         logbackAccessContext.emit(event)

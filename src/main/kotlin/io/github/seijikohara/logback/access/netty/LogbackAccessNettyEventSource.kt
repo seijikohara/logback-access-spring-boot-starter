@@ -26,6 +26,7 @@ import kotlin.text.Charsets.UTF_8
  * @property responseContentLength The content length of the response body.
  * @property requestBody The captured request body.
  * @property responseBody The captured response body.
+ * @property exchangeAttributes The attributes from the ServerWebExchange.
  */
 @Suppress("LongParameterList")
 class LogbackAccessNettyEventSource(
@@ -36,6 +37,7 @@ class LogbackAccessNettyEventSource(
     private val responseContentLength: Long = 0L,
     private val requestBody: String? = null,
     private val responseBody: String? = null,
+    private val exchangeAttributes: Map<String, Any> = emptyMap(),
 ) : LogbackAccessEventSource() {
 
     /**
@@ -68,7 +70,9 @@ class LogbackAccessNettyEventSource(
     override val localPort: Int by lazy(LazyThreadSafetyMode.NONE) {
         when (logbackAccessContext.properties.localPortStrategy) {
             LogbackAccessLocalPortStrategy.LOCAL -> serverHttpRequest.localAddress?.port ?: -1
-            LogbackAccessLocalPortStrategy.SERVER -> serverHttpRequest.uri.port.takeIf { it > 0 } ?: DEFAULT_HTTP_PORT
+
+            LogbackAccessLocalPortStrategy.SERVER -> serverHttpRequest.uri.port.takeIf { it > 0 }
+                ?: getDefaultPortForScheme(serverHttpRequest.uri.scheme)
         }
     }
 
@@ -87,11 +91,36 @@ class LogbackAccessNettyEventSource(
     }
 
     override val protocol: String by lazy(LazyThreadSafetyMode.NONE) {
-        "HTTP/1.1" // Netty doesn't expose protocol version easily in ServerHttpRequest
+        // HTTP/2 detection strategy:
+        // 1. Check for HTTP/2 pseudo-headers (":method", ":path", ":scheme")
+        //    Note: These are typically stripped by the server, so this may not work
+        // 2. Check for Upgrade header with h2c (HTTP/2 cleartext upgrade)
+        //    Note: The initial upgrade request is technically HTTP/1.1, but we report HTTP/2.0
+        //    to indicate the connection is being upgraded to HTTP/2.
+        // 3. Check for HTTP2-Settings header (h2c prior knowledge)
+        //
+        // Limitations:
+        // - For TLS-based HTTP/2 (h2), protocol detection is not reliable as ALPN
+        //   negotiation happens at the TLS layer, which is not exposed to application code.
+        // - We default to HTTP/1.1 when we cannot determine the protocol.
+        val headers = serverHttpRequest.headers
+        val hasHttp2PseudoHeaders = headers.getFirst(":method") != null ||
+            headers.getFirst(":path") != null ||
+            headers.getFirst(":scheme") != null
+        val upgradeHeader = headers.getFirst("Upgrade")
+        val http2SettingsHeader = headers.getFirst("HTTP2-Settings")
+
+        when {
+            hasHttp2PseudoHeaders -> "HTTP/2.0"
+            upgradeHeader?.contains("h2c", ignoreCase = true) == true -> "HTTP/2.0"
+            http2SettingsHeader != null -> "HTTP/2.0"
+            else -> "HTTP/1.1"
+        }
     }
 
     override val method: String by lazy(LazyThreadSafetyMode.NONE) {
-        serverHttpRequest.method.name()
+        // HttpMethod.name() returns the method name; handle potential null method
+        serverHttpRequest.method?.name() ?: "UNKNOWN"
     }
 
     override val requestURI: String? by lazy(LazyThreadSafetyMode.NONE) {
@@ -129,8 +158,12 @@ class LogbackAccessNettyEventSource(
     }
 
     override val attributeMap: Map<String, String> by lazy(LazyThreadSafetyMode.NONE) {
-        // Netty/WebFlux doesn't have request attributes in the same way as Servlet
-        unmodifiableMap(emptyMap())
+        // Convert exchange attributes to string map for compatibility with IAccessEvent
+        val attrs = linkedMapOf<String, String>()
+        exchangeAttributes.forEach { (key, value) ->
+            attrs[key] = value.toString()
+        }
+        unmodifiableMap(attrs)
     }
 
     override val sessionID: String? by lazy(LazyThreadSafetyMode.NONE) {
@@ -180,9 +213,21 @@ class LogbackAccessNettyEventSource(
         }
     }
 
+    /**
+     * Returns the default port number for the given URI scheme.
+     *
+     * @param scheme The URI scheme (e.g., "http", "https").
+     * @return The default port number for the scheme.
+     */
+    private fun getDefaultPortForScheme(scheme: String?): Int = when (scheme?.lowercase()) {
+        "https" -> DEFAULT_HTTPS_PORT
+        else -> DEFAULT_HTTP_PORT
+    }
+
     companion object {
         private const val NA = "-"
         private const val DEFAULT_HTTP_PORT = 80
+        private const val DEFAULT_HTTPS_PORT = 443
         private const val DEFAULT_STATUS_CODE = 200
     }
 }

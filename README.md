@@ -24,74 +24,14 @@
 [Spring Boot]: https://spring.io/projects/spring-boot
 [Logback-access]: https://logback.qos.ch/access.html
 
-## Features
+## Quick Start
 
-* Auto-detects your configuration file and auto-configures Logback-access.
-* Supports configuration files on the classpath.
-* Provides extensions (`<springProfile>` tag, `<springProperty>` tag) for configuration files.
-* Supports rewriting of some attributes by HTTP forward headers ("X-Forwarded-*").
-* Supports remote user provided by Spring Security.
-* Provides configuration properties to enable the tee filter.
-
-Supports the following web servers:
-
-|          | Web MVC (Servlet Stack) | WebFlux (Reactive Stack) |
-|:--------:|:-----------------------:|:------------------------:|
-|  Tomcat  |            ✅           |            ✅            |
-|  Jetty   |            ✅           |            ✅            |
-|  Netty   |            -            |  🚧 (under development)  |
-
-## Dependencies
-
-Depends on:
-
-* Java 17 or later
-* Kotlin 2.2 or later
-* Spring Boot 4.0
-* Logback-access 2.0
-
-## Usage
-
-### Adding the Dependency
-
-The artifact is published on [Maven Central Repository][maven central].
-If you are using Maven, add the following dependency.
+1. Add the dependency to your project
+2. Create a `logback-access.xml` configuration file in the classpath
+3. Start your application - access logging works automatically
 
 ```xml
-<dependency>
-    <groupId>io.github.seijikohara</groupId>
-    <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>${logback-access-spring-boot-starter.version}</version>
-</dependency>
-```
-
-If you are using the Tomcat web server, also add the following dependency.
-
-```xml
-<dependency>
-    <groupId>ch.qos.logback.access</groupId>
-    <artifactId>logback-access-tomcat</artifactId>
-    <version>${logback-access.version}</version>
-</dependency>
-```
-
-If you are using the Jetty web server, also add the following dependency.
-
-```xml
-<dependency>
-    <groupId>ch.qos.logback.access</groupId>
-    <artifactId>logback-access-jetty12</artifactId>
-    <version>${logback-access.version}</version>
-</dependency>
-```
-
-### Configuring the Logback-access
-
-Create a Logback-access configuration file "logback-access.xml" in the root of the classpath.
-
-For example:
-
-```xml
+<!-- logback-access.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
@@ -103,133 +43,183 @@ For example:
 </configuration>
 ```
 
-See also the Logback-access official documents:
+## Features
 
-* [Logback-access configuration](https://logback.qos.ch/access.html)
+* **Zero-configuration setup** - Auto-detects configuration files and auto-configures Logback-access
+* **Classpath configuration** - Supports configuration files on the classpath (not just the filesystem)
+* **Spring Boot extensions** - Provides `<springProfile>` and `<springProperty>` tags for configuration files
+* **Forward header support** - Rewrites attributes using HTTP forward headers ("X-Forwarded-*")
+* **Spring Security integration** - Provides remote user from Spring Security authentication
+* **Distributed tracing** - Integrates with Micrometer Tracing for trace/span ID logging
+* **Request/response body logging** - Configurable tee filter for capturing request and response bodies
+* **Flexible exclusion patterns** - Exclude specific URI patterns from access logging
 
-### Access Logging
+### Server Support Matrix
 
-When access the web application, it is logged.
+|          | Servlet Stack | Reactive Stack |
+|:--------:|:-------------:|:--------------:|
+|  Tomcat  |       ✅      |       ✅       |
+|  Jetty   |       ✅      |       ✅       |
+|  Netty   |       -       |   ✅ (Beta)    |
 
-For example:
+## Requirements
 
-```console
-0:0:0:0:0:0:0:1 - - [24/Oct/2021:15:32:03 +0900] "GET / HTTP/1.1" 200 319
-0:0:0:0:0:0:0:1 - - [24/Oct/2021:15:32:03 +0900] "GET /favicon.ico HTTP/1.1" 404 111
-0:0:0:0:0:0:0:1 - - [24/Oct/2021:15:32:04 +0900] "GET / HTTP/1.1" 304 0
+* Java 17 or later
+* Kotlin 2.2 or later
+* Spring Boot 4.0
+* Logback-access 2.0
+
+## Installation
+
+### Maven
+
+Add the starter dependency:
+
+```xml
+<dependency>
+    <groupId>io.github.seijikohara</groupId>
+    <artifactId>logback-access-spring-boot-starter</artifactId>
+    <version>${logback-access-spring-boot-starter.version}</version>
+</dependency>
 ```
 
-## Auto-detection of Configuration File
+### Server-Specific Dependencies
 
-### Priority Order
+#### Tomcat
 
-When the web application is started, the configuration files are searched in the following order.
-The first configuration file found will be used.
+```xml
+<dependency>
+    <groupId>ch.qos.logback.access</groupId>
+    <artifactId>logback-access-tomcat</artifactId>
+    <version>${logback-access.version}</version>
+</dependency>
+```
 
-1. "logback-access-test.xml" in the root of the classpath.
-2. "logback-access.xml" in the root of the classpath.
-3. "logback-access-test-spring.xml" in the root of the classpath.
-4. "logback-access-spring.xml" in the root of the classpath.
-5. [fallback configuration file (appends to the console with a common pattern)](src/main/resources/io/github/seijikohara/logback/access/logback-access-spring.xml).
+#### Jetty
 
-### Separation for Testing
+```xml
+<dependency>
+    <groupId>ch.qos.logback.access</groupId>
+    <artifactId>logback-access-jetty12</artifactId>
+    <version>${logback-access.version}</version>
+</dependency>
+```
 
-If you are using Maven and place the "logback-access-test(-spring).xml" file under the "src/test/resources" folder,
-Maven will ensure that it won't be included in the artifact produced.
-Thus, you can use a different configuration file "logback-access-test(-spring).xml" during testing,
-and another file "logback-access(-spring).xml" in production.
-This is the same concept as the [Logback configuration ("logback.xml" and "logback-test.xml")].
+#### Netty (Reactive Stack)
 
-[Logback configuration ("logback.xml" and "logback-test.xml")]: https://logback.qos.ch/manual/configuration.html#auto_configuration
+No additional dependencies required. Netty support is built into the starter.
 
-## Extensions for Configuration File
+## Configuration
 
-### Profile-specific Configuration
+### Configuration File
 
-The `<springProfile>` tag lets you optionally include or exclude sections of configuration based on the active Spring profiles.
-The usage of this extension is the same as the [Spring Boot Logback Extension "Profile-specific Configuration"].
+Create a `logback-access.xml` (or `logback-access-spring.xml`) file in the root of the classpath.
 
-[Spring Boot Logback Extension "Profile-specific Configuration"]: https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.logback-extensions.profile-specific
+#### Auto-detection Priority
 
-> ```xml
-> <springProfile name="staging">
->     <!-- configuration to be enabled when the "staging" profile is active -->
-> </springProfile>
-> <springProfile name="dev | staging">
->     <!-- configuration to be enabled when the "dev" or "staging" profiles are active -->
-> </springProfile>
-> <springProfile name="!production">
->     <!-- configuration to be enabled when the "production" profile is not active -->
-> </springProfile>
-> ```
+Configuration files are searched in the following order:
 
-### Environment Properties
+1. `classpath:logback-access-test.xml`
+2. `classpath:logback-access.xml`
+3. `classpath:logback-access-test-spring.xml`
+4. `classpath:logback-access-spring.xml`
+5. Built-in fallback (outputs to console with common pattern)
 
-The `<springProperty>` tag lets you expose properties from the Spring Environment for use within Logback.
-The usage of this extension is the same as the [Spring Boot Logback Extension "Environment Properties"].
+> **Tip**: Place `logback-access-test.xml` in `src/test/resources` for test-specific configuration. Maven ensures it won't be included in production artifacts.
 
-[Spring Boot Logback Extension "Environment Properties"]: https://docs.spring.io/spring-boot/reference/features/logging.html#features.logging.logback-extensions.environment-properties
+#### Example Configuration
 
-> ```xml
-> <springProperty scope="context" name="fluentHost" source="myapp.fluentd.host" defaultValue="localhost"/>
-> <appender name="FLUENT" class="ch.qos.logback.more.appenders.DataFluentAppender">
->     <remoteHost>${fluentHost}</remoteHost>
->     ...
-> </appender>
-> ```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender with combined pattern -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>combined</pattern>
+        </encoder>
+    </appender>
 
-## Configuration Properties
+    <!-- File appender with custom pattern -->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/access.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+        </encoder>
+    </appender>
 
-Provides the following configuration properties.
-These can be configured by your "application.yml", "application.properties", etc.
+    <appender-ref ref="console"/>
+    <appender-ref ref="file"/>
+</configuration>
+```
+
+### Configuration Properties
+
+Configure via `application.yml` or `application.properties`:
 
 ```yaml
-# The configuration properties for Logback-access.
 logback.access:
-  # Whether to enable auto-configuration.
-  # Defaults to true.
+  # Enable/disable auto-configuration (default: true)
   enabled: true
-  # The location of the configuration file.
-  # Specify a URL that starts with "classpath:" or "file:".
-  # Auto-detected by default:
-  #   1. "classpath:logback-access-test.xml"
-  #   2. "classpath:logback-access.xml"
-  #   3. "classpath:logback-access-test-spring.xml"
-  #   4. "classpath:logback-access-spring.xml"
-  #   5. "classpath:io/github/seijikohara/logback/access/logback-access-spring.xml"
-  config: classpath:your-logback-access.xml
-  # The strategy to change the behavior of IAccessEvent.getLocalPort.
-  # Defaults to "server".
-  #   "local":
-  #     Returns the port number of the interface on which the request was received.
-  #     Equivalent to ServletRequest.getLocalPort when using a servlet web server.
-  #   "server":
-  #     Returns the port number to which the request was sent.
-  #     Equivalent to ServletRequest.getServerPort when using a servlet web server.
-  #     Helps to identify the destination port number used by the client when forward headers are enabled.
+
+  # Custom configuration file location
+  # Supports "classpath:" and "file:" prefixes
+  config: classpath:custom-logback-access.xml
+
+  # Local port strategy: "local" or "server" (default: server)
+  # - local: Returns the port on which the request was received
+  # - server: Returns the port to which the request was sent
   local-port-strategy: server
-  # The properties for the Tomcat web server.
+
+  # Exclude patterns from access logging
+  exclude-patterns:
+    - /actuator/**
+    - /health
+    - /favicon.ico
+
+  # Only exclude successful (2xx) responses (default: false)
+  exclude-successful-only: false
+
+  # Tomcat-specific settings
   tomcat:
-    # Whether to enable the request attributes to work with RemoteIpValve.
-    # Defaults to the presence of RemoteIpValve enabled by the property "server.forward-headers-strategy=native".
+    # Enable request attributes for RemoteIpValve (auto-detected)
     request-attributes-enabled: true
-  # The properties for the tee filter.
-  # The tee filter is required to log request and response bodies.
+
+  # Tee filter for body logging
   tee-filter:
-    # Whether to enable the tee filter.
-    # Defaults to false.
-    enabled: true
-    # The host names to activate.
-    # By default, all hosts are activated.
-    includes: your-development-host
-    # The host names to deactivate.
-    # By default, all hosts are activated.
-    excludes: your-production-host
+    enabled: false
+    includes: localhost,dev-*
+    excludes: prod-*
+```
+
+### Exclusion Patterns
+
+Exclude specific URI patterns from access logging using Ant-style path patterns:
+
+```yaml
+logback.access:
+  exclude-patterns:
+    - /actuator/**      # All actuator endpoints
+    - /health           # Health check endpoint
+    - /static/**        # Static resources
+    - /**/favicon.ico   # Favicon requests
+```
+
+Set `exclude-successful-only: true` to only exclude requests that return 2xx status codes (useful for logging errors even on excluded paths):
+
+```yaml
+logback.access:
+  exclude-patterns:
+    - /health
+  exclude-successful-only: true  # Log errors on /health endpoint
 ```
 
 ### Request and Response Body Logging
 
-To log request and response bodies, you must enable the tee filter.
+Enable the tee filter to capture request and response bodies:
 
 ```yaml
 logback.access:
@@ -237,31 +227,222 @@ logback.access:
     enabled: true
 ```
 
-**Important Notes:**
-
-* Without the tee filter enabled, request and response bodies will not be logged.
-* The tee filter increases memory usage as it buffers the entire request and response bodies.
-* Consider enabling the tee filter only in development or testing environments.
-
-#### Body Capture Support Matrix
-
-|                          | Servlet Stack (with TeeFilter) | Reactive Stack |
-|:-------------------------|:------------------------------:|:--------------:|
-| `application/json`       |               ✅               |       ❌       |
-| `text/plain`             |               ✅               |       ❌       |
-| `application/xml`        |               ✅               |       ❌       |
-| `application/x-www-form-urlencoded` |        ❌ (※)          |       ❌       |
-| `multipart/form-data`    |               ❌               |       ❌       |
-
-※ `application/x-www-form-urlencoded` request bodies cannot be captured due to Servlet specification constraints.
-The Servlet container consumes the request body for parameter parsing before the tee filter can capture it.
-Use `%requestParameter{name}` pattern or access `requestParameterMap` for form data instead.
-
-Example Logback-access pattern to include request body:
+Then use the `%requestContent` and `%responseContent` patterns:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b "%requestContent"</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b [Request: %requestContent] [Response: %responseContent]</pattern>
 ```
+
+#### Body Size Limits
+
+By default, the tee filter captures up to 64KB of request and response bodies. Configure limits to prevent memory exhaustion with large payloads:
+
+```yaml
+logback.access:
+  tee-filter:
+    enabled: true
+    max-request-body-size: 64KB   # Default: 64KB
+    max-response-body-size: 128KB # Default: 64KB
+```
+
+Supported size formats: `64KB`, `1MB`, `1024B`, `1024` (bytes)
+
+When a body exceeds the limit, it will be truncated and `... [TRUNCATED]` will be appended.
+
+#### Body Capture Limitations
+
+|                          | Servlet Stack (TeeFilter) | Reactive Stack |
+|:-------------------------|:-------------------------:|:--------------:|
+| `application/json`       |             ✅            |       ❌       |
+| `text/plain`             |             ✅            |       ❌       |
+| `application/xml`        |             ✅            |       ❌       |
+| `application/x-www-form-urlencoded` |    ❌ (※)       |       ❌       |
+| `multipart/form-data`    |             ❌            |       ❌       |
+
+※ Form data cannot be captured because the Servlet container consumes the request body for parameter parsing. Use `%requestParameter{name}` instead.
+
+> **Warning**: The tee filter buffers bodies in memory before truncation. Size limits reduce log storage but do not prevent initial memory allocation. Enable only in development or testing environments.
+
+### Distributed Tracing Integration
+
+When [Micrometer Tracing](https://micrometer.io/docs/tracing) is on the classpath and configured, trace context is automatically available as request attributes.
+
+#### Setup
+
+Add Micrometer Tracing to your project (e.g., with Zipkin):
+
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
+```
+
+#### Usage
+
+Use request attributes in your logback-access configuration:
+
+```xml
+<pattern>%h %l %u [%t] "%r" %s %b traceId=%reqAttribute{traceId} spanId=%reqAttribute{spanId}</pattern>
+```
+
+Available attributes:
+- `%reqAttribute{traceId}` - The trace ID
+- `%reqAttribute{spanId}` - The span ID
+- `%reqAttribute{parentId}` - The parent span ID (if available)
+
+> **Note**: For Reactive stack (Netty), tracing integration requires proper observation setup. Ensure Micrometer Observation is configured with your tracing backend (e.g., via Spring Boot Actuator's tracing autoconfiguration).
+
+### Spring Boot Extensions
+
+#### Profile-specific Configuration
+
+Use `<springProfile>` to conditionally include configuration based on active Spring profiles:
+
+```xml
+<springProfile name="development">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%h %l %u [%t] "%r" %s %b %D</pattern>
+        </encoder>
+    </appender>
+    <appender-ref ref="console"/>
+</springProfile>
+
+<springProfile name="production">
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/access.log</file>
+        <encoder>
+            <pattern>combined</pattern>
+        </encoder>
+    </appender>
+    <appender-ref ref="file"/>
+</springProfile>
+```
+
+Profile expressions:
+- `name="staging"` - Active when "staging" profile is active
+- `name="dev | staging"` - Active when "dev" OR "staging" is active
+- `name="!production"` - Active when "production" is NOT active
+
+#### Environment Properties
+
+Use `<springProperty>` to expose Spring Environment properties:
+
+```xml
+<springProperty scope="context" name="appName" source="spring.application.name" defaultValue="app"/>
+<springProperty scope="context" name="logPath" source="logging.file.path" defaultValue="/var/log"/>
+
+<appender name="file" class="ch.qos.logback.core.FileAppender">
+    <file>${logPath}/${appName}-access.log</file>
+    <encoder>
+        <pattern>combined</pattern>
+    </encoder>
+</appender>
+```
+
+## Server-Specific Notes
+
+### Tomcat
+
+Tomcat provides full feature support including:
+- Request attributes for `RemoteIpValve` integration
+- Forward header processing with `server.forward-headers-strategy=native`
+- Full tee filter support for body logging
+
+### Jetty
+
+Jetty provides full feature support similar to Tomcat:
+- Forward header processing
+- Full tee filter support for body logging
+
+### Netty (Beta)
+
+Netty support for WebFlux reactive applications is available but with some limitations:
+
+| Feature                  | Status      |
+|:-------------------------|:-----------:|
+| Basic access logging     | ✅          |
+| Request/response headers | ✅          |
+| Query parameters         | ✅          |
+| Cookies                  | ✅          |
+| Status code              | ✅          |
+| Content length           | ✅          |
+| Remote address           | ✅          |
+| Protocol detection       | ✅ (HTTP/1.1, HTTP/2) |
+| Exchange attributes      | ✅          |
+| Tracing integration      | ✅ (requires observation setup) |
+| `remoteUser`             | ❌ (always null) |
+| `sessionID`              | ❌ (always null) |
+| Request body capture     | ❌          |
+| Response body capture    | ❌          |
+
+> **Note**: These limitations are due to fundamental differences between Servlet and Reactive APIs. WebFlux does not have direct equivalents for servlet sessions or request attributes.
+
+## Troubleshooting
+
+### Request/Response Body Not Logged
+
+**Problem**: `%requestContent` or `%responseContent` shows empty or "-"
+
+**Solutions**:
+1. Enable the tee filter:
+   ```yaml
+   logback.access:
+     tee-filter:
+       enabled: true
+   ```
+2. Check content type - form data (`application/x-www-form-urlencoded`) cannot be captured
+3. For reactive stack (Netty), body capture is not supported
+
+### Exclude Patterns Not Working
+
+**Problem**: Requests matching exclude patterns are still logged
+
+**Solutions**:
+1. Verify Ant-style pattern syntax:
+   - `*` matches zero or more characters within a path segment
+   - `**` matches zero or more path segments
+   - `?` matches exactly one character
+2. Examples:
+   - `/actuator/**` matches `/actuator/health`, `/actuator/info`, etc.
+   - `/api/*/users` matches `/api/v1/users`, `/api/v2/users`, etc.
+
+### Trace ID Not Appearing
+
+**Problem**: `%reqAttribute{traceId}` shows empty or "-"
+
+**Solutions**:
+1. Verify Micrometer Tracing is on the classpath and configured
+2. Ensure a `Tracer` bean is available in the application context
+3. Check that requests are being traced (sampling may exclude some requests)
+4. Note: Tracing is only available for Servlet stack, not Reactive
+
+### Configuration File Not Found
+
+**Problem**: Using fallback configuration instead of custom file
+
+**Solutions**:
+1. Check file location is on the classpath root
+2. Verify file name matches expected patterns
+3. Use explicit configuration:
+   ```yaml
+   logback.access:
+     config: classpath:my-logback-access.xml
+   ```
+
+### Forward Headers Not Applied
+
+**Problem**: Remote IP shows proxy address instead of client IP
+
+**Solutions**:
+1. For Tomcat, ensure `server.forward-headers-strategy=native` is set
+2. Verify `X-Forwarded-For` header is being sent by your proxy
+3. Check `tomcat.request-attributes-enabled` is true (auto-detected by default)
 
 ## API Reference
 
@@ -270,6 +451,10 @@ Please refer to the [Javadoc][javadoc].
 ## Release Notes
 
 Please refer to the [Releases][release] page.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
