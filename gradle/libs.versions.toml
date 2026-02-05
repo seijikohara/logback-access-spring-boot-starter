@@ -1,0 +1,13 @@
+[versions]
+kotest = "6.1.2"
+
+[libraries]
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
+kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5" }
+
+[plugins]
+detekt = "dev.detekt:2.0.0-alpha.2"
+kotlin-jvm = "org.jetbrains.kotlin.jvm:2.3.0"
+spotless = "com.diffplug.spotless:8.2.1"
+version-catalog-update = "nl.littlerobots.version-catalog-update:1.0.1"
