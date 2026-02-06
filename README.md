@@ -2,10 +2,11 @@
 
 [![Build](https://github.com/seijikohara/logback-access-spring-boot-starter/actions/workflows/test.yml/badge.svg)](https://github.com/seijikohara/logback-access-spring-boot-starter/actions/workflows/test.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/logback-access-spring-boot-starter)](https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://seijikohara.github.io/logback-access-spring-boot-starter/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 <p align="center">
-  <img src="logo.svg" alt="logback-access-spring-boot-starter" width="120" height="120">
+  <img src="logo.svg" alt="logback-access-spring-boot-starter" width="200" height="200">
 </p>
 
 Spring Boot auto-configuration for [Logback Access](https://logback.qos.ch/access.html). This library provides HTTP access logging for Tomcat and Jetty embedded servers with seamless Spring integration.
