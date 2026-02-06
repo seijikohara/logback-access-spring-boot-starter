@@ -9,3 +9,8 @@ build
 
 # Ignore IntelliJ IDEA files
 .idea
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/node_modules

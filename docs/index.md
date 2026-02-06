@@ -1,0 +1,92 @@
+---
+layout: home
+title: Home
+description: Spring Boot 4 auto-configuration for Logback Access HTTP logging
+
+hero:
+  name: logback-access-spring-boot-starter
+  text: HTTP Access Logging for Spring Boot
+  tagline: Auto-configuration for Logback Access with Tomcat and Jetty support
+  image:
+    src: /logo.svg
+    alt: logback-access-spring-boot-starter
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/getting-started
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/seijikohara/logback-access-spring-boot-starter
+
+features:
+  - icon: ⚙️
+    title: Auto-Configuration
+    details: Zero-configuration setup for Tomcat and Jetty embedded servers. Add the dependency and start logging.
+  - icon: 🔐
+    title: Spring Security Integration
+    details: Automatically captures authenticated usernames in access logs via Spring Security.
+  - icon: 📝
+    title: Request/Response Body Capture
+    details: Optional TeeFilter support for logging request and response body content.
+  - icon: 🎯
+    title: URL Filtering
+    details: Include/exclude URL patterns to control which requests are logged.
+  - icon: 🌱
+    title: Spring Profiles Support
+    details: Environment-specific logging configuration using Spring profiles.
+  - icon: 📊
+    title: JSON Logging
+    details: Built-in support for JSON output compatible with Logstash and ELK stack.
+---
+
+## Quick Start
+
+Add the dependency to your project:
+
+::: code-group
+
+```kotlin [Gradle (Kotlin)]
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+```
+
+```groovy [Gradle (Groovy)]
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+```
+
+```xml [Maven]
+<dependency>
+    <groupId>io.github.seijikohara</groupId>
+    <artifactId>logback-access-spring-boot-starter</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+:::
+
+Create `src/main/resources/logback-access.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%h %l %u %t "%r" %s %b</pattern>
+        </encoder>
+    </appender>
+    <appender-ref ref="CONSOLE"/>
+</configuration>
+```
+
+Start your application and access logs will appear in the console.
+
+## Requirements
+
+| Component | Version |
+|-----------|---------|
+| Java | 17+ |
+| Spring Boot | 4.0+ |
+| Kotlin | 2.0+ (if using Kotlin) |
+
+## License
+
+This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
