@@ -1,13 +1,43 @@
 [versions]
+axion-release = "1.21.1"
+error-prone = "2.41.0"
+jspecify = "1.0.0"
 kotest = "6.1.2"
+kotlin-logging = "7.0.14"
+logback-access = "2.0.9"
+logstash-logback-encoder = "8.0"
+maven-publish = "0.36.0"
+nullaway = "0.12.6"
+spring-boot = "4.0.2"
 
 [libraries]
+error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
 kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+logback-access-common = { module = "ch.qos.logback.access:logback-access-common", version.ref = "logback-access" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-tomcat = { module = "org.springframework.boot:spring-boot-starter-tomcat" }
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
 
 [plugins]
+axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axion-release" }
 detekt = "dev.detekt:2.0.0-alpha.2"
+dokka = "org.jetbrains.dokka:2.1.0"
+errorprone = "net.ltgt.errorprone:4.2.0"
 kotlin-jvm = "org.jetbrains.kotlin.jvm:2.3.0"
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+nullaway = "net.ltgt.nullaway:3.0.0"
 spotless = "com.diffplug.spotless:8.2.1"
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 version-catalog-update = "nl.littlerobots.version-catalog-update:1.0.1"

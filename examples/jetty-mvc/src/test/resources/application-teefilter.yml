@@ -1,0 +1,4 @@
+logback:
+  access:
+    tee-filter:
+      enabled: true

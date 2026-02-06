@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- JSON encoder for structured logging -->
+    <appender name="jsonConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
+    </appender>
+
+    <!-- ListAppender for test verification -->
+    <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
+
+    <appender-ref ref="jsonConsole"/>
+    <appender-ref ref="list"/>
+</configuration>

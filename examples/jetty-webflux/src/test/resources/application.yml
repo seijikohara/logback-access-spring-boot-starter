@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: jetty-webflux-test
+  main:
+    web-application-type: reactive

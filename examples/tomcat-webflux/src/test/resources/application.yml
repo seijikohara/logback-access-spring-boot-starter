@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: tomcat-webflux-test
+  main:
+    web-application-type: reactive

@@ -1,0 +1,268 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (MAJOR.MINOR.PATCH format, e.g., 1.2.0)'
+        required: true
+        type: string
+      dry-run:
+        description: 'Dry-run mode (skip actual deployment)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          SEMVER_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+
+          if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "::error::Invalid version format: $VERSION"
+            echo "::error::Version must be in MAJOR.MINOR.PATCH format (e.g., 1.2.0)"
+            exit 1
+          fi
+          echo "Version format is valid: $VERSION"
+
+      - name: Check tag does not exist
+        env:
+          TAG: v${{ github.event.inputs.version }}
+        run: |
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists"
+            exit 1
+          fi
+          echo "Tag $TAG does not exist yet"
+
+      - name: Validate version is newer
+        id: version
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          TAG="v$VERSION"
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+
+          if [[ -n "$LATEST_TAG" ]]; then
+            LATEST_VERSION="${LATEST_TAG#v}"
+            echo "Latest existing tag: $LATEST_TAG (version: $LATEST_VERSION)"
+
+            HIGHER_VERSION=$(printf '%s\n%s' "$LATEST_VERSION" "$VERSION" | sort -V | tail -n 1)
+
+            if [[ "$HIGHER_VERSION" != "$VERSION" ]]; then
+              echo "::error::Version $VERSION is not newer than the latest version $LATEST_VERSION"
+              exit 1
+            fi
+
+            if [[ "$HIGHER_VERSION" == "$LATEST_VERSION" && "$VERSION" == "$LATEST_VERSION" ]]; then
+              echo "::error::Version $VERSION is the same as the latest version"
+              exit 1
+            fi
+
+            echo "Version $VERSION is newer than $LATEST_VERSION"
+          else
+            echo "No existing tags found. This will be the first release."
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Validate GPG key existence
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          if [[ -z "$GPG_PRIVATE_KEY" ]]; then
+            echo "::error::GPG_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          if [[ -z "$GPG_PASSPHRASE" ]]; then
+            echo "::error::GPG_PASSPHRASE secret is not set"
+            exit 1
+          fi
+          echo "All GPG secrets are configured"
+
+      - name: Validate Maven Central credentials
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+        run: |
+          if [[ -z "$MAVEN_CENTRAL_USERNAME" ]]; then
+            echo "::error::MAVEN_CENTRAL_USERNAME secret is not set"
+            exit 1
+          fi
+          if [[ -z "$MAVEN_CENTRAL_TOKEN" ]]; then
+            echo "::error::MAVEN_CENTRAL_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "Maven Central credentials are configured"
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          {
+            echo "## Validation Passed"
+            echo ""
+            echo "### Version"
+            echo "- **Version:** $VERSION"
+            echo "- **Tag:** $TAG"
+            echo ""
+            echo "### Credentials"
+            echo "- **GPG Key:** Configured"
+            echo "- **Maven Central:** Configured"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-and-dry-run:
+    name: Build and Dry-Run
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Create local tag
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git tag "$TAG"
+
+      - name: Build and test with release version
+        run: ./gradlew clean build
+
+      - name: Verify version
+        env:
+          EXPECTED_VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          echo "Expected version: $EXPECTED_VERSION"
+          ./gradlew currentVersion
+
+      - name: Dry-run summary
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          {
+            echo "## Dry-Run Completed"
+            echo ""
+            echo "All checks passed. Ready for release approval."
+            echo ""
+            echo "- **Version:** $VERSION"
+            echo "- **Tag:** $TAG"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Release to Maven Central
+    needs: [validate, build-and-dry-run]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: ${{ !inputs.dry-run }}
+    environment:
+      name: maven-central
+      url: https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter
+
+    steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.DEV_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.DEV_AUTOMATION_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create local tag
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git tag "$TAG"
+
+      - name: Build with release version
+        run: ./gradlew clean build
+
+      - name: Publish to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Push tag
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git push origin "$TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.validate.outputs.tag }}
+          name: Release ${{ needs.validate.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Release summary
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          {
+            echo "## Release Completed"
+            echo ""
+            echo "- **Version:** $VERSION"
+            echo "- **Tag:** $TAG"
+            echo "- **Maven Central:** https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter/$VERSION"
+          } >> "$GITHUB_STEP_SUMMARY"

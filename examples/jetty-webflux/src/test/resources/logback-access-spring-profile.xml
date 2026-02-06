@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Common appender - always registered -->
+    <appender name="commonList" class="ch.qos.logback.core.read.ListAppender"/>
+    <appender-ref ref="commonList"/>
+
+    <!-- Dev profile appender -->
+    <springProfile name="dev">
+        <appender name="devList" class="ch.qos.logback.core.read.ListAppender"/>
+        <appender-ref ref="devList"/>
+    </springProfile>
+
+    <!-- Prod profile appender -->
+    <springProfile name="prod">
+        <appender name="prodList" class="ch.qos.logback.core.read.ListAppender"/>
+        <appender-ref ref="prodList"/>
+    </springProfile>
+</configuration>
