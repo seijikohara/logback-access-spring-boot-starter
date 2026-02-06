@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: jetty-test-app
-
-logback:
-  access:
-    config-location: classpath:logback-access-test.xml

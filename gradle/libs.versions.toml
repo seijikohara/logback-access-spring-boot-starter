@@ -7,6 +7,7 @@ kotlin-logging = "7.0.14"
 logback-access = "2.0.9"
 logstash-logback-encoder = "8.0"
 maven-publish = "0.36.0"
+mockk = "1.14.2"
 nullaway = "0.12.6"
 spring-boot = "4.0.2"
 
@@ -21,6 +22,7 @@ kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 logback-access-common = { module = "ch.qos.logback.access:logback-access-common", version.ref = "logback-access" }
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
