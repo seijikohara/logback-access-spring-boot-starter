@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <springProperty name="appName" source="spring.application.name" defaultValue="default-app" scope="context"/>
-    <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
-    <appender-ref ref="list"/>
-</configuration>

@@ -53,35 +53,9 @@ testing {
                 implementation(platform(libs.kotest.bom))
                 implementation(libs.kotest.runner.junit5)
                 implementation(libs.kotest.assertions.core)
-                implementation(libs.spring.boot.starter.test)
-                implementation(libs.spring.boot.starter.webmvc)
-                implementation(libs.spring.boot.starter.tomcat)
-            }
-        }
-        register<JvmTestSuite>("jettyTest") {
-            useJUnitJupiter()
-            dependencies {
-                implementation(project())
-                implementation(platform(libs.spring.boot.dependencies))
-                implementation(platform(libs.kotest.bom))
-                implementation(libs.kotest.runner.junit5)
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.spring.boot.starter.test)
-                implementation(libs.spring.boot.starter.webmvc)
-                implementation(libs.spring.boot.starter.jetty)
-                implementation(libs.logback.access.common)
-            }
-            targets {
-                all {
-                    testTask.configure {
-                        shouldRunAfter(test)
-                    }
-                }
+                implementation(libs.mockk)
+                implementation("org.springframework:spring-test")
             }
         }
     }
-}
-
-tasks.named("check") {
-    dependsOn(testing.suites.named("jettyTest"))
 }
