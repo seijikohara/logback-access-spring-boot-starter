@@ -45,14 +45,23 @@ class LogbackAccessContext(
     private val excludePatterns: List<Regex>? =
         properties.filter.excludeUrlPatterns?.map { Regex(it) }
 
-    /** Emits an access event through the filter chain and appenders. */
-    fun emit(event: LogbackAccessEvent): Unit =
-        event
-            .takeIf { shouldLog(it.requestURI) }
-            ?.let { accessContext.getFilterChainDecision(it) }
-            ?.takeIf { it != FilterReply.DENY }
-            ?.let { accessContext.callAppenders(event) }
-            ?: Unit
+    /**
+     * Emits an access event through the filter chain and appenders.
+     *
+     * Exceptions from appenders are caught and logged to prevent
+     * application crashes due to logging failures.
+     */
+    fun emit(event: LogbackAccessEvent) {
+        runCatching {
+            event
+                .takeIf { shouldLog(it.requestURI) }
+                ?.let { accessContext.getFilterChainDecision(it) }
+                ?.takeIf { it != FilterReply.DENY }
+                ?.let { accessContext.callAppenders(event) }
+        }.onFailure { e ->
+            logger.error(e) { "Failed to emit access event: ${event.requestURI}" }
+        }
+    }
 
     /**
      * Determines whether the request URI should be logged based on include/exclude patterns.

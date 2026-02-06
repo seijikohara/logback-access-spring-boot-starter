@@ -214,6 +214,8 @@ Use `%requestContent` and `%responseContent` patterns to access captured content
 | `logback.access.tee-filter.include-hosts` | Hosts to include (comma-separated) | All |
 | `logback.access.tee-filter.exclude-hosts` | Hosts to exclude (comma-separated) | None |
 
+> **Security Warning**: TeeFilter captures request/response bodies which may contain sensitive data (passwords, tokens, PII). Use `include-hosts`/`exclude-hosts` to limit scope, and consider implementing custom masking in production environments.
+
 ### URL Pattern Filtering
 
 Filter access logs using regex patterns:
@@ -339,6 +341,14 @@ Use `scope="context"` to access properties programmatically after configuration:
 
 TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets request attributes (`LB_INPUT_BUFFER`/`LB_OUTPUT_BUFFER`) on the Servlet request, but these attributes are not visible to the RequestLog.
 
+### Jetty Request Parameters
+
+On Jetty 12, `requestParameterMap` returns an empty map to avoid consuming the request body. Use `%i{Content-Type}` and request body logging if parameter inspection is required.
+
+### Jetty Remote Host
+
+On Jetty 12, `remoteHost` returns the same value as `remoteAddr` (no reverse DNS lookup is performed).
+
 ## Examples
 
 See the [examples/](examples/) directory for complete working projects:
@@ -349,6 +359,21 @@ See the [examples/](examples/) directory for complete working projects:
 | `jetty-mvc` | Jetty | Spring MVC | Full feature coverage |
 | `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
 | `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
+
+## API Stability
+
+This library follows [Semantic Versioning](https://semver.org/). The following packages are considered public API and covered by backward compatibility guarantees:
+
+- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext`
+- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessEvent`
+- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessProperties`
+- `io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy`
+
+The following packages are implementation details and **not covered** by semantic versioning guarantees:
+
+- `io.github.seijikohara.spring.boot.logback.access.tomcat.*`
+- `io.github.seijikohara.spring.boot.logback.access.jetty.*`
+- `io.github.seijikohara.spring.boot.logback.access.joran.*`
 
 ## Acknowledgments
 
