@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="oceanicGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="oceanicGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect x="10" y="30" width="70" height="8" rx="4" fill="url(#oceanicGrad)" filter="url(#oceanicGlow)"/>
+  <rect x="25" y="46" width="65" height="8" rx="4" fill="url(#oceanicGrad)" filter="url(#oceanicGlow)" opacity="0.7"/>
+  <rect x="15" y="62" width="50" height="8" rx="4" fill="url(#oceanicGrad)" filter="url(#oceanicGlow)" opacity="0.4"/>
+</svg>
