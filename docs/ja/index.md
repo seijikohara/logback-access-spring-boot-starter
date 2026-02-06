@@ -39,6 +39,30 @@ features:
     details: LogstashやELKスタックと互換性のあるJSON出力をビルトインでサポート。
 ---
 
+## アーキテクチャ
+
+```mermaid
+flowchart TB
+    subgraph Spring Boot Application
+        direction TB
+        A[HTTPリクエスト] --> B{組み込みサーバー}
+        B -->|Tomcat| C[LogbackAccessTomcatValve]
+        B -->|Jetty| D[LogbackAccessJettyRequestLog]
+        C --> E[LogbackAccessContext]
+        D --> E
+        E --> F[logback-access.xml]
+        F --> G[Appenders]
+        G -->|Console| H[コンソール出力]
+        G -->|File| I[ファイル出力]
+        G -->|JSON| J[Logstash/ELK]
+    end
+
+    subgraph オプション連携
+        K[Spring Security] -.->|ユーザー名| E
+        L[TeeFilter] -.->|ボディキャプチャ| E
+    end
+```
+
 ## クイックスタート
 
 プロジェクトに依存関係を追加:
