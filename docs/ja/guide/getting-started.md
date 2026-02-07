@@ -4,7 +4,7 @@
 
 ## 前提条件
 
-- Java 17以上
+- Java 21以上
 - Spring Boot 4.0以上
 - TomcatまたはJetty組み込みサーバー
 
