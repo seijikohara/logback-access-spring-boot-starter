@@ -1,8 +1,8 @@
 package io.github.seijikohara.spring.boot.logback.access.jetty
 
+import io.github.seijikohara.spring.boot.logback.access.AccessEventData.Companion.REMOTE_USER_ATTR
 import io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext
-import io.github.seijikohara.spring.boot.logback.access.REMOTE_USER_ATTR
 import org.eclipse.jetty.server.Request
 import java.util.Collections.unmodifiableMap
 

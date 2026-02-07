@@ -193,7 +193,7 @@ jobs:
     if: ${{ !inputs.dry-run }}
     environment:
       name: maven-central
-      url: https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter
+      url: https://central.sonatype.com/namespace/io.github.seijikohara
 
     steps:
       - name: Generate GitHub App Token
@@ -264,5 +264,6 @@ jobs:
             echo ""
             echo "- **Version:** $VERSION"
             echo "- **Tag:** $TAG"
-            echo "- **Maven Central:** https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter/$VERSION"
+            echo "- **Maven Central (starter):** https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter/$VERSION"
+            echo "- **Maven Central (core):** https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter-core/$VERSION"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -2,10 +2,6 @@ package io.github.seijikohara.spring.boot.logback.access
 
 import java.io.Serializable
 
-/** Request attribute key for the remote user set by the security filter. */
-internal const val REMOTE_USER_ATTR: String =
-    "io.github.seijikohara.spring.boot.logback.access.remoteUser"
-
 /**
  * Immutable snapshot of all access event data.
  *
@@ -74,5 +70,9 @@ data class AccessEventData(
 
     companion object {
         private const val serialVersionUID: Long = 1L
+
+        /** Request attribute key for the remote user set by the security filter. */
+        const val REMOTE_USER_ATTR: String =
+            "io.github.seijikohara.spring.boot.logback.access.remoteUser"
     }
 }

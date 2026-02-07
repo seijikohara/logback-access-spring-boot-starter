@@ -9,22 +9,18 @@ plugins {
 
 mavenPublishing {
     pom {
-        name = "Logback Access Spring Boot Starter"
-        description = "Spring Boot Starter for Logback Access with auto-configuration support for Tomcat and Jetty"
+        name = "Logback Access Spring Boot Starter Core"
+        description = "Core API for Logback Access Spring Boot Starter"
     }
 }
 
 dependencies {
-    api(project(":logback-access-spring-boot-starter-core"))
+    api(platform(libs.spring.boot.dependencies))
+    api(libs.logback.access.common)
+    api(libs.kotlin.reflect)
 
     implementation(libs.spring.boot.starter)
     implementation(libs.kotlin.logging)
-
-    compileOnly(libs.spring.boot.starter.webmvc)
-    compileOnly(libs.spring.boot.starter.webflux)
-    compileOnly(libs.spring.boot.starter.tomcat)
-    compileOnly(libs.spring.boot.starter.jetty)
-    compileOnly(libs.spring.boot.starter.security)
 }
 
 java {
@@ -35,7 +31,7 @@ java {
 
 tasks.jar {
     manifest {
-        attributes("Automatic-Module-Name" to "io.github.seijikohara.logback.access.spring")
+        attributes("Automatic-Module-Name" to "io.github.seijikohara.logback.access.core")
     }
 }
 

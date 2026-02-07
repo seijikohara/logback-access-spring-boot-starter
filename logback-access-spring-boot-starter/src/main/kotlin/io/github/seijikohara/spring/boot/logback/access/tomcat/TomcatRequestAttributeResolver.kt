@@ -1,8 +1,8 @@
 package io.github.seijikohara.spring.boot.logback.access.tomcat
 
+import io.github.seijikohara.spring.boot.logback.access.AccessEventData.Companion.REMOTE_USER_ATTR
 import io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext
-import io.github.seijikohara.spring.boot.logback.access.REMOTE_USER_ATTR
 import org.apache.catalina.AccessLog.PROTOCOL_ATTRIBUTE
 import org.apache.catalina.AccessLog.REMOTE_ADDR_ATTRIBUTE
 import org.apache.catalina.AccessLog.REMOTE_HOST_ATTRIBUTE
