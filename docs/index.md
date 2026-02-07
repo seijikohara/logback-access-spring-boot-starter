@@ -39,6 +39,30 @@ features:
     details: Built-in support for JSON output compatible with Logstash and ELK stack.
 ---
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Spring Boot Application
+        direction TB
+        A[HTTP Request] --> B{Embedded Server}
+        B -->|Tomcat| C[LogbackAccessTomcatValve]
+        B -->|Jetty| D[LogbackAccessJettyRequestLog]
+        C --> E[LogbackAccessContext]
+        D --> E
+        E --> F[logback-access.xml]
+        F --> G[Appenders]
+        G -->|Console| H[Console Output]
+        G -->|File| I[File Output]
+        G -->|JSON| J[Logstash/ELK]
+    end
+
+    subgraph Optional Integrations
+        K[Spring Security] -.->|Username| E
+        L[TeeFilter] -.->|Body Capture| E
+    end
+```
+
 ## Quick Start
 
 Add the dependency to your project:
