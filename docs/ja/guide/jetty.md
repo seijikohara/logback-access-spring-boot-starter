@@ -4,10 +4,10 @@
 
 ## 動作の仕組み
 
-組み込みサーバーとしてJettyを使用する場合、スターターはHTTPリクエストとレスポンスデータをキャプチャする`LogbackAccessJettyRequestLog`を登録します。
+組み込みサーバーとしてJettyを使用する場合、スターターはHTTPリクエストとレスポンスデータをキャプチャする`JettyRequestLog`を登録します。
 
 ```
-HTTPリクエスト → Jetty Server → LogbackAccessJettyRequestLog → アプリケーション
+HTTPリクエスト → Jetty Server → JettyRequestLog → アプリケーション
                                           ↓
                                    LogbackAccessContext
                                           ↓
@@ -25,7 +25,7 @@ implementation("org.springframework.boot:spring-boot-starter-webmvc") {
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
 }
 implementation("org.springframework.boot:spring-boot-starter-jetty")
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
@@ -33,7 +33,7 @@ implementation('org.springframework.boot:spring-boot-starter-webmvc') {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 }
 implementation 'org.springframework.boot:spring-boot-starter-jetty'
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
@@ -54,7 +54,7 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -90,9 +90,15 @@ Jettyはデフォルトで逆引きDNSルックアップを実行しません。
 
 ### リクエストパラメータ
 
-パフォーマンスと互換性の理由から、POSTボディからのリクエストパラメータは自動的に解析されません。POSTリクエストの場合、リクエストパラメータ用の`%{xxx}r`パターンは空の値を返します。
+パフォーマンスと互換性の理由から、`requestParameterMap`は全リクエストで空のマップを返します。これはリクエストボディの消費を避けるための意図的な動作です。
 
-POSTパラメータをキャプチャするには、[TeeFilter](/ja/guide/advanced#teefilter)を使用してリクエストボディ全体をキャプチャしてください。
+::: warning Jetty非対応: TeeFilter
+TeeFilterはJetty 12ではサポートされていません。JettyのRequestLog APIはServlet APIとは別のコアサーバーレベルで動作します。TeeFilterはServletリクエストにリクエスト属性を設定しますが、RequestLogからは参照できません。必要な場合は、アプリケーションレベルのインターセプターでリクエスト内容のログ記録を検討してください。
+:::
+
+### TeeFilter
+
+TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#リクエストパラメータ)を参照してください。
 
 ## ローカルポート戦略
 

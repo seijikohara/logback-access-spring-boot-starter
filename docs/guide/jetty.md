@@ -4,10 +4,10 @@ This page describes Jetty-specific configuration options and behavior.
 
 ## How It Works
 
-When using Jetty as the embedded server, the starter registers a `LogbackAccessJettyRequestLog` that captures HTTP request and response data.
+When using Jetty as the embedded server, the starter registers a `JettyRequestLog` that captures HTTP request and response data.
 
 ```
-HTTP Request → Jetty Server → LogbackAccessJettyRequestLog → Your Application
+HTTP Request → Jetty Server → JettyRequestLog → Your Application
                                           ↓
                                    LogbackAccessContext
                                           ↓
@@ -25,7 +25,7 @@ implementation("org.springframework.boot:spring-boot-starter-webmvc") {
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
 }
 implementation("org.springframework.boot:spring-boot-starter-jetty")
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
@@ -33,7 +33,7 @@ implementation('org.springframework.boot:spring-boot-starter-webmvc') {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 }
 implementation 'org.springframework.boot:spring-boot-starter-jetty'
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
@@ -54,7 +54,7 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -90,9 +90,15 @@ Jetty does not perform reverse DNS lookups by default. The `%h` variable will sh
 
 ### Request Parameters
 
-For performance and compatibility reasons, request parameters from POST body are not automatically parsed. The `%{xxx}r` pattern for request parameters will return empty values for POST requests.
+For performance and compatibility reasons, `requestParameterMap` returns an empty map for all requests. This is intentional to avoid consuming the request body.
 
-To capture POST parameters, use the [TeeFilter](/guide/advanced#teefilter) to capture the full request body.
+::: warning TeeFilter Not Supported on Jetty
+TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets request attributes on the Servlet request, but these attributes are not visible to the RequestLog. Consider logging request content via application-level interceptors if needed.
+:::
+
+### TeeFilter
+
+TeeFilter is not supported on Jetty 12. See the [warning above](#request-parameters) for details.
 
 ## Local Port Strategy
 

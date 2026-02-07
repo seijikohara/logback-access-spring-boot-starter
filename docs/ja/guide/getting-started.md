@@ -8,25 +8,38 @@
 - Spring Boot 4.0以上
 - TomcatまたはJetty組み込みサーバー
 
+## モジュール構成
+
+このライブラリは2つのMavenアーティファクトで構成されています:
+
+| アーティファクト | 説明 |
+|---------------|------|
+| `logback-access-spring-boot-starter` | 自動設定とサーバー連携（Tomcat、Jetty、Security、TeeFilter） |
+| `logback-access-spring-boot-starter-core` | 公開APIクラス（推移的依存関係 — 個別に宣言不要） |
+
+ほとんどのユーザーはスターター依存関係のみを宣言すれば十分です。coreモジュールは推移的依存関係として自動的に含まれます。
+
 ## インストール
 
 ビルドファイルに依存関係を追加します:
 
+> `VERSION`を[Maven Centralの最新バージョン](https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter)に置き換えてください。
+
 ::: code-group
 
 ```kotlin [Gradle (Kotlin)]
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -84,7 +97,7 @@ ApacheのCombined Log Formatに近い詳細な出力:
 出力例:
 
 ```
-127.0.0.1 - - [01/Jan/2024:12:00:00 +0000] "GET /api/users HTTP/1.1" 200 1234
+127.0.0.1 - - [01/Jan/2026:12:00:00 +0000] "GET /api/users HTTP/1.1" 200 1234
 ```
 
 ## 次のステップ

@@ -4,10 +4,10 @@ This page describes Tomcat-specific configuration options and behavior.
 
 ## How It Works
 
-When using Tomcat as the embedded server, the starter registers a `LogbackAccessTomcatValve` that intercepts all HTTP requests and responses.
+When using Tomcat as the embedded server, the starter registers a `TomcatValve` that intercepts all HTTP requests and responses.
 
 ```
-HTTP Request → Tomcat Connector → LogbackAccessTomcatValve → Your Application
+HTTP Request → Tomcat Connector → TomcatValve → Your Application
                                           ↓
                                    LogbackAccessContext
                                           ↓
@@ -20,6 +20,7 @@ HTTP Request → Tomcat Connector → LogbackAccessTomcatValve → Your Applicat
 logback:
   access:
     tomcat:
+      # Auto-detected from RemoteIpValve when not set
       request-attributes-enabled: true
 ```
 

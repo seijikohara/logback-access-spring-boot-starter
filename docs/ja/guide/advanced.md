@@ -6,6 +6,10 @@
 
 TeeFilterはロギング用にリクエストとレスポンスのボディ内容をキャプチャします。
 
+::: tip Servletアプリケーション限定
+TeeFilterはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）では使用できません。
+:::
+
 ### TeeFilterの有効化
 
 ```yaml
@@ -136,7 +140,7 @@ JSON出力にカスタムフィールドを追加:
 
 ```json
 {
-  "@timestamp": "2024-01-01T12:00:00.000Z",
+  "@timestamp": "2026-01-01T12:00:00.000Z",
   "@version": 1,
   "method": "GET",
   "uri": "/api/users",
@@ -152,6 +156,10 @@ JSON出力にカスタムフィールドを追加:
 ## Spring Security連携
 
 Spring Securityがクラスパスにある場合、認証済みユーザー名が自動的にキャプチャされます。
+
+::: tip Servletアプリケーション限定
+ユーザー名の自動キャプチャにはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）ではアクセスロギングは動作しますが、`%u`変数は`-`を表示します。
+:::
 
 ### 動作の仕組み
 
@@ -196,29 +204,14 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 </configuration>
 ```
 
-## 非同期ロギング
+## パフォーマンスのヒント
 
-パフォーマンス向上のために非同期Appenderを使用:
+アクセスロギングのパフォーマンスを最適化するには:
 
-```xml
-<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>logs/access.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
-    </rollingPolicy>
-    <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
-    </encoder>
-</appender>
-
-<appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="FILE"/>
-    <queueSize>512</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-</appender>
-
-<appender-ref ref="ASYNC"/>
-```
+1. 本番環境のファイルロギングにはサイズ制限付きの`RollingFileAppender`を使用
+2. [URLフィルタリング](#urlフィルタリング)を有効にしてログ量を削減
+3. JSONロギングには、[logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder)が独自の非同期機能を提供
+4. ボディキャプチャが不要な場合はTeeFilterを無効化
 
 ## トラブルシューティング
 

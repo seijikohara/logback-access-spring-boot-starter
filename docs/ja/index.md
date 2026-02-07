@@ -36,28 +36,33 @@ features:
     details: Springプロファイルによる環境別ロギング設定。
   - icon: 📊
     title: JSONロギング
-    details: LogstashやELKスタックと互換性のあるJSON出力をビルトインでサポート。
+    details: logstash-logback-encoderによるJSON出力。LogstashやELKスタックと互換。
 ---
 
 ## アーキテクチャ
 
 ```mermaid
 flowchart TB
-    subgraph Spring Boot Application
+    subgraph starter["logback-access-spring-boot-starter"]
         direction TB
         A[HTTPリクエスト] --> B{組み込みサーバー}
-        B -->|Tomcat| C[LogbackAccessTomcatValve]
-        B -->|Jetty| D[LogbackAccessJettyRequestLog]
-        C --> E[LogbackAccessContext]
-        D --> E
-        E --> F[logback-access.xml]
-        F --> G[Appenders]
-        G -->|Console| H[コンソール出力]
-        G -->|File| I[ファイル出力]
-        G -->|JSON| J[Logstash/ELK]
+        B -->|Tomcat| C[TomcatValve]
+        B -->|Jetty| D[JettyRequestLog]
     end
 
-    subgraph オプション連携
+    subgraph core["logback-access-spring-boot-starter-core"]
+        E[LogbackAccessContext]
+    end
+
+    C --> E
+    D --> E
+    E --> F[logback-access.xml]
+    F --> G[Appenders]
+    G -->|Console| H[コンソール出力]
+    G -->|File| I[ファイル出力]
+    G -->|JSON| J[Logstash/ELK]
+
+    subgraph optional["オプション連携"]
         K[Spring Security] -.->|ユーザー名| E
         L[TeeFilter] -.->|ボディキャプチャ| E
     end
@@ -67,21 +72,23 @@ flowchart TB
 
 プロジェクトに依存関係を追加:
 
+> `VERSION`を[Maven Centralの最新バージョン](https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter)に置き換えてください。
+
 ::: code-group
 
 ```kotlin [Gradle (Kotlin)]
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 

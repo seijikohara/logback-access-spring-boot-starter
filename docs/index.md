@@ -36,28 +36,33 @@ features:
     details: Environment-specific logging configuration using Spring profiles.
   - icon: 📊
     title: JSON Logging
-    details: Built-in support for JSON output compatible with Logstash and ELK stack.
+    details: JSON output via logstash-logback-encoder, compatible with Logstash and ELK stack.
 ---
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    subgraph Spring Boot Application
+    subgraph starter["logback-access-spring-boot-starter"]
         direction TB
         A[HTTP Request] --> B{Embedded Server}
-        B -->|Tomcat| C[LogbackAccessTomcatValve]
-        B -->|Jetty| D[LogbackAccessJettyRequestLog]
-        C --> E[LogbackAccessContext]
-        D --> E
-        E --> F[logback-access.xml]
-        F --> G[Appenders]
-        G -->|Console| H[Console Output]
-        G -->|File| I[File Output]
-        G -->|JSON| J[Logstash/ELK]
+        B -->|Tomcat| C[TomcatValve]
+        B -->|Jetty| D[JettyRequestLog]
     end
 
-    subgraph Optional Integrations
+    subgraph core["logback-access-spring-boot-starter-core"]
+        E[LogbackAccessContext]
+    end
+
+    C --> E
+    D --> E
+    E --> F[logback-access.xml]
+    F --> G[Appenders]
+    G -->|Console| H[Console Output]
+    G -->|File| I[File Output]
+    G -->|JSON| J[Logstash/ELK]
+
+    subgraph optional["Optional Integrations"]
         K[Spring Security] -.->|Username| E
         L[TeeFilter] -.->|Body Capture| E
     end
@@ -67,21 +72,23 @@ flowchart TB
 
 Add the dependency to your project:
 
+> Replace `VERSION` with the [latest version from Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter).
+
 ::: code-group
 
 ```kotlin [Gradle (Kotlin)]
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 

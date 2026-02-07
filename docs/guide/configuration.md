@@ -10,16 +10,17 @@ Configure the starter using Spring Boot properties in `application.yml` or `appl
 logback:
   access:
     enabled: true
-    config-location: classpath:logback-access.xml
+    # config-location: classpath:custom-access.xml  # Supports classpath: and file: prefixes
     local-port-strategy: server
     tomcat:
-      request-attributes-enabled: true
+      # request-attributes-enabled: true  # Auto-detected from RemoteIpValve
     tee-filter:
       enabled: false
-      include-hosts: localhost
-      exclude-hosts: ""
+      # include-hosts: localhost
+      # exclude-hosts: internal.example.com
     filter:
-      include-url-patterns: []
+      # include-url-patterns:
+      #   - /api/.*
       exclude-url-patterns:
         - /actuator/.*
         - /health
@@ -30,9 +31,9 @@ logback:
 | Property | Default | Description |
 |----------|---------|-------------|
 | `logback.access.enabled` | `true` | Enable or disable access logging |
-| `logback.access.config-location` | Auto-detected | Path to logback-access.xml configuration file |
+| `logback.access.config-location` | Auto-detected | Path to logback-access configuration file. Supports `classpath:` and `file:` URL prefixes |
 | `logback.access.local-port-strategy` | `server` | Port resolution strategy: `server` or `local` |
-| `logback.access.tomcat.request-attributes-enabled` | `true` | Enable Tomcat request attribute logging |
+| `logback.access.tomcat.request-attributes-enabled` | `Auto-detected` | Enable Tomcat request attributes. Auto-detected from RemoteIpValve when not set |
 | `logback.access.tee-filter.enabled` | `false` | Enable request/response body capture |
 | `logback.access.tee-filter.include-hosts` | `null` | Comma-separated list of hosts to include |
 | `logback.access.tee-filter.exclude-hosts` | `null` | Comma-separated list of hosts to exclude |
@@ -41,14 +42,15 @@ logback:
 
 ## Configuration File Resolution
 
-The starter searches for configuration files in the following order:
+When `logback.access.config-location` is set, that path is used directly (no fallback).
 
-1. Path specified in `logback.access.config-location`
-2. `classpath:logback-access-test.xml` (for testing)
-3. `classpath:logback-access.xml`
-4. `classpath:logback-access-test-spring.xml` (for testing with Spring features)
-5. `classpath:logback-access-spring.xml`
-6. Built-in fallback configuration
+When not set, the starter searches in the following order:
+
+1. `classpath:logback-access-test.xml` (for testing)
+2. `classpath:logback-access.xml`
+3. `classpath:logback-access-test-spring.xml` (for testing with Spring features)
+4. `classpath:logback-access-spring.xml`
+5. Built-in fallback configuration
 
 ## XML Configuration
 
