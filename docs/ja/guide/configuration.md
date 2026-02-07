@@ -10,16 +10,17 @@
 logback:
   access:
     enabled: true
-    config-location: classpath:logback-access.xml
+    # config-location: classpath:custom-access.xml  # Supports classpath: and file: prefixes
     local-port-strategy: server
     tomcat:
-      request-attributes-enabled: true
+      # request-attributes-enabled: true  # Auto-detected from RemoteIpValve
     tee-filter:
       enabled: false
-      include-hosts: localhost
-      exclude-hosts: ""
+      # include-hosts: localhost
+      # exclude-hosts: internal.example.com
     filter:
-      include-url-patterns: []
+      # include-url-patterns:
+      #   - /api/.*
       exclude-url-patterns:
         - /actuator/.*
         - /health
@@ -30,9 +31,9 @@ logback:
 | プロパティ | デフォルト | 説明 |
 |-----------|----------|------|
 | `logback.access.enabled` | `true` | アクセスロギングの有効/無効 |
-| `logback.access.config-location` | 自動検出 | logback-access.xml設定ファイルへのパス |
+| `logback.access.config-location` | 自動検出 | logback-access設定ファイルへのパス。`classpath:`および`file:` URLプレフィックスに対応 |
 | `logback.access.local-port-strategy` | `server` | ポート解決戦略: `server`または`local` |
-| `logback.access.tomcat.request-attributes-enabled` | `true` | Tomcatリクエスト属性ロギングの有効化 |
+| `logback.access.tomcat.request-attributes-enabled` | `自動検出` | Tomcatリクエスト属性の有効化。未設定時、RemoteIpValveの存在から自動判定 |
 | `logback.access.tee-filter.enabled` | `false` | リクエスト/レスポンスボディキャプチャの有効化 |
 | `logback.access.tee-filter.include-hosts` | `null` | 含めるホストのカンマ区切りリスト |
 | `logback.access.tee-filter.exclude-hosts` | `null` | 除外するホストのカンマ区切りリスト |
@@ -41,14 +42,15 @@ logback:
 
 ## 設定ファイルの解決
 
-スターターは以下の順序で設定ファイルを検索します:
+`logback.access.config-location`が設定されている場合、そのパスを直接使用します（フォールバックなし）。
 
-1. `logback.access.config-location`で指定されたパス
-2. `classpath:logback-access-test.xml`（テスト用）
-3. `classpath:logback-access.xml`
-4. `classpath:logback-access-test-spring.xml`（Spring機能付きテスト用）
-5. `classpath:logback-access-spring.xml`
-6. 組み込みフォールバック設定
+未設定の場合、以下の順序で設定ファイルを検索します:
+
+1. `classpath:logback-access-test.xml`（テスト用）
+2. `classpath:logback-access.xml`
+3. `classpath:logback-access-test-spring.xml`（Spring機能付きテスト用）
+4. `classpath:logback-access-spring.xml`
+5. 組み込みフォールバック設定
 
 ## XML設定
 

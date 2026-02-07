@@ -93,7 +93,7 @@ export default withMermaid(
 
       footer: {
         message: 'Released under the Apache 2.0 License.',
-        copyright: 'Copyright © 2024 Seiji Kohara'
+        copyright: 'Copyright © 2026 Seiji Kohara'
       },
 
       search: {

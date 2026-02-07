@@ -365,20 +365,20 @@ See the [examples/](examples/) directory for complete working projects:
 | `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
 | `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
 
-## API Stability
+## Module Structure
 
-This library follows [Semantic Versioning](https://semver.org/). The following packages are considered public API and covered by backward compatibility guarantees:
+The library is split into two artifacts:
 
-- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext`
-- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessEvent`
-- `io.github.seijikohara.spring.boot.logback.access.LogbackAccessProperties`
-- `io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy`
+| Artifact | Module Name (JPMS) | Description |
+|----------|-------------------|-------------|
+| `logback-access-spring-boot-starter` | `io.github.seijikohara.logback.access.spring` | Auto-configuration and server integrations (Tomcat, Jetty) |
+| `logback-access-spring-boot-starter-core` | `io.github.seijikohara.logback.access.core` | Public API classes (transitive dependency — no need to declare separately) |
 
-The following packages are implementation details and **not covered** by semantic versioning guarantees:
+Most users only need to declare the starter dependency:
 
-- `io.github.seijikohara.spring.boot.logback.access.tomcat.*`
-- `io.github.seijikohara.spring.boot.logback.access.jetty.*`
-- `io.github.seijikohara.spring.boot.logback.access.joran.*`
+```kotlin
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:$version")
+```
 
 ## Acknowledgments
 

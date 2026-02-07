@@ -4,10 +4,10 @@
 
 ## 動作の仕組み
 
-組み込みサーバーとしてTomcatを使用する場合、スターターはすべてのHTTPリクエストとレスポンスをインターセプトする`LogbackAccessTomcatValve`を登録します。
+組み込みサーバーとしてTomcatを使用する場合、スターターはすべてのHTTPリクエストとレスポンスをインターセプトする`TomcatValve`を登録します。
 
 ```
-HTTPリクエスト → Tomcat Connector → LogbackAccessTomcatValve → アプリケーション
+HTTPリクエスト → Tomcat Connector → TomcatValve → アプリケーション
                                           ↓
                                    LogbackAccessContext
                                           ↓
@@ -20,6 +20,7 @@ HTTPリクエスト → Tomcat Connector → LogbackAccessTomcatValve → アプ
 logback:
   access:
     tomcat:
+      # 未設定時、RemoteIpValveの存在から自動判定
       request-attributes-enabled: true
 ```
 

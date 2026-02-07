@@ -3,6 +3,7 @@ plugins {
 }
 
 rootProject.name = "logback-access-spring-boot-starter-root"
+include("logback-access-spring-boot-starter-core")
 include("logback-access-spring-boot-starter")
 include("examples:common")
 include("examples:tomcat-mvc")

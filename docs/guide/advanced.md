@@ -6,6 +6,10 @@ This page covers advanced features and configurations.
 
 The TeeFilter captures request and response body content for logging.
 
+::: tip Servlet Applications Only
+TeeFilter requires a Servlet-based web application (Spring MVC). It is not available for reactive applications (Spring WebFlux).
+:::
+
 ### Enable TeeFilter
 
 ```yaml
@@ -136,7 +140,7 @@ Add custom fields to JSON output:
 
 ```json
 {
-  "@timestamp": "2024-01-01T12:00:00.000Z",
+  "@timestamp": "2026-01-01T12:00:00.000Z",
   "@version": 1,
   "method": "GET",
   "uri": "/api/users",
@@ -152,6 +156,10 @@ Add custom fields to JSON output:
 ## Spring Security Integration
 
 When Spring Security is on the classpath, authenticated usernames are automatically captured.
+
+::: tip Servlet Applications Only
+Automatic username capture requires a Servlet-based web application (Spring MVC). For reactive applications (Spring WebFlux), access logging still works but the `%u` variable will show `-`.
+:::
 
 ### How It Works
 
@@ -196,29 +204,14 @@ Send logs to multiple destinations:
 </configuration>
 ```
 
-## Async Logging
+## Performance Tips
 
-Use async appenders for better performance:
+For optimal access logging performance:
 
-```xml
-<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>logs/access.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
-    </rollingPolicy>
-    <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
-    </encoder>
-</appender>
-
-<appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="FILE"/>
-    <queueSize>512</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-</appender>
-
-<appender-ref ref="ASYNC"/>
-```
+1. Use `RollingFileAppender` with size limits for production file logging
+2. Enable [URL filtering](#url-filtering) to reduce log volume
+3. For JSON logging, [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder) provides its own async capabilities
+4. Disable TeeFilter when body capture is not needed
 
 ## Troubleshooting
 

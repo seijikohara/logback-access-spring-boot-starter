@@ -1,1 +1,1 @@
-io.github.seijikohara.spring.boot.logback.access.LogbackAccessAutoConfiguration
+io.github.seijikohara.spring.boot.logback.access.autoconfigure.LogbackAccessAutoConfiguration

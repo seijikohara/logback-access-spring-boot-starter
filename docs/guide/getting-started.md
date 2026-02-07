@@ -8,25 +8,38 @@ This guide explains how to add HTTP access logging to your Spring Boot applicati
 - Spring Boot 4.0 or later
 - Tomcat or Jetty embedded server
 
+## Module Structure
+
+The library consists of two Maven artifacts:
+
+| Artifact | Description |
+|----------|-------------|
+| `logback-access-spring-boot-starter` | Auto-configuration and server integrations (Tomcat, Jetty, Security, TeeFilter) |
+| `logback-access-spring-boot-starter-core` | Public API classes (transitive dependency — no need to declare separately) |
+
+Most users only need to declare the starter dependency. The core module is automatically included as a transitive dependency.
+
 ## Installation
 
 Add the dependency to your build file:
 
+> Replace `VERSION` with the [latest version from Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/logback-access-spring-boot-starter).
+
 ::: code-group
 
 ```kotlin [Gradle (Kotlin)]
-implementation("io.github.seijikohara:logback-access-spring-boot-starter:1.0.0")
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
 ```
 
 ```groovy [Gradle (Groovy)]
-implementation 'io.github.seijikohara:logback-access-spring-boot-starter:1.0.0'
+implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION'
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>io.github.seijikohara</groupId>
     <artifactId>logback-access-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>VERSION</version>
 </dependency>
 ```
 
@@ -84,7 +97,7 @@ For a more detailed output similar to Apache's Combined Log Format:
 Example output:
 
 ```
-127.0.0.1 - - [01/Jan/2024:12:00:00 +0000] "GET /api/users HTTP/1.1" 200 1234
+127.0.0.1 - - [01/Jan/2026:12:00:00 +0000] "GET /api/users HTTP/1.1" 200 1234
 ```
 
 ## Next Steps

@@ -1,6 +1,6 @@
 package io.github.seijikohara.spring.boot.logback.access.security
 
-import io.github.seijikohara.spring.boot.logback.access.REMOTE_USER_ATTR
+import io.github.seijikohara.spring.boot.logback.access.AccessEventData.Companion.REMOTE_USER_ATTR
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
