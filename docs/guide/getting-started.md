@@ -4,7 +4,7 @@ This guide explains how to add HTTP access logging to your Spring Boot applicati
 
 ## Prerequisites
 
-- Java 17 or later
+- Java 21 or later
 - Spring Boot 4.0 or later
 - Tomcat or Jetty embedded server
 

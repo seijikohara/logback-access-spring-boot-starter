@@ -107,7 +107,7 @@ Start your application and access logs will appear in the console.
 
 | Component | Version |
 |-----------|---------|
-| Java | 17+ |
+| Java | 21+ |
 | Spring Boot | 4.0+ |
 | Kotlin | 2.0+ (if using Kotlin) |
 

@@ -141,7 +141,7 @@ classDiagram
 
 | Component | Version |
 |-----------|---------|
-| Java | 17+ |
+| Java | 21+ |
 | Gradle | 8.x |
 
 ## Running Tests
