@@ -18,14 +18,14 @@ import org.springframework.util.ResourceUtils.getURL
  * with Spring environment support, and provides the [emit] entry point
  * for server integrations.
  */
-class LogbackAccessContext(
+public class LogbackAccessContext(
     /** Configuration properties for this context. */
-    val properties: LogbackAccessProperties,
+    public val properties: LogbackAccessProperties,
     resourceLoader: ResourceLoader,
     environment: Environment,
 ) : AutoCloseable {
     /** The underlying Logback-access context. */
-    val accessContext: AccessContext = AccessContext()
+    public val accessContext: AccessContext = AccessContext()
 
     init {
         val (name, resource) = resolveConfig(properties, resourceLoader)
@@ -51,7 +51,7 @@ class LogbackAccessContext(
      * Exceptions from appenders are caught and logged to prevent
      * application crashes due to logging failures.
      */
-    fun emit(event: LogbackAccessEvent) {
+    public fun emit(event: LogbackAccessEvent) {
         runCatching {
             event
                 .takeIf { shouldLog(it.requestURI) }
@@ -90,7 +90,7 @@ class LogbackAccessContext(
 
     override fun toString(): String = "LogbackAccessContext(${accessContext.name})"
 
-    companion object {
+    private companion object {
         private val logger = KotlinLogging.logger {}
 
         private fun resolveConfig(

@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * Since all data is captured eagerly in [AccessEventData],
  * [prepareForDeferredProcessing] is a no-op and serialization works naturally.
  */
-class LogbackAccessEvent
+public class LogbackAccessEvent
     @JvmOverloads
     constructor(
         private val data: AccessEventData,
@@ -101,7 +101,7 @@ class LogbackAccessEvent
 
         override fun toString(): String = "${this::class.simpleName}(${data.requestURL} ${data.statusCode})"
 
-        companion object {
+        private companion object {
             private const val serialVersionUID: Long = 1L
 
             /** Reusable empty parameter array to avoid repeated allocation. */

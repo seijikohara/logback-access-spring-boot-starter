@@ -23,6 +23,10 @@ dependencies {
     implementation(libs.kotlin.logging)
 }
 
+kotlin {
+    explicitApi()
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
