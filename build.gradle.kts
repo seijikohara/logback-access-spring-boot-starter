@@ -4,10 +4,22 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 
 plugins {
     alias(libs.plugins.axion.release)
+    alias(libs.plugins.binary.compatibility.validator)
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.maven.publish) apply false
     alias(libs.plugins.version.catalog.update)
+}
+
+apiValidation {
+    ignoredProjects += listOf(
+        "logback-access-spring-boot-starter",
+        "common",
+        "tomcat-mvc",
+        "jetty-mvc",
+        "tomcat-webflux",
+        "jetty-webflux",
+    )
 }
 
 group = "io.github.seijikohara"

@@ -34,6 +34,7 @@ spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-st
 
 [plugins]
 axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axion-release" }
+binary-compatibility-validator = "org.jetbrains.kotlinx.binary-compatibility-validator:0.18.1"
 detekt = "dev.detekt:2.0.0-alpha.2"
 dokka = "org.jetbrains.dokka:2.1.0"
 errorprone = "net.ltgt.errorprone:5.0.0"
