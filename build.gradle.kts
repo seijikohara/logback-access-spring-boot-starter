@@ -5,6 +5,7 @@ import com.vanniktech.maven.publish.MavenPublishBaseExtension
 plugins {
     alias(libs.plugins.axion.release)
     alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.cyclonedx)
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.maven.publish) apply false
