@@ -180,7 +180,7 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
@@ -190,7 +190,7 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 

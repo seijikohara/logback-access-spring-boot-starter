@@ -54,7 +54,7 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
     <appender-ref ref="CONSOLE"/>
@@ -85,7 +85,7 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 ApacheのCombined Log Formatに近い詳細な出力:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}"</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}"</pattern>
 ```
 
 ## 動作確認

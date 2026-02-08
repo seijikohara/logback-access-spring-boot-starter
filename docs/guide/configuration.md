@@ -62,7 +62,7 @@ When not set, the starter searches in the following order:
     <!-- Appenders define where logs go -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
@@ -82,7 +82,7 @@ Inject Spring properties into your configuration:
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[${appName}] %h %l %u %t "%r" %s %b</pattern>
+            <pattern>[${appName}] %h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
     <appender-ref ref="CONSOLE"/>
@@ -98,7 +98,7 @@ Configure different appenders for different environments:
     <springProfile name="dev">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b %D</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b %D</pattern>
             </encoder>
         </appender>
         <appender-ref ref="CONSOLE"/>
@@ -112,7 +112,7 @@ Configure different appenders for different environments:
                 <maxHistory>30</maxHistory>
             </rollingPolicy>
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b</pattern>
             </encoder>
         </appender>
         <appender-ref ref="FILE"/>
@@ -144,7 +144,7 @@ Write access logs to a file:
 <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>logs/access.log</file>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```
@@ -163,7 +163,7 @@ Rotate logs based on time or size:
         <totalSizeCap>3GB</totalSizeCap>
     </rollingPolicy>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```

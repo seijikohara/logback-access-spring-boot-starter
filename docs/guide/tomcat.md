@@ -84,7 +84,7 @@ logback:
 When Spring Security is on the classpath, authenticated usernames are automatically captured:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b</pattern>
 ```
 
 The `%u` variable will show:
@@ -108,7 +108,7 @@ Complete example for a production Tomcat setup:
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 

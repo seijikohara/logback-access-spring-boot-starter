@@ -62,7 +62,7 @@ logback:
     <!-- Appenderはログの出力先を定義 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
@@ -82,7 +82,7 @@ logback:
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[${appName}] %h %l %u %t "%r" %s %b</pattern>
+            <pattern>[${appName}] %h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
     <appender-ref ref="CONSOLE"/>
@@ -98,7 +98,7 @@ logback:
     <springProfile name="dev">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b %D</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b %D</pattern>
             </encoder>
         </appender>
         <appender-ref ref="CONSOLE"/>
@@ -112,7 +112,7 @@ logback:
                 <maxHistory>30</maxHistory>
             </rollingPolicy>
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b</pattern>
             </encoder>
         </appender>
         <appender-ref ref="FILE"/>
@@ -144,7 +144,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>logs/access.log</file>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```
@@ -163,7 +163,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
         <totalSizeCap>3GB</totalSizeCap>
     </rollingPolicy>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```

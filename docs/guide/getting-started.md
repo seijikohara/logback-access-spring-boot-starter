@@ -54,7 +54,7 @@ Create a `logback-access.xml` file in `src/main/resources`:
 <configuration>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
     <appender-ref ref="CONSOLE"/>
@@ -85,7 +85,7 @@ The following pattern variables are available:
 For a more detailed output similar to Apache's Combined Log Format:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}"</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}"</pattern>
 ```
 
 ## Verify Installation

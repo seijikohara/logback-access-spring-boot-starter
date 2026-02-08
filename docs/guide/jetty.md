@@ -147,7 +147,7 @@ Complete example for a production Jetty setup:
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 

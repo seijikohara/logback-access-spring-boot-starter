@@ -84,7 +84,7 @@ logback:
 Spring Securityがクラスパスにある場合、認証済みユーザー名が自動的にキャプチャされます:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b</pattern>
 ```
 
 `%u`変数の表示:
@@ -108,7 +108,7 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 
