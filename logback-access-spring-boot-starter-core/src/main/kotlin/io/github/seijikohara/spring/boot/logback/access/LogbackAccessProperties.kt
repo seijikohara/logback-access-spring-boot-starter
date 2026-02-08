@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue
  * @property filter URL filtering properties.
  */
 @ConfigurationProperties("logback.access")
-data class LogbackAccessProperties
+public data class LogbackAccessProperties
     @ConstructorBinding
     constructor(
         @DefaultValue("true")
@@ -38,7 +38,7 @@ data class LogbackAccessProperties
          * @property requestAttributesEnabled Whether to enable request attributes for use with RemoteIpValve.
          *           Defaults to the presence of RemoteIpValve when not specified.
          */
-        data class TomcatProperties(
+        public data class TomcatProperties(
             val requestAttributesEnabled: Boolean?,
         )
 
@@ -49,7 +49,7 @@ data class LogbackAccessProperties
          * @property includeHosts Comma-separated host names to activate. All hosts when not specified.
          * @property excludeHosts Comma-separated host names to deactivate.
          */
-        data class TeeFilterProperties
+        public data class TeeFilterProperties
             @ConstructorBinding
             constructor(
                 @DefaultValue("false")
@@ -65,15 +65,15 @@ data class LogbackAccessProperties
          *           All URLs when not specified.
          * @property excludeUrlPatterns Regex patterns for URLs to exclude from access logging.
          */
-        data class FilterProperties(
+        public data class FilterProperties(
             val includeUrlPatterns: List<String>?,
             val excludeUrlPatterns: List<String>?,
         )
 
-        companion object {
+        public companion object {
             /** Default configuration file locations searched in order. */
             @JvmField
-            val DEFAULT_CONFIGS: List<String> =
+            public val DEFAULT_CONFIGS: List<String> =
                 listOf(
                     "classpath:logback-access-test.xml",
                     "classpath:logback-access.xml",
@@ -82,7 +82,7 @@ data class LogbackAccessProperties
                 )
 
             /** Built-in fallback configuration file location. */
-            const val FALLBACK_CONFIG: String =
+            public const val FALLBACK_CONFIG: String =
                 "classpath:io/github/seijikohara/spring/boot/logback/access/logback-access-spring.xml"
         }
     }

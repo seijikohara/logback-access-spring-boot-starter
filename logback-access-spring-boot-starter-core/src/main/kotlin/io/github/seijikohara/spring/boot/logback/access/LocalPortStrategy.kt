@@ -3,7 +3,7 @@ package io.github.seijikohara.spring.boot.logback.access
 /**
  * Strategy for resolving the local port reported in access log events.
  */
-enum class LocalPortStrategy {
+public enum class LocalPortStrategy {
     /**
      * Returns the port number of the interface on which the request was received.
      */

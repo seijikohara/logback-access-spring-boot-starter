@@ -9,7 +9,7 @@ import java.io.Serializable
  * deferred processing and serialization without holding references to
  * server-specific request/response objects.
  */
-data class AccessEventData(
+public data class AccessEventData(
     /** Timestamp when the request was received (epoch milliseconds). */
     val timeStamp: Long,
     /** Time elapsed processing the request in milliseconds, or null if unavailable. */
@@ -68,11 +68,11 @@ data class AccessEventData(
         requestParameterMap.mapValues { (_, values) -> values.toTypedArray() }
     }
 
-    companion object {
+    public companion object {
         private const val serialVersionUID: Long = 1L
 
         /** Request attribute key for the remote user set by the security filter. */
-        const val REMOTE_USER_ATTR: String =
+        public const val REMOTE_USER_ATTR: String =
             "io.github.seijikohara.spring.boot.logback.access.remoteUser"
     }
 }

@@ -15,7 +15,7 @@ import java.util.function.Supplier
  *
  * @see org.springframework.boot.logging.logback.SpringBootJoranConfigurator
  */
-class AccessJoranConfigurator(
+public class AccessJoranConfigurator(
     private val environment: Environment,
 ) : JoranConfigurator() {
     override fun addElementSelectorAndActionAssociations(store: RuleStore): Unit =
