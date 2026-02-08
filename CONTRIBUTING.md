@@ -57,15 +57,13 @@ Both tools run as part of `./gradlew build`. Fix any issues before submitting a 
 - **Framework**: [Kotest](https://kotest.io/) with FunSpec style
 - **Mocking**: [MockK](https://mockk.io/)
 
-All tests are pure unit tests. Place test files alongside the source they test:
+The project contains both unit tests and integration tests:
 
-```
-logback-access-spring-boot-starter-core/
-  src/test/kotlin/...    # Core unit tests
-
-logback-access-spring-boot-starter/
-  src/jettyTest/kotlin/... # Jetty integration tests
-```
+| Location | Type | Description |
+|----------|------|-------------|
+| `logback-access-spring-boot-starter-core/src/test/` | Unit tests | Core API and Joran extension tests (Kotest) |
+| `logback-access-spring-boot-starter/src/jettyTest/` | Integration tests | Jetty-specific tests |
+| `examples/` | Integration tests | Full Spring Boot tests for Tomcat/Jetty x MVC/WebFlux |
 
 Run tests only:
 
