@@ -60,14 +60,14 @@ logback:
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- Appenderはログの出力先を定義 -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
     <!-- Appenderを参照して有効化 -->
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 
@@ -80,12 +80,12 @@ logback:
     <springProperty name="appName" source="spring.application.name"
                     defaultValue="app" scope="context"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>[${appName}] %h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 
@@ -96,16 +96,16 @@ logback:
 ```xml
 <configuration>
     <springProfile name="dev">
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%h %l %u [%t] "%r" %s %b %D</pattern>
             </encoder>
         </appender>
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="console"/>
     </springProfile>
 
     <springProfile name="prod">
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>logs/access.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                 <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
@@ -115,7 +115,7 @@ logback:
                 <pattern>%h %l %u [%t] "%r" %s %b</pattern>
             </encoder>
         </appender>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="file"/>
     </springProfile>
 </configuration>
 ```
@@ -141,7 +141,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 アクセスログをファイルに出力:
 
 ```xml
-<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+<appender name="file" class="ch.qos.logback.core.FileAppender">
     <file>logs/access.log</file>
     <encoder>
         <pattern>%h %l %u [%t] "%r" %s %b</pattern>
@@ -154,7 +154,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 時間またはサイズに基づいてログをローテーション:
 
 ```xml
-<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>logs/access.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
         <fileNamePattern>logs/access.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>

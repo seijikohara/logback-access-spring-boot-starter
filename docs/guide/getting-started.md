@@ -52,12 +52,12 @@ Create a `logback-access.xml` file in `src/main/resources`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 

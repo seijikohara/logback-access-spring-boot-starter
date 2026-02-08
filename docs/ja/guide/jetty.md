@@ -140,7 +140,7 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
@@ -151,7 +151,7 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
         </encoder>
     </appender>
 
-    <appender-ref ref="FILE"/>
+    <appender-ref ref="file"/>
 </configuration>
 ```
 

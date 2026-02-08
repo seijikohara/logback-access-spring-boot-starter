@@ -119,10 +119,10 @@ implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
     </appender>
-    <appender-ref ref="JSON"/>
+    <appender-ref ref="json"/>
 </configuration>
 ```
 
@@ -178,13 +178,13 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 
 ```xml
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
@@ -194,13 +194,13 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
         </encoder>
     </appender>
 
-    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
     </appender>
 
-    <appender-ref ref="CONSOLE"/>
-    <appender-ref ref="FILE"/>
-    <appender-ref ref="JSON"/>
+    <appender-ref ref="console"/>
+    <appender-ref ref="file"/>
+    <appender-ref ref="json"/>
 </configuration>
 ```
 
