@@ -105,6 +105,16 @@ Run tests only:
 
 5. **CI must pass** — the PR will be reviewed after all checks are green
 
+## Dependency Verification
+
+This project uses [Gradle dependency verification](https://docs.gradle.org/current/userguide/dependency_verification.html) with SHA-256 checksums. When adding or updating dependencies, regenerate the verification metadata:
+
+```bash
+./gradlew --write-verification-metadata sha256 clean build
+```
+
+Commit the updated `gradle/verification-metadata.xml` alongside your dependency changes.
+
 ## Reporting Issues
 
 - **Bugs**: Use the [Bug Report](https://github.com/seijikohara/logback-access-spring-boot-starter/issues/new?template=bug_report.yml) template
