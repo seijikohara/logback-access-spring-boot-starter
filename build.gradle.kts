@@ -53,6 +53,14 @@ allprojects {
     version = rootProject.version
 }
 
+// Configure reproducible builds for all archive tasks
+subprojects {
+    tasks.withType<AbstractArchiveTask>().configureEach {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+    }
+}
+
 // Common maven-publish configuration for all publishable subprojects
 subprojects {
     pluginManager.withPlugin("com.vanniktech.maven.publish") {
