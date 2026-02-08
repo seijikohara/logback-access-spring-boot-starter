@@ -18,8 +18,8 @@ flowchart TB
     subgraph Spring Boot Application
         direction TB
         A[HTTP Request] --> B{Embedded Server}
-        B -->|Tomcat| C[LogbackAccessTomcatValve]
-        B -->|Jetty| D[LogbackAccessJettyRequestLog]
+        B -->|Tomcat| C[TomcatValve]
+        B -->|Jetty| D[JettyRequestLog]
         C --> E[LogbackAccessContext]
         D --> E
         E --> F[logback-access.xml]
