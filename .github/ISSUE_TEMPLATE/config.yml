@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://seijikohara.github.io/logback-access-spring-boot-starter/
+    about: Check the documentation before opening an issue
