@@ -254,7 +254,7 @@ flowchart LR
 For structured JSON logging, add [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder):
 
 ```kotlin
-implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 ```
 
 Configure `logback-access.xml`:

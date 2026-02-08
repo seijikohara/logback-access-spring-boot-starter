@@ -101,14 +101,14 @@ logback:
 ::: code-group
 
 ```kotlin [Gradle (Kotlin)]
-implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 ```
 
 ```xml [Maven]
 <dependency>
     <groupId>net.logstash.logback</groupId>
     <artifactId>logstash-logback-encoder</artifactId>
-    <version>8.0</version>
+    <version>9.0</version>
 </dependency>
 ```
 
