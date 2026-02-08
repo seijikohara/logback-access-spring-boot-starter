@@ -231,6 +231,9 @@ jobs:
       - name: Build with release version
         run: ./gradlew clean build
 
+      - name: Generate SBOM
+        run: ./gradlew cyclonedxBom
+
       - name: Publish to Maven Central
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
         env:
@@ -253,6 +256,7 @@ jobs:
           draft: false
           prerelease: false
           token: ${{ steps.generate_token.outputs.token }}
+          files: build/reports/cyclonedx/bom.json
 
       - name: Release summary
         env:
