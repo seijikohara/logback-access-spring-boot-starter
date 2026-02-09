@@ -59,7 +59,10 @@ testing {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.mockk)
                 implementation("org.springframework:spring-test")
+                implementation("org.springframework.boot:spring-boot-test")
+                implementation("org.assertj:assertj-core")
                 implementation(libs.spring.boot.starter.tomcat)
+                implementation(libs.spring.boot.starter.jetty)
                 implementation(libs.spring.boot.starter.security)
             }
         }
