@@ -222,6 +222,8 @@ Use `%requestContent` and `%responseContent` patterns to access captured content
 | `logback.access.tee-filter.enabled` | Enable TeeFilter | `false` |
 | `logback.access.tee-filter.include-hosts` | Hosts to include (comma-separated) | All |
 | `logback.access.tee-filter.exclude-hosts` | Hosts to exclude (comma-separated) | None |
+| `logback.access.tee-filter.max-payload-size` | Maximum payload size (bytes) to log | `65536` |
+| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns for body capture (override mode) | Text and JSON types |
 
 > **Security Warning**: TeeFilter captures request/response bodies which may contain sensitive data (passwords, tokens, PII). Use `include-hosts`/`exclude-hosts` to limit scope, and consider implementing custom masking in production environments.
 

@@ -44,6 +44,10 @@ logback:
 
 標準変数に加えて、Tomcatは`RemoteIpValve`が設定するすべてのリクエスト属性をサポートします（例: `%{org.apache.catalina.AccessLog.RemoteAddr}r`）。`request-attributes-enabled`が`true`の場合、これらの属性はリバースプロキシの背後にある実際のクライアント情報を反映します。
 
+## 経過時間
+
+`%D`と`%T`パターン変数はリクエスト処理時間を出力します。Tomcatが`AccessLog.log(request, response, time)`コントラクトで直接値を提供する場合、スターターはそのまま使用します。値が利用できない場合は、リクエスト開始時刻から計算します。
+
 ## リバースプロキシの背後での使用
 
 プロキシ（nginx、Apache、ロードバランサー）の背後で動作する場合、`RemoteIpValve`を設定して実際のクライアントIPを取得します:

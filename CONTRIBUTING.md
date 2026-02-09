@@ -61,9 +61,9 @@ The project contains both unit tests and integration tests:
 
 | Location | Type | Description |
 |----------|------|-------------|
-| `logback-access-spring-boot-starter-core/src/test/` | Unit tests | Core API and Joran extension tests (Kotest) |
-| `logback-access-spring-boot-starter/src/jettyTest/` | Integration tests | Jetty-specific tests |
-| `examples/` | Integration tests | Full Spring Boot tests for Tomcat/Jetty x MVC/WebFlux |
+| `logback-access-spring-boot-starter-core/src/test/` | Unit tests | Core API, Joran extensions, Properties (Kotest) |
+| `logback-access-spring-boot-starter/src/test/` | Unit tests | Body capture, Tomcat extractors, Security filter (Kotest) |
+| `examples/` | Integration tests | Full Spring Boot tests for Tomcat/Jetty × MVC/WebFlux |
 
 Run tests only:
 
