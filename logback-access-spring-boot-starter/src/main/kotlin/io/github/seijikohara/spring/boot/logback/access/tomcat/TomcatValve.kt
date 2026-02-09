@@ -15,8 +15,10 @@ import org.apache.catalina.valves.ValveBase
  *
  * Implements [AccessLog] so that Tomcat invokes [log] after each request
  * completes, at which point all response data is available.
+ *
+ * This class is auto-configured by the starter. Direct instantiation is not needed.
  */
-class TomcatValve(
+internal class TomcatValve(
     private val logbackAccessContext: LogbackAccessContext,
 ) : ValveBase(true),
     AccessLog {

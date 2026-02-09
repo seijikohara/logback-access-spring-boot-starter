@@ -80,15 +80,21 @@ logback:
 2. If exclude patterns are defined, matching URLs are excluded
 3. Exclude takes precedence when both match
 
-### Regular Expression Syntax
+### Pattern Matching Behavior
 
-Patterns use Java regular expressions:
+Patterns use Java regular expressions with **partial matching**. A pattern matches if it is found anywhere within the request URI. Use anchors (`^`, `$`) for exact matching.
 
-| Pattern | Matches |
-|---------|---------|
-| `/api/.*` | Any URL starting with `/api/` |
-| `/users/[0-9]+` | `/users/123`, `/users/456` |
-| `.*\\.json` | Any URL ending with `.json` |
+| Pattern | Matches | Does NOT Match |
+|---------|---------|----------------|
+| `/api/.*` | `/api/users`, `/v2/api/data` | `/apiary` |
+| `/health` | `/health`, `/api/health-check` | `/heal` |
+| `^/health$` | `/health` | `/api/health`, `/health/check` |
+| `/users/[0-9]+` | `/users/123`, `/users/456` | `/users/abc` |
+| `.*\\.json` | `/data.json`, `/api/config.json` | `/json-data` |
+
+::: tip
+To match an exact path, use anchored patterns. For example, `^/actuator/health$` matches only `/actuator/health`, not `/actuator/health/liveness`.
+:::
 
 ## JSON Logging
 
@@ -140,14 +146,18 @@ Add custom fields to JSON output:
 
 ```json
 {
-  "@timestamp": "2026-01-01T12:00:00.000Z",
-  "@version": 1,
+  "@timestamp": "2026-01-01T12:00:00.000+09:00",
+  "@version": "1",
+  "message": "GET /api/users HTTP/1.1",
   "method": "GET",
-  "uri": "/api/users",
-  "status": 200,
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "requested_url": "GET /api/users HTTP/1.1",
+  "requested_uri": "/api/users",
+  "remote_host": "192.168.1.100",
+  "remote_user": "-",
+  "content_length": 1234,
   "elapsed_time": 45,
-  "remote_addr": "192.168.1.100",
-  "user_agent": "Mozilla/5.0...",
   "service": "my-app",
   "environment": "production"
 }
@@ -155,7 +165,7 @@ Add custom fields to JSON output:
 
 ## Spring Security Integration
 
-When Spring Security is on the classpath, authenticated usernames are automatically captured.
+The starter captures authenticated usernames automatically when Spring Security is on the classpath.
 
 ::: tip Servlet Applications Only
 Automatic username capture requires a Servlet-based web application (Spring MVC). For reactive applications (Spring WebFlux), access logging still works but the `%u` variable will show `-`.
@@ -163,14 +173,14 @@ Automatic username capture requires a Servlet-based web application (Spring MVC)
 
 ### How It Works
 
-The library checks the `SecurityContextHolder` for the authenticated principal:
+The starter checks the `SecurityContextHolder` for the authenticated principal:
 
-1. Authenticated requests: Username is captured in `%u`
-2. Anonymous requests: `-` is shown
+1. Authenticated requests: The starter captures the username in `%u`
+2. Anonymous requests: The starter shows `-`
 
 ### Custom Principal Extraction
 
-The library uses `SecurityContextHolder.getContext().getAuthentication().getName()` by default.
+The starter uses `SecurityContextHolder.getContext().getAuthentication().getName()` by default.
 
 ## Multiple Appenders
 
@@ -233,3 +243,9 @@ For optimal access logging performance:
 2. Enable URL filtering to reduce log volume
 3. Disable body capture (TeeFilter) if not needed
 4. Use rolling file appenders with size limits
+
+## See Also
+
+- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse proxy configuration
+- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations
+- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration

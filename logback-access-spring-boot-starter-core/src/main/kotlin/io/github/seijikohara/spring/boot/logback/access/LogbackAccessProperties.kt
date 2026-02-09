@@ -61,9 +61,15 @@ public data class LogbackAccessProperties
         /**
          * URL pattern filtering properties for access logging.
          *
+         * Patterns are compiled as regular expressions and matched using partial matching
+         * ([Regex.containsMatchIn]). For example, the pattern `/health` matches any URI
+         * containing "/health", including "/api/health-check".
+         * Use anchored patterns (e.g., `^/health$`) for exact matching.
+         *
          * @property includeUrlPatterns Regex patterns for URLs to include in access logging.
-         *           All URLs when not specified.
+         *           All URLs are included when not specified.
          * @property excludeUrlPatterns Regex patterns for URLs to exclude from access logging.
+         *           No URLs are excluded when not specified.
          */
         public data class FilterProperties(
             val includeUrlPatterns: List<String>?,

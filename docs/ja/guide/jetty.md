@@ -66,21 +66,14 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 
 ## パターン変数
 
-Jettyは標準のパターン変数をすべてサポート:
+標準のパターン変数については[はじめに — パターン変数](/ja/guide/getting-started#パターン変数)を参照してください。
 
-| 変数 | 説明 |
-|------|------|
-| `%h` | リモートホスト（IPアドレス） |
-| `%l` | リモートログ名（常に`-`） |
-| `%u` | リモートユーザー |
-| `%t` | リクエストタイムスタンプ |
-| `%r` | リクエストライン |
-| `%s` | HTTPステータスコード |
-| `%b` | レスポンスボディサイズ |
-| `%D` | リクエスト処理時間（ミリ秒） |
-| `%T` | リクエスト処理時間（秒） |
-| `%{xxx}i` | リクエストヘッダー`xxx` |
-| `%{xxx}o` | レスポンスヘッダー`xxx` |
+Jetty固有の注意事項:
+
+- **Cookie** (`%{xxx}c`): スターターはJettyネイティブAPIの`Request.getCookies()`を使用してCookieを抽出します。
+- **リクエスト属性** (`%{xxx}r`): 標準のServletリクエスト属性は利用可能ですが、Tomcat固有の`AccessLog`属性（例: `org.apache.catalina.AccessLog.RemoteAddr`）はサポートされません。
+- **リモートホスト** (`%h`): 常にIPアドレスを返します（逆引きDNSルックアップは実行されません）。
+- **リクエストパラメータ**: `requestParameterMap`はリクエストボディの消費を避けるため、空のマップを返します。
 
 ## 既知の制限事項
 
@@ -92,13 +85,11 @@ Jettyはデフォルトで逆引きDNSルックアップを実行しません。
 
 パフォーマンスと互換性の理由から、`requestParameterMap`は全リクエストで空のマップを返します。これはリクエストボディの消費を避けるための意図的な動作です。
 
-::: warning Jetty非対応: TeeFilter
-TeeFilterはJetty 12ではサポートされていません。JettyのRequestLog APIはServlet APIとは別のコアサーバーレベルで動作します。TeeFilterはServletリクエストにリクエスト属性を設定しますが、RequestLogからは参照できません。必要な場合は、アプリケーションレベルのインターセプターでリクエスト内容のログ記録を検討してください。
-:::
-
 ### TeeFilter
 
-TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#jetty非対応-teefilter)を参照してください。
+::: warning Jetty 12非対応
+TeeFilterはJetty 12ではサポートされていません。JettyのRequestLog APIはServlet APIとは別のコアサーバーレベルで動作します。TeeFilterはServletリクエストにリクエスト属性を設定しますが、RequestLogからは参照できません。TomcatでのTeeFilter使用方法は[高度な設定 — TeeFilter](/ja/guide/advanced#teefilter)を参照してください。
+:::
 
 ## ローカルポート戦略
 
@@ -131,7 +122,7 @@ server:
 
 ## Spring Security連携
 
-Spring Securityがクラスパスにある場合、認証済みユーザー名が`%u`変数で自動的にキャプチャされます。
+Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を`%u`変数で自動的にキャプチャします。
 
 ## 設定例
 
@@ -165,3 +156,8 @@ logback:
         - /actuator/.*
         - /health
 ```
+
+## 関連ページ
+
+- [設定リファレンス](/ja/guide/configuration) — 全プロパティリファレンスとXML設定
+- [高度な設定](/ja/guide/advanced) — TeeFilter、URLフィルタリング、JSONロギング、Spring Security

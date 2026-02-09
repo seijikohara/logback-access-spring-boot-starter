@@ -80,15 +80,21 @@ logback:
 2. 除外パターンが定義されている場合、マッチするURLは除外される
 3. 両方にマッチする場合、除外が優先
 
-### 正規表現構文
+### パターンマッチングの動作
 
-パターンはJava正規表現を使用:
+パターンはJava正規表現を使用し、**部分一致**で評価します。パターンがリクエストURIの任意の位置に見つかればマッチします。完全一致にはアンカー（`^`、`$`）を使用してください。
 
-| パターン | マッチ対象 |
-|---------|----------|
-| `/api/.*` | `/api/`で始まる任意のURL |
-| `/users/[0-9]+` | `/users/123`、`/users/456` |
-| `.*\\.json` | `.json`で終わる任意のURL |
+| パターン | マッチする | マッチしない |
+|---------|----------|------------|
+| `/api/.*` | `/api/users`, `/v2/api/data` | `/apiary` |
+| `/health` | `/health`, `/api/health-check` | `/heal` |
+| `^/health$` | `/health` | `/api/health`, `/health/check` |
+| `/users/[0-9]+` | `/users/123`, `/users/456` | `/users/abc` |
+| `.*\\.json` | `/data.json`, `/api/config.json` | `/json-data` |
+
+::: tip
+完全一致にはアンカー付きパターンを使用してください。例えば、`^/actuator/health$`は`/actuator/health`のみにマッチし、`/actuator/health/liveness`にはマッチしません。
+:::
 
 ## JSONロギング
 
@@ -140,14 +146,18 @@ JSON出力にカスタムフィールドを追加:
 
 ```json
 {
-  "@timestamp": "2026-01-01T12:00:00.000Z",
-  "@version": 1,
+  "@timestamp": "2026-01-01T12:00:00.000+09:00",
+  "@version": "1",
+  "message": "GET /api/users HTTP/1.1",
   "method": "GET",
-  "uri": "/api/users",
-  "status": 200,
+  "protocol": "HTTP/1.1",
+  "status_code": 200,
+  "requested_url": "GET /api/users HTTP/1.1",
+  "requested_uri": "/api/users",
+  "remote_host": "192.168.1.100",
+  "remote_user": "-",
+  "content_length": 1234,
   "elapsed_time": 45,
-  "remote_addr": "192.168.1.100",
-  "user_agent": "Mozilla/5.0...",
   "service": "my-app",
   "environment": "production"
 }
@@ -155,7 +165,7 @@ JSON出力にカスタムフィールドを追加:
 
 ## Spring Security連携
 
-Spring Securityがクラスパスにある場合、認証済みユーザー名が自動的にキャプチャされます。
+Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を自動的にキャプチャします。
 
 ::: tip Servletアプリケーション限定
 ユーザー名の自動キャプチャにはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）ではアクセスロギングは動作しますが、`%u`変数は`-`を表示します。
@@ -163,14 +173,14 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 
 ### 動作の仕組み
 
-ライブラリは認証済みプリンシパルの`SecurityContextHolder`をチェックします:
+スターターは認証済みプリンシパルの`SecurityContextHolder`をチェックします:
 
 1. 認証済みリクエスト: ユーザー名が`%u`でキャプチャされる
 2. 匿名リクエスト: `-`が表示される
 
 ### カスタムプリンシパル抽出
 
-ライブラリはデフォルトで`SecurityContextHolder.getContext().getAuthentication().getName()`を使用します。
+スターターはデフォルトで`SecurityContextHolder.getContext().getAuthentication().getName()`を使用します。
 
 ## 複数Appender
 
@@ -233,3 +243,9 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 2. URLフィルタリングを有効にしてログ量を削減
 3. 不要な場合はボディキャプチャ（TeeFilter）を無効化
 4. サイズ制限付きのローリングファイルAppenderを使用
+
+## 関連ページ
+
+- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシの設定
+- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項
+- [設定リファレンス](/ja/guide/configuration) — 全プロパティリファレンスとXML設定

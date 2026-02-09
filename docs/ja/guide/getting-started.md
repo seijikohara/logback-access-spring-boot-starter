@@ -70,6 +70,9 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 | 変数 | 説明 |
 |------|------|
 | `%h` | リモートホスト（IPアドレス） |
+| `%a` | リモートIPアドレス |
+| `%A` | ローカルIPアドレス |
+| `%p` | ローカルポート |
 | `%l` | リモートログ名（常に`-`） |
 | `%u` | リモートユーザー（認証から取得） |
 | `%t` | リクエストタイムスタンプ |
@@ -79,6 +82,13 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 | `%D` | リクエスト処理時間（ミリ秒） |
 | `%T` | リクエスト処理時間（秒） |
 | `%I` | スレッド名 |
+| `%{xxx}i` | リクエストヘッダー`xxx` |
+| `%{xxx}o` | レスポンスヘッダー`xxx` |
+| `%{xxx}c` | Cookie値`xxx` |
+| `%{xxx}r` | リクエスト属性`xxx` |
+| `%queryString` | クエリ文字列（`?`プレフィックス付き、例: `?name=value`） |
+| `%requestContent` | リクエストボディ（TeeFilterが必要） |
+| `%responseContent` | レスポンスボディ（TeeFilterが必要） |
 
 ## Combined Log Format
 

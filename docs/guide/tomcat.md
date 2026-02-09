@@ -40,17 +40,9 @@ These attributes are useful when behind a reverse proxy.
 
 ## Pattern Variables
 
-Tomcat supports all standard pattern variables plus:
+For standard pattern variables, see [Getting Started — Pattern Variables](/guide/getting-started#pattern-variables).
 
-| Variable | Description |
-|----------|-------------|
-| `%a` | Remote IP address |
-| `%A` | Local IP address |
-| `%p` | Local port |
-| `%{xxx}i` | Request header `xxx` |
-| `%{xxx}o` | Response header `xxx` |
-| `%{xxx}c` | Cookie value `xxx` |
-| `%{xxx}r` | Request attribute `xxx` |
+In addition to the standard variables, Tomcat supports all request attributes set by `RemoteIpValve` (e.g., `%{org.apache.catalina.AccessLog.RemoteAddr}r`). When `request-attributes-enabled` is `true`, these attributes reflect the real client information from behind a reverse proxy.
 
 ## Behind a Reverse Proxy
 
@@ -81,7 +73,7 @@ logback:
 
 ## Spring Security Integration
 
-When Spring Security is on the classpath, authenticated usernames are automatically captured:
+The starter captures authenticated usernames automatically when Spring Security is on the classpath:
 
 ```xml
 <pattern>%h %l %u [%t] "%r" %s %b</pattern>
@@ -129,3 +121,8 @@ logback:
         - /health
         - /favicon.ico
 ```
+
+## See Also
+
+- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security

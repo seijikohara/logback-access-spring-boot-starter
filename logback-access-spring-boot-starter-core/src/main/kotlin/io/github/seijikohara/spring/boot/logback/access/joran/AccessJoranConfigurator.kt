@@ -10,8 +10,12 @@ import java.util.function.Supplier
 
 /**
  * Extended [JoranConfigurator] that adds Spring-specific XML tags:
- * - `<springProperty>`: Sources Logback properties from the Spring environment
+ * - `<springProperty>`: Sources Logback properties from the Spring [Environment]
  * - `<springProfile>`: Conditionally includes configuration based on active profiles
+ *
+ * This class is public to allow subclassing for advanced customization.
+ * In most cases, [LogbackAccessContext] creates an instance automatically
+ * during initialization, so manual instantiation is not required.
  *
  * @see org.springframework.boot.logging.logback.SpringBootJoranConfigurator
  */
