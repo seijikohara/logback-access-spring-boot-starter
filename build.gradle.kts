@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     alias(libs.plugins.axion.release)
@@ -65,6 +66,19 @@ subprojects {
 // Common maven-publish configuration for all publishable subprojects
 subprojects {
     pluginManager.withPlugin("com.vanniktech.maven.publish") {
+        // Resolve BOM-managed dependency versions in the generated POM
+        pluginManager.withPlugin("maven-publish") {
+            extensions.configure<PublishingExtension> {
+                publications.withType<MavenPublication>().configureEach {
+                    versionMapping {
+                        allVariants {
+                            fromResolutionResult()
+                        }
+                    }
+                }
+            }
+        }
+
         extensions.configure<MavenPublishBaseExtension> {
             publishToMavenCentral()
             signAllPublications()
