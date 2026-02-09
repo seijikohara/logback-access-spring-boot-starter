@@ -3,6 +3,7 @@ package io.github.seijikohara.spring.boot.logback.access
 import ch.qos.logback.access.common.spi.IAccessEvent
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -139,7 +140,7 @@ class LogbackAccessContextSpec :
 
                     val throwingAppender =
                         object : ch.qos.logback.core.AppenderBase<IAccessEvent>() {
-                            override fun append(eventObject: IAccessEvent?): Unit = error("Simulated appender failure")
+                            override fun append(eventObject: IAccessEvent?): Unit = throw IllegalStateException("Simulated failure")
                         }
                     throwingAppender.context = context.accessContext
                     throwingAppender.name = "throwing"
@@ -147,6 +148,31 @@ class LogbackAccessContextSpec :
                     context.accessContext.addAppender(throwingAppender)
 
                     context.emit(createTestEvent("/api/test"))
+                } finally {
+                    context.close()
+                }
+            }
+
+            test("propagates errors without catching") {
+                val properties = createProperties()
+                val context = createContext(properties)
+
+                try {
+                    val appender = getListAppender(context)
+                    context.accessContext.detachAppender(appender.name)
+
+                    val errorAppender =
+                        object : ch.qos.logback.core.AppenderBase<IAccessEvent>() {
+                            override fun append(eventObject: IAccessEvent?): Unit = throw OutOfMemoryError("Simulated OOM")
+                        }
+                    errorAppender.context = context.accessContext
+                    errorAppender.name = "error-throwing"
+                    errorAppender.start()
+                    context.accessContext.addAppender(errorAppender)
+
+                    shouldThrow<OutOfMemoryError> {
+                        context.emit(createTestEvent("/api/test"))
+                    }
                 } finally {
                     context.close()
                 }

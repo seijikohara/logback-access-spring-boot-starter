@@ -196,15 +196,17 @@ sequenceDiagram
     AccessLog->>AccessLog: Log with username
 ```
 
-The starter captures the authenticated username automatically when Spring Security is on the classpath:
+The starter captures the authenticated username automatically when Spring Security is on the classpath (Servlet applications only):
 
 ```
 127.0.0.1 - admin [06/Feb/2026:10:30:45 +0900] "GET /api/secure HTTP/1.1" 200 14
 ```
 
-No additional configuration is required.
+No additional configuration is required. For reactive applications (Spring WebFlux), access logging works but `%u` shows `-`.
 
 ### TeeFilter (Body Capture)
+
+> **Note**: TeeFilter is available for Servlet applications (Spring MVC with Tomcat) only. It is not supported on Jetty 12.
 
 Enable TeeFilter to capture request and response bodies:
 
@@ -223,7 +225,7 @@ Use `%requestContent` and `%responseContent` patterns to access captured content
 | `logback.access.tee-filter.include-hosts` | Hosts to include (comma-separated) | All |
 | `logback.access.tee-filter.exclude-hosts` | Hosts to exclude (comma-separated) | None |
 | `logback.access.tee-filter.max-payload-size` | Maximum payload size (bytes) to log | `65536` |
-| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns for body capture (override mode) | Text and JSON types |
+| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns for body capture (override mode) | Text, JSON, XML, and form types |
 
 > **Security Warning**: TeeFilter captures request/response bodies which may contain sensitive data (passwords, tokens, PII). Use `include-hosts`/`exclude-hosts` to limit scope, and consider implementing custom masking in production environments.
 
