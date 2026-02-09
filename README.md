@@ -361,9 +361,9 @@ See the [examples/](examples/) directory for complete working projects:
 | Module | Server | Framework | Description |
 |--------|--------|-----------|-------------|
 | `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage |
+| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage (TeeFilter excluded) |
 | `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
+| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage (TeeFilter excluded) |
 
 ## Module Structure
 

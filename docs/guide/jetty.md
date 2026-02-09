@@ -98,7 +98,7 @@ TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the
 
 ### TeeFilter
 
-TeeFilter is not supported on Jetty 12. See the [warning above](#request-parameters) for details.
+TeeFilter is not supported on Jetty 12. See the [TeeFilter warning](#teefilter) for details.
 
 ## Local Port Strategy
 

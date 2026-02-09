@@ -98,7 +98,7 @@ TeeFilterはJetty 12ではサポートされていません。JettyのRequestLog
 
 ### TeeFilter
 
-TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#リクエストパラメータ)を参照してください。
+TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#jetty非対応-teefilter)を参照してください。
 
 ## ローカルポート戦略
 

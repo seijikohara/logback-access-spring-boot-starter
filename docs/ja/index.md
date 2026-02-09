@@ -116,7 +116,6 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 |---------------|-----------|
 | Java | 21以上 |
 | Spring Boot | 4.0以上 |
-| Kotlin | 2.0以上（Kotlin使用時） |
 
 ## ライセンス
 
