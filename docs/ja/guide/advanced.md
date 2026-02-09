@@ -23,11 +23,13 @@ logback:
 
 ### 設定オプション
 
-| プロパティ | 説明 |
-|-----------|------|
-| `enabled` | ボディキャプチャの有効/無効 |
-| `include-hosts` | 含めるホストのカンマ区切りリスト |
-| `exclude-hosts` | 除外するホストのカンマ区切りリスト |
+| プロパティ | 説明 | デフォルト |
+|-----------|------|-----------|
+| `enabled` | ボディキャプチャの有効/無効 | `false` |
+| `include-hosts` | 含めるホストのカンマ区切りリスト | 全ホスト |
+| `exclude-hosts` | 除外するホストのカンマ区切りリスト | なし |
+| `max-payload-size` | ログ出力する最大ペイロードサイズ（バイト） | `65536` |
+| `allowed-content-types` | ボディキャプチャを許可するContent-Typeパターン（上書きモード） | 下記参照 |
 
 ### ボディ内容へのアクセス
 
@@ -36,6 +38,47 @@ logback:
 ```xml
 <pattern>%h "%r" %s %requestContent %responseContent</pattern>
 ```
+
+### ボディキャプチャポリシー
+
+ボディ内容はログ出力に含める前にキャプチャポリシーで評価されます。バイナリコンテンツタイプや巨大なペイロードは自動的に抑制され、センチネル値に置換されます。
+
+**デフォルトで許可されるコンテンツタイプ:**
+
+- `text/*`（text/plain、text/htmlなど）
+- `application/json`
+- `application/xml`
+- `application/*+json`（application/vnd.api+jsonなど）
+- `application/*+xml`（application/atom+xmlなど）
+- `application/x-www-form-urlencoded`
+
+**センチネル値:**
+
+| 条件 | センチネル |
+|------|-----------|
+| 画像コンテンツ（`image/*`） | `[IMAGE CONTENTS SUPPRESSED]` |
+| その他のバイナリコンテンツ | `[BINARY CONTENT SUPPRESSED]` |
+| ペイロードが`max-payload-size`を超過 | `[CONTENT TOO LARGE]` |
+
+**カスタムコンテンツタイプ:**
+
+```yaml
+logback:
+  access:
+    tee-filter:
+      enabled: true
+      max-payload-size: 131072
+      allowed-content-types:
+        - "text/*"
+        - "application/json"
+        - "application/pdf"
+```
+
+`allowed-content-types`を指定すると、デフォルトは完全に置換されます（上書きモード）。
+
+::: warning
+`max-payload-size`設定はキャプチャされたコンテンツがログ出力に含まれるかどうかのみを制御します。TeeFilterはこの制限に関係なく、完全なボディをメモリにバッファリングします。本番環境ではホストフィルタリングを使用してキャプチャ範囲を制限してください。
+:::
 
 ### 文字エンコーディング
 

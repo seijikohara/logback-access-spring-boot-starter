@@ -18,6 +18,8 @@ logback:
       enabled: false
       # include-hosts: localhost
       # exclude-hosts: internal.example.com
+      # max-payload-size: 65536
+      # allowed-content-types: text/*,application/json
     filter:
       # include-url-patterns:
       #   - /api/.*
@@ -37,6 +39,8 @@ logback:
 | `logback.access.tee-filter.enabled` | `false` | Enable request/response body capture |
 | `logback.access.tee-filter.include-hosts` | `null` | Comma-separated list of hosts to include |
 | `logback.access.tee-filter.exclude-hosts` | `null` | Comma-separated list of hosts to exclude |
+| `logback.access.tee-filter.max-payload-size` | `65536` | Maximum payload size (bytes) to log before suppression |
+| `logback.access.tee-filter.allowed-content-types` | `null` | Content-Type patterns allowed for body capture (override mode) |
 | `logback.access.filter.include-url-patterns` | `null` | URL patterns to include (regex) |
 | `logback.access.filter.exclude-url-patterns` | `null` | URL patterns to exclude (regex) |
 

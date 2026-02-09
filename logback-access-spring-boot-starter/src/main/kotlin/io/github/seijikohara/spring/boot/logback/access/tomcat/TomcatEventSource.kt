@@ -39,11 +39,11 @@ internal fun createAccessEventData(
                 requestParameterMap = TomcatRequestDataExtractor.extractParameters(request),
                 attributeMap = TomcatRequestDataExtractor.extractAttributes(request),
                 sessionID = request.getSession(false)?.id,
-                requestContent = TomcatRequestDataExtractor.extractContent(request),
+                requestContent = TomcatRequestDataExtractor.extractContent(request, context.properties.teeFilter),
                 statusCode = response.status,
                 responseHeaderMap = TomcatResponseDataExtractor.extractHeaders(response),
                 contentLength = response.getBytesWritten(false),
-                responseContent = TomcatResponseDataExtractor.extractContent(request, response),
+                responseContent = TomcatResponseDataExtractor.extractContent(request, response, context.properties.teeFilter),
             )
         }
     }

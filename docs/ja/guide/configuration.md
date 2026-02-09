@@ -18,6 +18,8 @@ logback:
       enabled: false
       # include-hosts: localhost
       # exclude-hosts: internal.example.com
+      # max-payload-size: 65536
+      # allowed-content-types: text/*,application/json
     filter:
       # include-url-patterns:
       #   - /api/.*
@@ -37,6 +39,8 @@ logback:
 | `logback.access.tee-filter.enabled` | `false` | リクエスト/レスポンスボディキャプチャの有効化 |
 | `logback.access.tee-filter.include-hosts` | `null` | 含めるホストのカンマ区切りリスト |
 | `logback.access.tee-filter.exclude-hosts` | `null` | 除外するホストのカンマ区切りリスト |
+| `logback.access.tee-filter.max-payload-size` | `65536` | ログ出力する最大ペイロードサイズ（バイト） |
+| `logback.access.tee-filter.allowed-content-types` | `null` | ボディキャプチャを許可するContent-Typeパターン（上書きモード） |
 | `logback.access.filter.include-url-patterns` | `null` | 含めるURLパターン（正規表現） |
 | `logback.access.filter.exclude-url-patterns` | `null` | 除外するURLパターン（正規表現） |
 

@@ -162,16 +162,20 @@ public final class io/github/seijikohara/spring/boot/logback/access/LogbackAcces
 }
 
 public final class io/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties {
-	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (ZLjava/lang/String;Ljava/lang/String;JLjava/util/List;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (ZLjava/lang/String;Ljava/lang/String;)Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;
-	public static synthetic fun copy$default (Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;
+	public final fun component4 ()J
+	public final fun component5 ()Ljava/util/List;
+	public final fun copy (ZLjava/lang/String;Ljava/lang/String;JLjava/util/List;)Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;
+	public static synthetic fun copy$default (Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;ZLjava/lang/String;Ljava/lang/String;JLjava/util/List;ILjava/lang/Object;)Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties$TeeFilterProperties;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllowedContentTypes ()Ljava/util/List;
 	public final fun getEnabled ()Z
 	public final fun getExcludeHosts ()Ljava/lang/String;
 	public final fun getIncludeHosts ()Ljava/lang/String;
+	public final fun getMaxPayloadSize ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

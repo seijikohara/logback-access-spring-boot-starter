@@ -207,6 +207,8 @@ private fun createProperties(
                 enabled = false,
                 includeHosts = null,
                 excludeHosts = null,
+                maxPayloadSize = 65536L,
+                allowedContentTypes = null,
             ),
         filter =
             LogbackAccessProperties.FilterProperties(

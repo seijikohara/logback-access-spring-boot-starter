@@ -37,6 +37,8 @@ class LogbackAccessPropertiesSpec :
                             enabled = true,
                             includeHosts = "localhost,example.com",
                             excludeHosts = "internal.example.com",
+                            maxPayloadSize = 65536L,
+                            allowedContentTypes = listOf("text/*", "application/json"),
                         ),
                     filter =
                         LogbackAccessProperties.FilterProperties(
@@ -53,6 +55,8 @@ class LogbackAccessPropertiesSpec :
                 properties.teeFilter.enabled shouldBe true
                 properties.teeFilter.includeHosts shouldBe "localhost,example.com"
                 properties.teeFilter.excludeHosts shouldBe "internal.example.com"
+                properties.teeFilter.maxPayloadSize shouldBe 65536L
+                properties.teeFilter.allowedContentTypes shouldBe listOf("text/*", "application/json")
                 properties.filter.includeUrlPatterns shouldBe listOf("/api/.*")
                 properties.filter.excludeUrlPatterns shouldBe listOf("/health")
             }
@@ -68,6 +72,8 @@ class LogbackAccessPropertiesSpec :
                     enabled = false,
                     includeHosts = null,
                     excludeHosts = null,
+                    maxPayloadSize = 65536L,
+                    allowedContentTypes = null,
                 )
             val filter =
                 LogbackAccessProperties.FilterProperties(
@@ -80,6 +86,8 @@ class LogbackAccessPropertiesSpec :
                 teeFilter.enabled shouldBe false
                 teeFilter.includeHosts shouldBe null
                 teeFilter.excludeHosts shouldBe null
+                teeFilter.maxPayloadSize shouldBe 65536L
+                teeFilter.allowedContentTypes shouldBe null
                 filter.includeUrlPatterns shouldBe null
                 filter.excludeUrlPatterns shouldBe null
             }
