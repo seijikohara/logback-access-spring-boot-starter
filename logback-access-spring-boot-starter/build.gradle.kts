@@ -59,6 +59,7 @@ testing {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.mockk)
                 implementation("org.springframework:spring-test")
+                implementation(libs.spring.boot.starter.tomcat)
             }
         }
     }
