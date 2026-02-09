@@ -225,7 +225,20 @@ Spring Securityがクラスパスにある場合、スターターは認証済�
 スターターは認証済みプリンシパルの`SecurityContextHolder`をチェックします:
 
 1. 認証済みリクエスト: ユーザー名が`%u`でキャプチャされる
-2. 匿名リクエスト: `-`が表示される
+2. 匿名リクエスト: `%u`変数は`-`を表示
+
+匿名認証トークン（`AnonymousAuthenticationToken`など）は`AuthenticationTrustResolver`を使用して除外されます。アクセスログには実際に認証されたユーザーのみが記録されます。
+
+### 信頼解決のカスタマイズ
+
+スターターはデフォルトの`AuthenticationTrustResolver` Bean（`AuthenticationTrustResolverImpl`）を提供します。独自のBeanを定義することでオーバーライドできます:
+
+```java
+@Bean
+public AuthenticationTrustResolver authenticationTrustResolver() {
+    return new MyCustomTrustResolver();
+}
+```
 
 ### カスタムプリンシパル抽出
 

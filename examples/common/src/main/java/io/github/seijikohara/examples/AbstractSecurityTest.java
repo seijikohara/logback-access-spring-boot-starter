@@ -73,7 +73,7 @@ public abstract class AbstractSecurityTest {
     }
 
     @Test
-    void unauthenticatedRequestOnPublicEndpointHasAnonymousUser() throws Exception {
+    void unauthenticatedRequestOnPublicEndpointHasNoUser() throws Exception {
         final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/public");
 
         assertThat(response.statusCode()).isEqualTo(200);
@@ -82,8 +82,8 @@ public abstract class AbstractSecurityTest {
 
         assertThat(events).hasSize(1);
         final var event = events.get(0);
-        // Spring Security sets anonymous user when security filter chain is applied
-        assertThat(event.getRemoteUser()).isEqualTo("anonymousUser");
+        // Anonymous authentication tokens are excluded from remoteUser
+        assertThat(event.getRemoteUser()).isEqualTo("-");
     }
 
     @Test
