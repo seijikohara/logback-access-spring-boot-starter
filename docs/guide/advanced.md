@@ -225,7 +225,20 @@ Automatic username capture requires a Servlet-based web application (Spring MVC)
 The starter checks the `SecurityContextHolder` for the authenticated principal:
 
 1. Authenticated requests: The starter captures the username in `%u`
-2. Anonymous requests: The starter shows `-`
+2. Anonymous requests: The `%u` variable shows `-`
+
+Anonymous authentication tokens (such as `AnonymousAuthenticationToken`) are excluded using an `AuthenticationTrustResolver`. Only genuinely authenticated users appear in the access log.
+
+### Customizing Trust Resolution
+
+The starter provides a default `AuthenticationTrustResolver` bean (`AuthenticationTrustResolverImpl`). You can override it by defining your own bean:
+
+```java
+@Bean
+public AuthenticationTrustResolver authenticationTrustResolver() {
+    return new MyCustomTrustResolver();
+}
+```
 
 ### Custom Principal Extraction
 
