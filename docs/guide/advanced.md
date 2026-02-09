@@ -23,11 +23,13 @@ logback:
 
 ### Configuration Options
 
-| Property | Description |
-|----------|-------------|
-| `enabled` | Enable or disable body capture |
-| `include-hosts` | Comma-separated list of hosts to include |
-| `exclude-hosts` | Comma-separated list of hosts to exclude |
+| Property | Description | Default |
+|----------|-------------|---------|
+| `enabled` | Enable or disable body capture | `false` |
+| `include-hosts` | Comma-separated list of hosts to include | all hosts |
+| `exclude-hosts` | Comma-separated list of hosts to exclude | none |
+| `max-payload-size` | Maximum payload size (bytes) to log before suppression | `65536` |
+| `allowed-content-types` | Content-Type patterns allowed for body capture (override mode) | see below |
 
 ### Accessing Body Content
 
@@ -36,6 +38,47 @@ Use the `%requestContent` and `%responseContent` patterns:
 ```xml
 <pattern>%h "%r" %s %requestContent %responseContent</pattern>
 ```
+
+### Body Capture Policy
+
+Body content is evaluated against a capture policy before being included in log output. Binary content types and oversized payloads are automatically suppressed and replaced with sentinel values.
+
+**Default allowed content types:**
+
+- `text/*` (text/plain, text/html, etc.)
+- `application/json`
+- `application/xml`
+- `application/*+json` (application/vnd.api+json, etc.)
+- `application/*+xml` (application/atom+xml, etc.)
+- `application/x-www-form-urlencoded`
+
+**Sentinel values:**
+
+| Condition | Sentinel |
+|-----------|----------|
+| Image content (`image/*`) | `[IMAGE CONTENTS SUPPRESSED]` |
+| Other binary content | `[BINARY CONTENT SUPPRESSED]` |
+| Payload exceeds `max-payload-size` | `[CONTENT TOO LARGE]` |
+
+**Custom content types:**
+
+```yaml
+logback:
+  access:
+    tee-filter:
+      enabled: true
+      max-payload-size: 131072
+      allowed-content-types:
+        - "text/*"
+        - "application/json"
+        - "application/pdf"
+```
+
+When `allowed-content-types` is specified, it completely replaces the defaults (override mode).
+
+::: warning
+The `max-payload-size` setting only controls whether captured content appears in log output. TeeFilter still buffers the full body in memory regardless of this limit. Use host filtering to limit capture scope in production.
+:::
 
 ### Character Encoding
 

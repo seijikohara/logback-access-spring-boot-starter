@@ -48,6 +48,14 @@ public data class LogbackAccessProperties
          * @property enabled Whether to enable the TeeFilter.
          * @property includeHosts Comma-separated host names to activate. All hosts when not specified.
          * @property excludeHosts Comma-separated host names to deactivate.
+         * @property maxPayloadSize Maximum payload size in bytes to include in log output.
+         *           Bodies exceeding this size are replaced with a sentinel value.
+         *           Note: This does not limit TeeFilter's internal buffering — the full body
+         *           is still buffered in memory by the upstream TeeFilter.
+         * @property allowedContentTypes Content-Type patterns allowed for body capture.
+         *           Supports type wildcards (e.g. "text/\*") and suffix patterns (e.g. "application/\*+json").
+         *           When null, uses built-in defaults (text types, application/json, etc.).
+         *           When specified, completely replaces the defaults (override mode).
          */
         public data class TeeFilterProperties
             @ConstructorBinding
@@ -56,6 +64,9 @@ public data class LogbackAccessProperties
                 val enabled: Boolean,
                 val includeHosts: String?,
                 val excludeHosts: String?,
+                @DefaultValue("65536")
+                val maxPayloadSize: Long,
+                val allowedContentTypes: List<String>?,
             )
 
         /**

@@ -3,9 +3,10 @@ package io.github.seijikohara.spring.boot.logback.access.tomcat
 import ch.qos.logback.access.common.AccessConstants.LB_INPUT_BUFFER
 import ch.qos.logback.access.common.AccessConstants.LB_OUTPUT_BUFFER
 import ch.qos.logback.access.common.servlet.Util.isFormUrlEncoded
+import io.github.seijikohara.spring.boot.logback.access.LogbackAccessProperties.TeeFilterProperties
+import io.github.seijikohara.spring.boot.logback.access.tee.BodyCapturePolicy
 import org.apache.catalina.connector.Request
 import java.net.URLEncoder.encode
-import java.nio.charset.Charset
 import java.util.Collections.unmodifiableList
 import java.util.Collections.unmodifiableMap
 
@@ -42,16 +43,23 @@ internal object TomcatRequestDataExtractor {
     /**
      * Extracts request body content captured by TeeFilter.
      *
+     * Evaluates body capture policy (content type and size) before conversion.
      * Uses the request's character encoding for byte-to-string conversion,
      * falling back to UTF-8 when the encoding is not specified or unsupported.
      */
-    fun extractContent(request: Request): String? =
-        (request.getAttribute(LB_INPUT_BUFFER) as? ByteArray)
-            ?.let { String(it, resolveCharset(request.characterEncoding)) }
-            ?: encodeFormDataIfApplicable(request)
+    fun extractContent(
+        request: Request,
+        teeFilterProperties: TeeFilterProperties,
+    ): String? {
+        val buffer =
+            request.getAttribute(LB_INPUT_BUFFER) as? ByteArray
+                ?: return encodeFormDataIfApplicable(request)
+        return BodyCapturePolicy.evaluate(request.contentType, buffer.size, teeFilterProperties)
+            ?: String(buffer, BodyCapturePolicy.resolveCharset(request.characterEncoding))
+    }
 
     private fun encodeFormDataIfApplicable(request: Request): String? {
-        val charsetName = resolveCharset(request.characterEncoding).name()
+        val charsetName = BodyCapturePolicy.resolveCharset(request.characterEncoding).name()
         return request
             .takeIf { isFormUrlEncoded(it) }
             ?.parameterMap
@@ -61,7 +69,4 @@ internal object TomcatRequestDataExtractor {
                 "${encode(key, charsetName)}=${encode(value, charsetName)}"
             }
     }
-
-    private fun resolveCharset(encoding: String?): Charset =
-        encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
 }
