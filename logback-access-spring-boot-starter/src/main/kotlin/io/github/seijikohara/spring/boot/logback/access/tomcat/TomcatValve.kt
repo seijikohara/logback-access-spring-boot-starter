@@ -46,7 +46,7 @@ internal class TomcatValve(
         response: Response,
         time: Long,
     ): Unit =
-        createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled)
+        createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled, time)
             .let { data -> LogbackAccessEvent(data, request, response) }
             .let(logbackAccessContext::emit)
 
