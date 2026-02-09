@@ -20,6 +20,8 @@ internal object TomcatResponseDataExtractor {
     /**
      * Extracts response body content captured by TeeFilter.
      *
+     * Returns `null` immediately when TeeFilter is disabled.
+     *
      * Evaluates body capture policy (content type and size) before conversion.
      * Uses the response's character encoding for byte-to-string conversion,
      * falling back to UTF-8 when the encoding is not specified or unsupported.
@@ -29,8 +31,10 @@ internal object TomcatResponseDataExtractor {
         response: Response,
         teeFilterProperties: TeeFilterProperties,
     ): String? {
-        val buffer = request.getAttribute(LB_OUTPUT_BUFFER) as? ByteArray ?: return null
-        return BodyCapturePolicy.evaluate(response.contentType, buffer.size, teeFilterProperties)
-            ?: String(buffer, BodyCapturePolicy.resolveCharset(response.characterEncoding))
+        if (!teeFilterProperties.enabled) return null
+        return (request.getAttribute(LB_OUTPUT_BUFFER) as? ByteArray)?.let { buffer ->
+            BodyCapturePolicy.evaluate(response.contentType, buffer.size, teeFilterProperties)
+                ?: String(buffer, BodyCapturePolicy.resolveCharset(response.characterEncoding))
+        }
     }
 }

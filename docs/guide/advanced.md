@@ -80,6 +80,10 @@ When `allowed-content-types` is specified, it completely replaces the defaults (
 The `max-payload-size` setting only controls whether captured content appears in log output. TeeFilter still buffers the full body in memory regardless of this limit. Use host filtering to limit capture scope in production.
 :::
 
+::: info
+When `tee-filter.enabled` is `false` (the default), `%requestContent` and `%responseContent` produce empty output. This includes form data (`application/x-www-form-urlencoded`) that would otherwise be reconstructed from request parameters. Body capture is completely disabled unless TeeFilter is explicitly enabled.
+:::
+
 ### Character Encoding
 
 Body content captured by TeeFilter is converted from bytes to text using the character encoding specified in the request or response `Content-Type` header. When no encoding is specified or the encoding is unsupported, UTF-8 is used as the fallback.

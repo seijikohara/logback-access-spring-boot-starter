@@ -93,4 +93,16 @@ class TomcatResponseDataExtractorSpec :
 
             content shouldBe "[CONTENT TOO LARGE]"
         }
+
+        test("extractContent returns null when TeeFilter is disabled") {
+            val request = mockk<Request>(relaxed = true)
+            val response = mockk<Response>(relaxed = true)
+            every { request.getAttribute(LB_OUTPUT_BUFFER) } returns "hello".toByteArray()
+            every { response.contentType } returns "text/plain"
+            val disabledProperties = defaultProperties.copy(enabled = false)
+
+            val content = TomcatResponseDataExtractor.extractContent(request, response, disabledProperties)
+
+            content shouldBe null
+        }
     })
