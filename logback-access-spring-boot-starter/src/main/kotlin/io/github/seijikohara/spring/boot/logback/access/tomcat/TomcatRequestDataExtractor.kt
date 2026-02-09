@@ -5,6 +5,7 @@ import ch.qos.logback.access.common.AccessConstants.LB_OUTPUT_BUFFER
 import ch.qos.logback.access.common.servlet.Util.isFormUrlEncoded
 import org.apache.catalina.connector.Request
 import java.net.URLEncoder.encode
+import java.nio.charset.Charset
 import java.util.Collections.unmodifiableList
 import java.util.Collections.unmodifiableMap
 
@@ -38,18 +39,29 @@ internal object TomcatRequestDataExtractor {
             }.toMap(linkedMapOf())
             .let(::unmodifiableMap)
 
+    /**
+     * Extracts request body content captured by TeeFilter.
+     *
+     * Uses the request's character encoding for byte-to-string conversion,
+     * falling back to UTF-8 when the encoding is not specified or unsupported.
+     */
     fun extractContent(request: Request): String? =
         (request.getAttribute(LB_INPUT_BUFFER) as? ByteArray)
-            ?.let { String(it, Charsets.UTF_8) }
+            ?.let { String(it, resolveCharset(request.characterEncoding)) }
             ?: encodeFormDataIfApplicable(request)
 
-    private fun encodeFormDataIfApplicable(request: Request): String? =
-        request
+    private fun encodeFormDataIfApplicable(request: Request): String? {
+        val charsetName = resolveCharset(request.characterEncoding).name()
+        return request
             .takeIf { isFormUrlEncoded(it) }
             ?.parameterMap
             ?.asSequence()
             ?.flatMap { (key, values) -> values.asSequence().map { key to it } }
             ?.joinToString("&") { (key, value) ->
-                "${encode(key, Charsets.UTF_8.name())}=${encode(value, Charsets.UTF_8.name())}"
+                "${encode(key, charsetName)}=${encode(value, charsetName)}"
             }
+    }
+
+    private fun resolveCharset(encoding: String?): Charset =
+        encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
 }

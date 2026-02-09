@@ -37,6 +37,12 @@ Use the `%requestContent` and `%responseContent` patterns:
 <pattern>%h "%r" %s %requestContent %responseContent</pattern>
 ```
 
+### Character Encoding
+
+Body content captured by TeeFilter is converted from bytes to text using the character encoding specified in the request or response `Content-Type` header. When no encoding is specified or the encoding is unsupported, UTF-8 is used as the fallback.
+
+This means non-ASCII content (such as Shift_JIS or ISO-8859-1) is decoded correctly when the appropriate `Content-Type` charset is set by the client or server.
+
 ### Performance Considerations
 
 ::: warning
