@@ -60,14 +60,14 @@ When not set, the starter searches in the following order:
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- Appenders define where logs go -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
 
     <!-- Reference appenders to activate them -->
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 
@@ -80,12 +80,12 @@ Inject Spring properties into your configuration:
     <springProperty name="appName" source="spring.application.name"
                     defaultValue="app" scope="context"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[${appName}] %h %l %u %t "%r" %s %b</pattern>
+            <pattern>[${appName}] %h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 
@@ -96,26 +96,26 @@ Configure different appenders for different environments:
 ```xml
 <configuration>
     <springProfile name="dev">
-        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b %D</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b %D</pattern>
             </encoder>
         </appender>
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="console"/>
     </springProfile>
 
     <springProfile name="prod">
-        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>logs/access.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                 <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log</fileNamePattern>
                 <maxHistory>30</maxHistory>
             </rollingPolicy>
             <encoder>
-                <pattern>%h %l %u %t "%r" %s %b</pattern>
+                <pattern>%h %l %u [%t] "%r" %s %b</pattern>
             </encoder>
         </appender>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="file"/>
     </springProfile>
 </configuration>
 ```
@@ -141,10 +141,10 @@ Spring profile expressions support negation and multiple profiles:
 Write access logs to a file:
 
 ```xml
-<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+<appender name="file" class="ch.qos.logback.core.FileAppender">
     <file>logs/access.log</file>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```
@@ -154,7 +154,7 @@ Write access logs to a file:
 Rotate logs based on time or size:
 
 ```xml
-<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>logs/access.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
         <fileNamePattern>logs/access.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
@@ -163,7 +163,7 @@ Rotate logs based on time or size:
         <totalSizeCap>3GB</totalSizeCap>
     </rollingPolicy>
     <encoder>
-        <pattern>%h %l %u %t "%r" %s %b</pattern>
+        <pattern>%h %l %u [%t] "%r" %s %b</pattern>
     </encoder>
 </appender>
 ```

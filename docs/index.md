@@ -99,12 +99,12 @@ Create `src/main/resources/logback-access.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b</pattern>
         </encoder>
     </appender>
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="console"/>
 </configuration>
 ```
 
@@ -116,7 +116,6 @@ Start your application and access logs will appear in the console.
 |-----------|---------|
 | Java | 21+ |
 | Spring Boot | 4.0+ |
-| Kotlin | 2.0+ (if using Kotlin) |
 
 ## License
 

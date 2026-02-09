@@ -98,7 +98,7 @@ TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the
 
 ### TeeFilter
 
-TeeFilter is not supported on Jetty 12. See the [warning above](#request-parameters) for details.
+TeeFilter is not supported on Jetty 12. See the [TeeFilter warning](#teefilter) for details.
 
 ## Local Port Strategy
 
@@ -140,18 +140,18 @@ Complete example for a production Jetty setup:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 
-    <appender-ref ref="FILE"/>
+    <appender-ref ref="file"/>
 </configuration>
 ```
 

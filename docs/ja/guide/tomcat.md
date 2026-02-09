@@ -84,7 +84,7 @@ logback:
 Spring Securityがクラスパスにある場合、認証済みユーザー名が自動的にキャプチャされます:
 
 ```xml
-<pattern>%h %l %u %t "%r" %s %b</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b</pattern>
 ```
 
 `%u`変数の表示:
@@ -101,18 +101,18 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
     <springProperty name="appName" source="spring.application.name"
                     defaultValue="app" scope="context"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 
-    <appender-ref ref="FILE"/>
+    <appender-ref ref="file"/>
 </configuration>
 ```
 

@@ -98,7 +98,7 @@ TeeFilterはJetty 12ではサポートされていません。JettyのRequestLog
 
 ### TeeFilter
 
-TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#リクエストパラメータ)を参照してください。
+TeeFilterはJetty 12ではサポートされていません。詳細は[上記の警告](#jetty非対応-teefilter)を参照してください。
 
 ## ローカルポート戦略
 
@@ -140,18 +140,18 @@ Spring Securityがクラスパスにある場合、認証済みユーザー名�
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u %t "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
         </encoder>
     </appender>
 
-    <appender-ref ref="FILE"/>
+    <appender-ref ref="file"/>
 </configuration>
 ```
 

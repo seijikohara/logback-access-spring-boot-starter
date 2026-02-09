@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-|---------|--------------------|
-| Latest  | :white_check_mark: |
-| Older   | :x:                |
+| Version              | Supported          |
+|----------------------|--------------------|
+| Latest minor release | :white_check_mark: |
+| Previous releases    | :x:                |
 
 Only the latest minor release receives security patches. Users are encouraged to upgrade to the latest version.
 

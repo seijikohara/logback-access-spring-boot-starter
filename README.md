@@ -18,8 +18,8 @@ flowchart TB
     subgraph Spring Boot Application
         direction TB
         A[HTTP Request] --> B{Embedded Server}
-        B -->|Tomcat| C[LogbackAccessTomcatValve]
-        B -->|Jetty| D[LogbackAccessJettyRequestLog]
+        B -->|Tomcat| C[TomcatValve]
+        B -->|Jetty| D[JettyRequestLog]
         C --> E[LogbackAccessContext]
         D --> E
         E --> F[logback-access.xml]
@@ -254,7 +254,7 @@ flowchart LR
 For structured JSON logging, add [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder):
 
 ```kotlin
-implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 ```
 
 Configure `logback-access.xml`:
@@ -361,9 +361,9 @@ See the [examples/](examples/) directory for complete working projects:
 | Module | Server | Framework | Description |
 |--------|--------|-----------|-------------|
 | `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage |
+| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage (TeeFilter excluded) |
 | `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
+| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage (TeeFilter excluded) |
 
 ## Module Structure
 
