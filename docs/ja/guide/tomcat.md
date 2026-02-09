@@ -40,17 +40,9 @@ logback:
 
 ## パターン変数
 
-Tomcatは標準のパターン変数に加えて以下をサポート:
+標準のパターン変数については[はじめに — パターン変数](/ja/guide/getting-started#パターン変数)を参照してください。
 
-| 変数 | 説明 |
-|------|------|
-| `%a` | リモートIPアドレス |
-| `%A` | ローカルIPアドレス |
-| `%p` | ローカルポート |
-| `%{xxx}i` | リクエストヘッダー`xxx` |
-| `%{xxx}o` | レスポンスヘッダー`xxx` |
-| `%{xxx}c` | Cookie値`xxx` |
-| `%{xxx}r` | リクエスト属性`xxx` |
+標準変数に加えて、Tomcatは`RemoteIpValve`が設定するすべてのリクエスト属性をサポートします（例: `%{org.apache.catalina.AccessLog.RemoteAddr}r`）。`request-attributes-enabled`が`true`の場合、これらの属性はリバースプロキシの背後にある実際のクライアント情報を反映します。
 
 ## リバースプロキシの背後での使用
 
@@ -81,7 +73,7 @@ logback:
 
 ## Spring Security連携
 
-Spring Securityがクラスパスにある場合、認証済みユーザー名が自動的にキャプチャされます:
+Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を自動的にキャプチャします:
 
 ```xml
 <pattern>%h %l %u [%t] "%r" %s %b</pattern>
@@ -129,3 +121,8 @@ logback:
         - /health
         - /favicon.ico
 ```
+
+## 関連ページ
+
+- [設定リファレンス](/ja/guide/configuration) — 全プロパティリファレンスとXML設定
+- [高度な設定](/ja/guide/advanced) — TeeFilter、URLフィルタリング、JSONロギング、Spring Security

@@ -89,6 +89,10 @@ logback:
 </configuration>
 ```
 
+::: warning デフォルトスコープ
+`<springProperty>`のデフォルトスコープは`LOCAL`です。LOCALスコープのプロパティは、XML設定処理中の変数置換（`${varName}`など）でのみ使用可能です。`context.getProperty()`でプログラム的にアクセスするには、`scope="context"`を設定してください。
+:::
+
 ### Springプロファイルの使用
 
 環境別に異なるAppenderを設定:
@@ -195,3 +199,9 @@ logback:
   access:
     enabled: false
 ```
+
+## 関連ページ
+
+- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシの設定
+- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項
+- [高度な設定](/ja/guide/advanced) — TeeFilter、URLフィルタリング、JSONロギング、Spring Security

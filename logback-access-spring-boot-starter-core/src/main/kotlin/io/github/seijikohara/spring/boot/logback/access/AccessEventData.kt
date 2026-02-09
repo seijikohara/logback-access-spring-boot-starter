@@ -24,7 +24,7 @@ public data class AccessEventData(
     val localPort: Int,
     /** IP address of the remote client. */
     val remoteAddr: String,
-    /** Hostname of the remote client (may equal remoteAddr if DNS lookup is disabled). */
+    /** Hostname of the remote client. On Jetty, this equals [remoteAddr] (no reverse DNS lookup). */
     val remoteHost: String,
     /** Authenticated username, or null if not authenticated. */
     val remoteUser: String?,
@@ -42,13 +42,13 @@ public data class AccessEventData(
     val requestHeaderMap: Map<String, String>,
     /** Cookies from the request. */
     val cookieMap: Map<String, String>,
-    /** Request parameters (query string and/or form data). */
+    /** Request parameters (query string and/or form data). On Jetty, this is always empty to avoid consuming the request body. */
     val requestParameterMap: Map<String, List<String>>,
     /** Request attributes set by filters or valves. */
     val attributeMap: Map<String, String>,
     /** Session ID if a session exists, or null. */
     val sessionID: String?,
-    /** Request body content if captured by TeeFilter, or null. */
+    /** Request body content if captured by TeeFilter, or null. Always null on Jetty (TeeFilter not supported). */
     val requestContent: String?,
     /** HTTP response status code. */
     val statusCode: Int,
@@ -56,7 +56,7 @@ public data class AccessEventData(
     val responseHeaderMap: Map<String, String>,
     /** Number of bytes written in the response body. */
     val contentLength: Long,
-    /** Response body content if captured by TeeFilter, or null. */
+    /** Response body content if captured by TeeFilter, or null. Always null on Jetty (TeeFilter not supported). */
     val responseContent: String?,
 ) : Serializable {
     /**

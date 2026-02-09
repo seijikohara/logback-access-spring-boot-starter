@@ -11,6 +11,12 @@ import java.util.concurrent.TimeUnit.NANOSECONDS
  *
  * All values are extracted eagerly so the returned data is safe for
  * deferred processing without holding references to Jetty objects.
+ *
+ * Jetty-specific limitations:
+ * - [AccessEventData.remoteHost] equals [AccessEventData.remoteAddr] (no reverse DNS lookup)
+ * - [AccessEventData.requestParameterMap] is always empty to avoid consuming the request body
+ * - [AccessEventData.requestContent] and [AccessEventData.responseContent] are always null
+ *   (TeeFilter is not supported on the Jetty native RequestLog API)
  */
 internal fun createAccessEventData(
     context: LogbackAccessContext,

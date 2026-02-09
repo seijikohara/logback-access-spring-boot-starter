@@ -69,4 +69,9 @@ public class ReactiveExampleController {
     public Mono<Map<String, Object>> deleteItem(@PathVariable Long id) {
         return Mono.just(Map.of("id", id, "deleted", true));
     }
+
+    @GetMapping("/health")
+    public Mono<Map<String, String>> health() {
+        return Mono.just(Map.of("status", "UP"));
+    }
 }

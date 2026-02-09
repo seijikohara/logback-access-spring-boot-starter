@@ -89,6 +89,10 @@ Inject Spring properties into your configuration:
 </configuration>
 ```
 
+::: warning Default Scope
+The default scope for `<springProperty>` is `LOCAL`. Properties with LOCAL scope are only available during XML configuration processing for variable substitution (e.g., `${varName}`). To access properties programmatically via `context.getProperty()`, set `scope="context"`.
+:::
+
 ### Using Spring Profiles
 
 Configure different appenders for different environments:
@@ -195,3 +199,9 @@ logback:
   access:
     enabled: false
 ```
+
+## See Also
+
+- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse proxy configuration
+- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security

@@ -11,8 +11,8 @@ flowchart TB
         common[common<br/>Shared code]
         tomcat-mvc[tomcat-mvc<br/>39 tests]
         jetty-mvc[jetty-mvc<br/>36 tests]
-        tomcat-webflux[tomcat-webflux<br/>24 tests]
-        jetty-webflux[jetty-webflux<br/>24 tests]
+        tomcat-webflux[tomcat-webflux<br/>32 tests]
+        jetty-webflux[jetty-webflux<br/>32 tests]
 
         common --> tomcat-mvc
         common --> jetty-mvc
@@ -26,10 +26,10 @@ flowchart TB
 | `common` | - | - | - | Shared controllers, configs, and test utilities |
 | `tomcat-mvc` | Tomcat | Spring MVC | 39 | Full feature coverage |
 | `jetty-mvc` | Jetty | Spring MVC | 36 | Full feature coverage (TeeFilter disabled) |
-| `tomcat-webflux` | Tomcat | WebFlux | 24 | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | 24 | Reactive endpoint coverage |
+| `tomcat-webflux` | Tomcat | WebFlux | 32 | Reactive endpoint coverage |
+| `jetty-webflux` | Jetty | WebFlux | 32 | Reactive endpoint coverage |
 
-**Total: 119 active tests** (4 TeeFilter tests skipped on Jetty)
+**Total: 139 active tests** (4 TeeFilter tests skipped on Jetty)
 
 ## Common Module
 
@@ -128,6 +128,7 @@ classDiagram
 | `test.common` | `AbstractSpringPropertyScopeTest` | 3 | springProperty scope |
 | `test.common` | `AbstractDisabledAccessLogTest` | 2 | Disabled configuration |
 | `test.webflux` | `AbstractReactiveAccessLogTest` | 9 | Reactive endpoint tests |
+| `test.webflux` | `AbstractReactiveLocalPortStrategyTest` | 2 | Port resolution strategy |
 | `test.webflux` | `AbstractRouterFunctionTest` | 2 | RouterFunction tests |
 
 ### Test Utilities
@@ -177,8 +178,8 @@ classDiagram
 | 404 Response | ✓ | ✓ | ✓ | ✓ |
 | Spring Security | ✓ | ✓ | - | - |
 | TeeFilter | ✓ | ✗ | - | - |
-| LocalPortStrategy | ✓ | ✓ | - | - |
-| URL Filtering | ✓ | ✓ | - | - |
+| LocalPortStrategy | ✓ | ✓ | ✓ | ✓ |
+| URL Filtering | ✓ | ✓ | ✓ | ✓ |
 | JSON Logging | ✓ | ✓ | ✓ | ✓ |
 | Spring Profiles | ✓ | ✓ | ✓ | ✓ |
 | springProperty | ✓ | ✓ | ✓ | ✓ |
@@ -246,23 +247,27 @@ The Jetty 12 RequestLog API operates at the core server level, separate from the
 | `JettySpringPropertyScopeTest` | 3 | springProperty scope |
 | `JettyDisabledAccessLogTest` | 2 | Disabled state |
 
-### Tomcat WebFlux (24 tests)
+### Tomcat WebFlux (32 tests)
 
 | Test Class | Tests | Description |
 |------------|-------|-------------|
 | `ReactiveAccessLogTest` | 9 | Reactive endpoint logging |
 | `RouterFunctionTest` | 2 | RouterFunction logging |
+| `UrlFilteringTest` | 6 | URL pattern filtering |
+| `LocalPortStrategyTest` | 2 | Port resolution strategy |
 | `JsonLoggingTest` | 4 | JSON logging |
 | `SpringProfileTest` | 4 | Profile-specific appenders |
 | `SpringPropertyScopeTest` | 3 | springProperty scope |
 | `DisabledAccessLogTest` | 2 | Disabled state |
 
-### Jetty WebFlux (24 tests)
+### Jetty WebFlux (32 tests)
 
 | Test Class | Tests | Description |
 |------------|-------|-------------|
 | `ReactiveAccessLogTest` | 9 | Reactive endpoint logging |
 | `RouterFunctionTest` | 2 | RouterFunction logging |
+| `UrlFilteringTest` | 6 | URL pattern filtering |
+| `LocalPortStrategyTest` | 2 | Port resolution strategy |
 | `JsonLoggingTest` | 4 | JSON logging |
 | `SpringProfileTest` | 4 | Profile-specific appenders |
 | `SpringPropertyScopeTest` | 3 | springProperty scope |

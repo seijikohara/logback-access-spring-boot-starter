@@ -48,8 +48,14 @@ public class LogbackAccessContext(
     /**
      * Emits an access event through the filter chain and appenders.
      *
-     * Exceptions from appenders are caught and logged to prevent
-     * application crashes due to logging failures.
+     * The processing pipeline is:
+     * 1. URL filtering (include/exclude patterns via [shouldLog])
+     * 2. Logback filter chain evaluation
+     * 3. Appender invocation
+     *
+     * Exceptions from appenders are caught and logged at ERROR level to prevent
+     * application crashes due to logging failures. Check the application log
+     * for error messages if events are not appearing.
      */
     public fun emit(event: LogbackAccessEvent) {
         runCatching {

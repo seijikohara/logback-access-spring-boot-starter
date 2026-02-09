@@ -154,13 +154,17 @@ The starter searches for configuration files in the classpath in the order shown
 | `%s` | Status code | `200` |
 | `%b` | Response size (bytes) | `1234` |
 | `%D` | Processing time (ms) | `45` |
+| `%T` | Processing time (seconds) | `0` |
+| `%I` | Thread name | `http-nio-8080-exec-1` |
 | `%i{Header}` | Request header | `%i{User-Agent}` |
+
+For the complete list of pattern variables, see the [documentation](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/getting-started#pattern-variables).
 
 ## Server Integration
 
 ### Tomcat
 
-The starter registers a custom `Valve` implementing `AccessLog`. Registration occurs automatically when Tomcat is detected.
+The starter registers a custom `Valve` implementing `AccessLog` automatically when it detects Tomcat.
 
 | Property | Description | Default |
 |----------|-------------|---------|
@@ -168,7 +172,7 @@ The starter registers a custom `Valve` implementing `AccessLog`. Registration oc
 
 ### Jetty
 
-The starter registers a custom `RequestLog` implementation. Registration occurs automatically when Jetty is detected.
+The starter registers a custom `RequestLog` implementation automatically when it detects Jetty.
 
 > **Note**: Jetty 12 uses a native RequestLog API that operates at the core server level, separate from the Servlet API. This architectural difference affects TeeFilter compatibility. See [Known Limitations](#known-limitations) for details.
 
@@ -192,7 +196,7 @@ sequenceDiagram
     AccessLog->>AccessLog: Log with username
 ```
 
-When Spring Security is present, the authenticated username appears automatically in access logs:
+The starter captures the authenticated username automatically when Spring Security is on the classpath:
 
 ```
 127.0.0.1 - admin [06/Feb/2026:10:30:45 +0900] "GET /api/secure HTTP/1.1" 200 14
@@ -221,19 +225,21 @@ Use `%requestContent` and `%responseContent` patterns to access captured content
 
 > **Security Warning**: TeeFilter captures request/response bodies which may contain sensitive data (passwords, tokens, PII). Use `include-hosts`/`exclude-hosts` to limit scope, and consider implementing custom masking in production environments.
 
+For details on TeeFilter configuration and platform compatibility, see the [documentation](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced#teefilter).
+
 ### URL Pattern Filtering
 
-Filter access logs using regex patterns:
+Filter access logs using regex patterns. Patterns use **partial matching** — a pattern matches if found anywhere in the request URI. Use anchors (`^`, `$`) for exact matching.
 
 ```yaml
 logback:
   access:
     filter:
       include-url-patterns:
-        - /api/.*
+        - ^/api/.*
       exclude-url-patterns:
-        - /actuator/health
-        - /actuator/info
+        - ^/actuator/.*
+        - ^/health$
 ```
 
 ```mermaid
@@ -274,10 +280,15 @@ Output:
 {
   "@timestamp": "2026-02-06T10:30:45.123+09:00",
   "@version": "1",
+  "message": "GET /api/hello HTTP/1.1",
   "method": "GET",
+  "protocol": "HTTP/1.1",
   "status_code": 200,
+  "requested_url": "GET /api/hello HTTP/1.1",
   "requested_uri": "/api/hello",
   "remote_host": "127.0.0.1",
+  "remote_user": "-",
+  "content_length": 13,
   "elapsed_time": 45
 }
 ```

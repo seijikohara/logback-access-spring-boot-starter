@@ -12,8 +12,14 @@ import org.eclipse.jetty.server.Response
  *
  * Jetty calls [log] after each request completes, at which point
  * all response data is available.
+ *
+ * This class operates at the Jetty core server level, not the Servlet level.
+ * TeeFilter attributes (LB_INPUT_BUFFER/LB_OUTPUT_BUFFER) set on the Servlet
+ * request are not visible from this API.
+ *
+ * This class is auto-configured by the starter. Direct instantiation is not needed.
  */
-class JettyRequestLog(
+internal class JettyRequestLog(
     private val logbackAccessContext: LogbackAccessContext,
 ) : RequestLog {
     override fun log(

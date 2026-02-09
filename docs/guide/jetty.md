@@ -66,21 +66,14 @@ This library is compatible with Jetty 12 (the version bundled with Spring Boot 4
 
 ## Pattern Variables
 
-Jetty supports all standard pattern variables:
+For standard pattern variables, see [Getting Started — Pattern Variables](/guide/getting-started#pattern-variables).
 
-| Variable | Description |
-|----------|-------------|
-| `%h` | Remote host (IP address) |
-| `%l` | Remote log name (always `-`) |
-| `%u` | Remote user |
-| `%t` | Request timestamp |
-| `%r` | Request line |
-| `%s` | HTTP status code |
-| `%b` | Response body size |
-| `%D` | Request processing time (ms) |
-| `%T` | Request processing time (seconds) |
-| `%{xxx}i` | Request header `xxx` |
-| `%{xxx}o` | Response header `xxx` |
+Jetty-specific notes:
+
+- **Cookies** (`%{xxx}c`): The starter extracts cookies using `Request.getCookies()` from the Jetty native API.
+- **Request attributes** (`%{xxx}r`): Standard servlet request attributes are available, but Tomcat-specific `AccessLog` attributes (e.g., `org.apache.catalina.AccessLog.RemoteAddr`) are not supported.
+- **Remote host** (`%h`): Always returns the IP address (no reverse DNS lookup is performed).
+- **Request parameters**: `requestParameterMap` returns an empty map to avoid consuming the request body.
 
 ## Known Limitations
 
@@ -92,13 +85,11 @@ Jetty does not perform reverse DNS lookups by default. The `%h` variable will sh
 
 For performance and compatibility reasons, `requestParameterMap` returns an empty map for all requests. This is intentional to avoid consuming the request body.
 
-::: warning TeeFilter Not Supported on Jetty
-TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets request attributes on the Servlet request, but these attributes are not visible to the RequestLog. Consider logging request content via application-level interceptors if needed.
-:::
-
 ### TeeFilter
 
-TeeFilter is not supported on Jetty 12. See the [TeeFilter warning](#teefilter) for details.
+::: warning Not Supported on Jetty 12
+TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets request attributes on the Servlet request, but these attributes are not visible to the RequestLog. See [Advanced Topics — TeeFilter](/guide/advanced#teefilter) for details on TeeFilter usage with Tomcat.
+:::
 
 ## Local Port Strategy
 
@@ -131,7 +122,7 @@ server:
 
 ## Spring Security Integration
 
-When Spring Security is on the classpath, authenticated usernames are automatically captured in the `%u` variable.
+The starter captures authenticated usernames automatically in the `%u` variable when Spring Security is on the classpath.
 
 ## Example Configuration
 
@@ -165,3 +156,8 @@ logback:
         - /actuator/.*
         - /health
 ```
+
+## See Also
+
+- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security

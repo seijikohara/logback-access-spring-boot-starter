@@ -70,6 +70,9 @@ The following pattern variables are available:
 | Variable | Description |
 |----------|-------------|
 | `%h` | Remote host (IP address) |
+| `%a` | Remote IP address |
+| `%A` | Local IP address |
+| `%p` | Local port |
 | `%l` | Remote log name (always `-`) |
 | `%u` | Remote user (from authentication) |
 | `%t` | Request timestamp |
@@ -79,6 +82,13 @@ The following pattern variables are available:
 | `%D` | Request processing time in milliseconds |
 | `%T` | Request processing time in seconds |
 | `%I` | Thread name |
+| `%{xxx}i` | Request header `xxx` |
+| `%{xxx}o` | Response header `xxx` |
+| `%{xxx}c` | Cookie value `xxx` |
+| `%{xxx}r` | Request attribute `xxx` |
+| `%queryString` | Query string (includes `?` prefix, e.g., `?name=value`) |
+| `%requestContent` | Request body (requires TeeFilter) |
+| `%responseContent` | Response body (requires TeeFilter) |
 
 ## Combined Log Format
 
