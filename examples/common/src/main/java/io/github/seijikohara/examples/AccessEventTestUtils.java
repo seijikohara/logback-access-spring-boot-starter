@@ -79,4 +79,33 @@ public final class AccessEventTestUtils {
         }
         return List.copyOf(appender.list);
     }
+
+    /**
+     * Waits for a period and asserts that no events were logged.
+     *
+     * @param appender the ListAppender to check
+     */
+    public static void awaitNoEvents(final ListAppender<IAccessEvent> appender) {
+        awaitNoEvents(appender, 500L);
+    }
+
+    /**
+     * Waits for the specified period and asserts that no events were logged.
+     *
+     * @param appender  the ListAppender to check
+     * @param timeoutMs the wait period in milliseconds
+     */
+    public static void awaitNoEvents(
+            final ListAppender<IAccessEvent> appender,
+            final long timeoutMs) {
+        try {
+            TimeUnit.MILLISECONDS.sleep(timeoutMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if (!appender.list.isEmpty()) {
+            throw new AssertionError(
+                    "Expected no events but found " + appender.list.size());
+        }
+    }
 }
