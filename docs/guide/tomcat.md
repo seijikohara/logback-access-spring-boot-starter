@@ -44,6 +44,10 @@ For standard pattern variables, see [Getting Started — Pattern Variables](/gui
 
 In addition to the standard variables, Tomcat supports all request attributes set by `RemoteIpValve` (e.g., `%{org.apache.catalina.AccessLog.RemoteAddr}r`). When `request-attributes-enabled` is `true`, these attributes reflect the real client information from behind a reverse proxy.
 
+## Elapsed Time
+
+The `%D` and `%T` pattern variables report the request processing time. When Tomcat provides this value directly (via the `AccessLog.log(request, response, time)` contract), the starter uses it as-is. If the value is not available, the starter computes it from the request start time.
+
 ## Behind a Reverse Proxy
 
 When running behind a proxy (nginx, Apache, load balancer), configure the `RemoteIpValve` to get the real client IP:
