@@ -10,6 +10,9 @@ build
 # Ignore IntelliJ IDEA files
 .idea
 
+# Stray build artifacts
+META-INF/
+
 # VitePress
 docs/.vitepress/dist
 docs/.vitepress/cache

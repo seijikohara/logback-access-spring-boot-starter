@@ -78,6 +78,18 @@ class AccessEventDataSpec :
             deserialized shouldBe original
         }
 
+        test("requestParameterArrayMap is accessible after deserialization") {
+            val original = createTestData(requestParameterMap = mapOf("key" to listOf("v1", "v2")))
+
+            val baos = ByteArrayOutputStream()
+            ObjectOutputStream(baos).use { it.writeObject(original) }
+
+            val bais = ByteArrayInputStream(baos.toByteArray())
+            val deserialized = ObjectInputStream(bais).use { it.readObject() as AccessEventData }
+
+            deserialized.requestParameterArrayMap["key"] shouldBe arrayOf("v1", "v2")
+        }
+
         test("copy creates independent instance") {
             val original = createTestData()
             val copied = original.copy(statusCode = 404)
