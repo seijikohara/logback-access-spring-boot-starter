@@ -149,6 +149,15 @@ class LogbackAccessAutoConfigurationSpec :
                     assertThat(context).doesNotHaveBean("logbackAccessTeeFilter")
                 }
             }
+
+            test("does not create TeeFilter bean when Tomcat is absent") {
+                baseRunner()
+                    .withPropertyValues("logback.access.tee-filter.enabled=true")
+                    .withClassLoader(FilteredClassLoader(Tomcat::class.java))
+                    .run { context ->
+                        assertThat(context).doesNotHaveBean("logbackAccessTeeFilter")
+                    }
+            }
         }
     })
 

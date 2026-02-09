@@ -3,11 +3,15 @@ package io.github.seijikohara.spring.boot.logback.access
 import java.io.Serializable
 
 /**
- * Immutable snapshot of all access event data.
+ * Data snapshot of all access event fields.
  *
  * Captures all values eagerly at construction time, making it safe for
  * deferred processing and serialization without holding references to
  * server-specific request/response objects.
+ *
+ * Effectively immutable when created by built-in extractors (Tomcat/Jetty),
+ * which construct unmodifiable maps and lists. External constructors should
+ * follow the same convention for consistent behavior.
  */
 public data class AccessEventData(
     /** Timestamp when the request was received (epoch milliseconds). */
@@ -60,13 +64,11 @@ public data class AccessEventData(
     val responseContent: String?,
 ) : Serializable {
     /**
-     * Lazily computed array-backed parameter map for [ch.qos.logback.access.common.spi.IAccessEvent] compatibility.
-     * Excluded from serialization to avoid redundant data.
+     * Array-backed parameter map for [ch.qos.logback.access.common.spi.IAccessEvent] compatibility.
+     * Computed on each access from [requestParameterMap] to ensure correct behavior after deserialization.
      */
-    @delegate:Transient
-    val requestParameterArrayMap: Map<String, Array<String>> by lazy {
-        requestParameterMap.mapValues { (_, values) -> values.toTypedArray() }
-    }
+    val requestParameterArrayMap: Map<String, Array<String>>
+        get() = requestParameterMap.mapValues { (_, values) -> values.toTypedArray() }
 
     public companion object {
         private const val serialVersionUID: Long = 1L

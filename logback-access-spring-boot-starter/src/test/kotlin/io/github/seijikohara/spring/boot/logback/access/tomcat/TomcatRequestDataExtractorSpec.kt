@@ -109,4 +109,35 @@ class TomcatRequestDataExtractorSpec :
 
             content shouldBe null
         }
+
+        test("extractContent suppresses oversized form data via BodyCapturePolicy") {
+            val request = mockk<Request>(relaxed = true)
+            every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+            every { request.contentType } returns "application/x-www-form-urlencoded"
+            every { request.method } returns "POST"
+            every { request.characterEncoding } returns null
+            val largeValue = "x".repeat(70000)
+            every { request.parameterMap } returns mapOf("key" to arrayOf(largeValue))
+
+            val smallLimit = defaultProperties.copy(maxPayloadSize = 100L)
+
+            val content = TomcatRequestDataExtractor.extractContent(request, smallLimit)
+
+            content shouldBe "[CONTENT TOO LARGE]"
+        }
+
+        test("extractContent applies allowed-content-types to form data fallback") {
+            val request = mockk<Request>(relaxed = true)
+            every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+            every { request.contentType } returns "application/x-www-form-urlencoded"
+            every { request.method } returns "POST"
+            every { request.characterEncoding } returns null
+            every { request.parameterMap } returns mapOf("key" to arrayOf("value"))
+
+            val jsonOnly = defaultProperties.copy(allowedContentTypes = listOf("application/json"))
+
+            val content = TomcatRequestDataExtractor.extractContent(request, jsonOnly)
+
+            content shouldBe "[BINARY CONTENT SUPPRESSED]"
+        }
     })

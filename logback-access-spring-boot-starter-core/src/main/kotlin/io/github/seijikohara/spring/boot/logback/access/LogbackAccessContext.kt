@@ -27,6 +27,14 @@ public class LogbackAccessContext(
     /** The underlying Logback-access context. */
     public val accessContext: AccessContext = AccessContext()
 
+    /** Compiled regex patterns for URL filtering, cached for performance. */
+    private val includePatterns: List<Regex>? =
+        properties.filter.includeUrlPatterns?.map { Regex(it) }
+
+    /** Compiled regex patterns for URL exclusion, cached for performance. */
+    private val excludePatterns: List<Regex>? =
+        properties.filter.excludeUrlPatterns?.map { Regex(it) }
+
     init {
         val (name, resource) = resolveConfig(properties, resourceLoader)
         accessContext.name = name
@@ -36,14 +44,6 @@ public class LogbackAccessContext(
         accessContext.start()
         logger.debug { "Initialized LogbackAccessContext: $this" }
     }
-
-    /** Compiled regex patterns for URL filtering, cached for performance. */
-    private val includePatterns: List<Regex>? =
-        properties.filter.includeUrlPatterns?.map { Regex(it) }
-
-    /** Compiled regex patterns for URL exclusion, cached for performance. */
-    private val excludePatterns: List<Regex>? =
-        properties.filter.excludeUrlPatterns?.map { Regex(it) }
 
     /**
      * Emits an access event through the filter chain and appenders.
