@@ -53,18 +53,18 @@ public class LogbackAccessContext(
      * 2. Logback filter chain evaluation
      * 3. Appender invocation
      *
-     * Exceptions from appenders are caught and logged at ERROR level to prevent
-     * application crashes due to logging failures. Check the application log
-     * for error messages if events are not appearing.
+     * Only [Exception] subclasses are caught and logged at ERROR level.
+     * Fatal errors ([Error]) are propagated to the caller.
      */
+    @Suppress("TooGenericExceptionCaught")
     public fun emit(event: LogbackAccessEvent) {
-        runCatching {
+        try {
             event
                 .takeIf { shouldLog(it.requestURI) }
                 ?.let { accessContext.getFilterChainDecision(it) }
                 ?.takeIf { it != FilterReply.DENY }
                 ?.let { accessContext.callAppenders(event) }
-        }.onFailure { e ->
+        } catch (e: Exception) {
             logger.error(e) { "Failed to emit access event: ${event.requestURI}" }
         }
     }
