@@ -90,6 +90,10 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 | `%requestContent` | リクエストボディ（TeeFilterが必要） |
 | `%responseContent` | レスポンスボディ（TeeFilterが必要） |
 
+::: tip 代替構文
+ヘッダー、Cookie、属性パターンについては、`%{name}i`と`%i{name}`の両形式がサポートされています。本ドキュメントの例では`%i{name}`形式を使用しています。
+:::
+
 ## Combined Log Format
 
 ApacheのCombined Log Formatに近い詳細な出力:

@@ -53,9 +53,7 @@ class JettyUrlFilteringTest {
         void excludedUrlDoesNotEmitEvent() throws Exception {
             HttpClientTestUtils.get(baseUrl() + "/api/health");
 
-            // Wait a bit and verify no events were emitted
-            Thread.sleep(500);
-            assertThat(listAppender.list).isEmpty();
+            AccessEventTestUtils.awaitNoEvents(listAppender);
         }
 
         @Test
@@ -112,9 +110,7 @@ class JettyUrlFilteringTest {
         void nonIncludedUrlDoesNotEmitEvent() throws Exception {
             HttpClientTestUtils.get(baseUrl() + "/api/greet");
 
-            // Wait a bit and verify no events were emitted
-            Thread.sleep(500);
-            assertThat(listAppender.list).isEmpty();
+            AccessEventTestUtils.awaitNoEvents(listAppender);
         }
     }
 
@@ -164,9 +160,7 @@ class JettyUrlFilteringTest {
         void includedAndExcludedUrlDoesNotEmitEvent() throws Exception {
             HttpClientTestUtils.get(baseUrl() + "/api/health");
 
-            // Wait a bit and verify no events were emitted
-            Thread.sleep(500);
-            assertThat(listAppender.list).isEmpty();
+            AccessEventTestUtils.awaitNoEvents(listAppender);
         }
     }
 }

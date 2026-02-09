@@ -90,6 +90,10 @@ The following pattern variables are available:
 | `%requestContent` | Request body (requires TeeFilter) |
 | `%responseContent` | Response body (requires TeeFilter) |
 
+::: tip Alternative Syntax
+For header, cookie, and attribute patterns, both `%{name}i` and `%i{name}` forms are supported. The examples in this documentation use the `%i{name}` form.
+:::
+
 ## Combined Log Format
 
 For a more detailed output similar to Apache's Combined Log Format:
