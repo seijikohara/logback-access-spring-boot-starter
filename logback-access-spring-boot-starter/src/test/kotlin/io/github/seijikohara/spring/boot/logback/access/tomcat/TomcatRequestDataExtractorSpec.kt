@@ -86,4 +86,27 @@ class TomcatRequestDataExtractorSpec :
 
             content shouldBe "[CONTENT TOO LARGE]"
         }
+
+        test("extractContent returns null when TeeFilter is disabled") {
+            val request = mockk<Request>(relaxed = true)
+            every { request.getAttribute(LB_INPUT_BUFFER) } returns "hello".toByteArray()
+            every { request.contentType } returns "text/plain"
+            val disabledProperties = defaultProperties.copy(enabled = false)
+
+            val content = TomcatRequestDataExtractor.extractContent(request, disabledProperties)
+
+            content shouldBe null
+        }
+
+        test("extractContent returns null when TeeFilter is disabled even for form data") {
+            val request = mockk<Request>(relaxed = true)
+            every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+            every { request.contentType } returns "application/x-www-form-urlencoded"
+
+            val disabledProperties = defaultProperties.copy(enabled = false)
+
+            val content = TomcatRequestDataExtractor.extractContent(request, disabledProperties)
+
+            content shouldBe null
+        }
     })

@@ -43,6 +43,9 @@ internal object TomcatRequestDataExtractor {
     /**
      * Extracts request body content captured by TeeFilter.
      *
+     * Returns `null` immediately when TeeFilter is disabled to prevent
+     * unintended exposure of form data (e.g. login credentials).
+     *
      * Evaluates body capture policy (content type and size) before conversion.
      * Uses the request's character encoding for byte-to-string conversion,
      * falling back to UTF-8 when the encoding is not specified or unsupported.
@@ -51,11 +54,14 @@ internal object TomcatRequestDataExtractor {
         request: Request,
         teeFilterProperties: TeeFilterProperties,
     ): String? {
-        val buffer =
-            request.getAttribute(LB_INPUT_BUFFER) as? ByteArray
-                ?: return encodeFormDataIfApplicable(request)
-        return BodyCapturePolicy.evaluate(request.contentType, buffer.size, teeFilterProperties)
-            ?: String(buffer, BodyCapturePolicy.resolveCharset(request.characterEncoding))
+        if (!teeFilterProperties.enabled) return null
+        val buffer = request.getAttribute(LB_INPUT_BUFFER) as? ByteArray
+        return if (buffer != null) {
+            BodyCapturePolicy.evaluate(request.contentType, buffer.size, teeFilterProperties)
+                ?: String(buffer, BodyCapturePolicy.resolveCharset(request.characterEncoding))
+        } else {
+            encodeFormDataIfApplicable(request)
+        }
     }
 
     private fun encodeFormDataIfApplicable(request: Request): String? {
