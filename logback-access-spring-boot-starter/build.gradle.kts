@@ -16,6 +16,7 @@ mavenPublishing {
 
 dependencies {
     api(project(":logback-access-spring-boot-starter-core"))
+    api(platform(libs.spring.boot.dependencies))
 
     implementation(libs.spring.boot.starter)
     implementation(libs.kotlin.logging)
