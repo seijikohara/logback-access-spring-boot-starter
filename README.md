@@ -121,7 +121,7 @@ Access logs appear in the console:
 |----------|-------------|---------|
 | `logback.access.enabled` | Enable/disable access logging | `true` |
 | `logback.access.config-location` | Custom configuration file path | Auto-detected |
-| `logback.access.local-port-strategy` | Port resolution: `SERVER` or `LOCAL` | `SERVER` |
+| `logback.access.local-port-strategy` | Port resolution: `server` or `local` | `server` |
 | `logback.access.filter.include-url-patterns` | Regex patterns for URLs to include | All URLs |
 | `logback.access.filter.exclude-url-patterns` | Regex patterns for URLs to exclude | None |
 

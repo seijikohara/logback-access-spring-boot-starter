@@ -29,7 +29,7 @@ flowchart TB
 | `tomcat-webflux` | Tomcat | WebFlux | 32 | Reactive endpoint coverage |
 | `jetty-webflux` | Jetty | WebFlux | 32 | Reactive endpoint coverage |
 
-**Total: 139 active tests** (4 TeeFilter tests skipped on Jetty)
+**Total: 135 active tests** (139 total, 4 TeeFilter tests skipped on Jetty)
 
 ## Common Module
 
