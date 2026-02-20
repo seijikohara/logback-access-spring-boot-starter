@@ -9,7 +9,7 @@ logstash-logback-encoder = "9.0"
 maven-publish = "0.36.0"
 mockk = "1.14.9"
 nullaway = "0.13.1"
-spring-boot = "4.0.2"
+spring-boot = "4.0.3"
 
 [libraries]
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
