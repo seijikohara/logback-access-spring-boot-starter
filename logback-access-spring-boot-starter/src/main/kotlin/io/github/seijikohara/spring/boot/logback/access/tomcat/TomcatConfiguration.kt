@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration
  * Registers Tomcat-specific access logging infrastructure.
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(Tomcat::class)
+@ConditionalOnClass(Tomcat::class, ConfigurableTomcatWebServerFactory::class)
 @ConditionalOnWebApplication
 internal class TomcatConfiguration {
     @Bean
