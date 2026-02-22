@@ -9,9 +9,9 @@ import org.eclipse.jetty.server.Server
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.jetty.ConfigurableJettyWebServerFactory
 import org.springframework.boot.test.context.FilteredClassLoader
-import org.springframework.boot.tomcat.ConfigurableTomcatWebServerFactory
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
+import org.springframework.boot.tomcat.ConfigurableTomcatWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.DefaultResourceLoader
