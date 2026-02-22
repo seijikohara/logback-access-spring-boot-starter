@@ -7,6 +7,7 @@ import org.apache.catalina.startup.Tomcat
 import org.assertj.core.api.Assertions.assertThat
 import org.eclipse.jetty.server.Server
 import org.springframework.boot.autoconfigure.AutoConfigurations
+import org.springframework.boot.jetty.ConfigurableJettyWebServerFactory
 import org.springframework.boot.test.context.FilteredClassLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
@@ -111,6 +112,14 @@ class LogbackAccessAutoConfigurationSpec :
             test("does not create Jetty customizer when Jetty is absent") {
                 baseRunner()
                     .withClassLoader(FilteredClassLoader(Server::class.java))
+                    .run { context ->
+                        assertThat(context).doesNotHaveBean("logbackAccessJettyCustomizer")
+                    }
+            }
+
+            test("does not create Jetty customizer when spring-boot-jetty is absent") {
+                baseRunner()
+                    .withClassLoader(FilteredClassLoader(ConfigurableJettyWebServerFactory::class.java))
                     .run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessJettyCustomizer")
                     }
