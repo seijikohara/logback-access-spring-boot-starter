@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration
  * Registers Jetty-specific access logging infrastructure.
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(Server::class)
+@ConditionalOnClass(Server::class, ConfigurableJettyWebServerFactory::class)
 @ConditionalOnWebApplication
 internal class JettyConfiguration {
     @Bean
