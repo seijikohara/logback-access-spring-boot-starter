@@ -96,7 +96,7 @@ class LogbackAccessAutoConfigurationSpec :
 
             test("does not create Tomcat customizer when Tomcat is absent") {
                 baseRunner()
-                    .withClassLoader(FilteredClassLoader(Tomcat::class.java))
+                    .withClassLoader(FilteredClassLoader(Tomcat::class.java, ConfigurableTomcatWebServerFactory::class.java))
                     .run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessTomcatCustomizer")
                     }
@@ -120,7 +120,7 @@ class LogbackAccessAutoConfigurationSpec :
 
             test("does not create Jetty customizer when Jetty is absent") {
                 baseRunner()
-                    .withClassLoader(FilteredClassLoader(Server::class.java))
+                    .withClassLoader(FilteredClassLoader(Server::class.java, ConfigurableJettyWebServerFactory::class.java))
                     .run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessJettyCustomizer")
                     }
