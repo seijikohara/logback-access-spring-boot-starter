@@ -9,6 +9,7 @@ import org.eclipse.jetty.server.Server
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.jetty.ConfigurableJettyWebServerFactory
 import org.springframework.boot.test.context.FilteredClassLoader
+import org.springframework.boot.tomcat.ConfigurableTomcatWebServerFactory
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
 import org.springframework.context.annotation.Bean
@@ -96,6 +97,14 @@ class LogbackAccessAutoConfigurationSpec :
             test("does not create Tomcat customizer when Tomcat is absent") {
                 baseRunner()
                     .withClassLoader(FilteredClassLoader(Tomcat::class.java))
+                    .run { context ->
+                        assertThat(context).doesNotHaveBean("logbackAccessTomcatCustomizer")
+                    }
+            }
+
+            test("does not create Tomcat customizer when spring-boot-tomcat is absent") {
+                baseRunner()
+                    .withClassLoader(FilteredClassLoader(ConfigurableTomcatWebServerFactory::class.java))
                     .run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessTomcatCustomizer")
                     }
