@@ -1,17 +1,29 @@
 [versions]
 axion-release = "1.21.1"
+binary-compatibility-validator = "0.18.1"
+cyclonedx = "3.2.0"
+detekt = "2.0.0-alpha.2"
+dokka = "2.1.0"
 error-prone = "2.47.0"
+error-prone-plugin = "5.0.0"
 jspecify = "1.0.0"
 kotest = "6.1.3"
-kotlin-logging = "7.0.14"
-logback-access = "2.0.9"
+kotlin = "2.3.10"
+kotlin-logging = "8.0.01"
+logback-access = "2.0.12"
 logstash-logback-encoder = "9.0"
 maven-publish = "0.36.0"
 mockk = "1.14.9"
 nullaway = "0.13.1"
-spring-boot = "4.0.2"
+nullaway-plugin = "3.0.0"
+spotless = "8.2.1"
+spring-boot = "4.0.3"
+version-catalog-update = "1.1.0"
 
 [libraries]
+gradle-dokka-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
@@ -23,6 +35,8 @@ logback-access-common = { module = "ch.qos.logback.access:logback-access-common"
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
+assertj-core = { module = "org.assertj:assertj-core" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
@@ -31,17 +45,19 @@ spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-star
 spring-boot-starter-tomcat = { module = "org.springframework.boot:spring-boot-starter-tomcat" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+spring-boot-test = { module = "org.springframework.boot:spring-boot-test" }
+spring-test = { module = "org.springframework:spring-test" }
 
 [plugins]
 axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axion-release" }
-binary-compatibility-validator = "org.jetbrains.kotlinx.binary-compatibility-validator:0.18.1"
-cyclonedx = "org.cyclonedx.bom:3.1.0"
-detekt = "dev.detekt:2.0.0-alpha.2"
-dokka = "org.jetbrains.dokka:2.1.0"
-errorprone = "net.ltgt.errorprone:5.0.0"
-kotlin-jvm = "org.jetbrains.kotlin.jvm:2.3.10"
+binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
+cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "error-prone-plugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
-nullaway = "net.ltgt.nullaway:3.0.0"
-spotless = "com.diffplug.spotless:8.2.1"
+nullaway = { id = "net.ltgt.nullaway", version.ref = "nullaway-plugin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
-version-catalog-update = "nl.littlerobots.version-catalog-update:1.0.1"
+version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }

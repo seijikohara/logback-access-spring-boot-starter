@@ -5,6 +5,9 @@ plugins {
     `java-library`
 }
 
+group = rootProject.group
+version = rootProject.version
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -12,7 +15,7 @@ java {
 }
 
 nullaway {
-    annotatedPackages.add("io.github.seijikohara")
+    annotatedPackages.add("examples")
     jspecifyMode = true
 }
 
@@ -21,10 +24,6 @@ dependencies {
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.jspecify)
-
-    testImplementation(project(":examples:common"))
-    testImplementation(libs.spring.boot.starter.test)
-    testImplementation(libs.logstash.logback.encoder)
 
     errorprone(libs.error.prone.core)
     errorprone(libs.nullaway)
@@ -38,8 +37,17 @@ tasks.named<Jar>("jar") {
     enabled = true
 }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+            dependencies {
+                implementation(project(":examples:common"))
+                implementation(libs.spring.boot.starter.test)
+                implementation(libs.logstash.logback.encoder)
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {

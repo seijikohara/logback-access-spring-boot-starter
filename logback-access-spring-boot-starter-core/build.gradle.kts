@@ -1,11 +1,12 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    id("maven-publish-conventions")
     alias(libs.plugins.detekt)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.maven.publish)
     alias(libs.plugins.spotless)
     `java-library`
 }
+
+group = rootProject.group
+version = rootProject.version
 
 mavenPublishing {
     pom {
@@ -57,7 +58,7 @@ testing {
                 implementation(libs.kotest.runner.junit5)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.mockk)
-                implementation("org.springframework:spring-test")
+                implementation(libs.spring.test)
             }
         }
     }
