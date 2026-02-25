@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.nullaway)
 }
 
+group = rootProject.group
+version = rootProject.version
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -11,7 +14,7 @@ java {
 }
 
 nullaway {
-    annotatedPackages.add("io.github.seijikohara")
+    annotatedPackages.add("examples")
     jspecifyMode = true
 }
 
@@ -21,17 +24,17 @@ dependencies {
     api(libs.logback.access.common)
     api(libs.jspecify)
     api(libs.logstash.logback.encoder)
-    api("org.junit.jupiter:junit-jupiter-api")
-    api("org.assertj:assertj-core")
-    api("org.springframework.boot:spring-boot-test")
-    api("org.springframework:spring-test")
+    api(libs.junit.jupiter.api)
+    api(libs.assertj.core)
+    api(libs.spring.boot.test)
+    api(libs.spring.test)
 
     // MVC common code dependencies (compileOnly to avoid forcing MVC on all consumers)
-    compileOnly("org.springframework.boot:spring-boot-starter-webmvc")
-    compileOnly("org.springframework.boot:spring-boot-starter-security")
+    compileOnly(libs.spring.boot.starter.webmvc)
+    compileOnly(libs.spring.boot.starter.security)
 
     // WebFlux common code dependencies (compileOnly to avoid forcing WebFlux on all consumers)
-    compileOnly("org.springframework.boot:spring-boot-starter-webflux")
+    compileOnly(libs.spring.boot.starter.webflux)
 
     errorprone(libs.error.prone.core)
     errorprone(libs.nullaway)
