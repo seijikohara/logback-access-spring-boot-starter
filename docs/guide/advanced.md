@@ -6,8 +6,8 @@ This page covers advanced features and configurations.
 
 The TeeFilter captures request and response body content for logging.
 
-::: tip Servlet Applications Only
-TeeFilter requires a Servlet-based web application (Spring MVC). It is not available for reactive applications (Spring WebFlux).
+::: tip Tomcat Servlet Applications Only
+TeeFilter requires a Tomcat-based Servlet web application (Spring MVC). It is not available for Jetty or reactive applications (Spring WebFlux).
 :::
 
 ### Enable TeeFilter

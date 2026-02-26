@@ -16,9 +16,8 @@ import java.util.Collections.unmodifiableMap
 internal object TomcatRequestDataExtractor {
     fun extractHeaders(request: Request): Map<String, String> =
         sortedMapOf<String, String>(String.CASE_INSENSITIVE_ORDER)
-            .also { headers ->
-                request.headerNames.asSequence().associateWithTo(headers) { request.getHeader(it) }
-            }.let(::unmodifiableMap)
+            .apply { for (name in request.headerNames) putIfAbsent(name, request.getHeader(name)) }
+            .let(::unmodifiableMap)
 
     fun extractCookies(request: Request): Map<String, String> =
         request.cookies
@@ -40,6 +39,25 @@ internal object TomcatRequestDataExtractor {
             }.toMap(linkedMapOf())
             .let(::unmodifiableMap)
 
+    private fun decodeBufferContent(
+        request: Request,
+        teeFilterProperties: TeeFilterProperties,
+    ): String? =
+        (request.getAttribute(LB_INPUT_BUFFER) as? ByteArray)?.let { buffer ->
+            BodyCapturePolicy.evaluate(request.contentType, buffer.size.toLong(), teeFilterProperties)
+                ?: String(buffer, BodyCapturePolicy.resolveCharset(request.characterEncoding))
+        }
+
+    private fun decodeFormDataContent(
+        request: Request,
+        teeFilterProperties: TeeFilterProperties,
+    ): String? =
+        encodeFormDataIfApplicable(request)?.let { formData ->
+            val charset = BodyCapturePolicy.resolveCharset(request.characterEncoding)
+            BodyCapturePolicy.evaluate(request.contentType, formData.toByteArray(charset).size.toLong(), teeFilterProperties)
+                ?: formData
+        }
+
     /**
      * Extracts request body content captured by TeeFilter.
      *
@@ -54,30 +72,20 @@ internal object TomcatRequestDataExtractor {
     fun extractContent(
         request: Request,
         teeFilterProperties: TeeFilterProperties,
-    ): String? {
-        if (!teeFilterProperties.enabled) return null
-        val buffer = request.getAttribute(LB_INPUT_BUFFER) as? ByteArray
-        return if (buffer != null) {
-            BodyCapturePolicy.evaluate(request.contentType, buffer.size, teeFilterProperties)
-                ?: String(buffer, BodyCapturePolicy.resolveCharset(request.characterEncoding))
-        } else {
-            encodeFormDataIfApplicable(request)?.let { formData ->
-                val charset = BodyCapturePolicy.resolveCharset(request.characterEncoding)
-                BodyCapturePolicy.evaluate(request.contentType, formData.toByteArray(charset).size, teeFilterProperties)
-                    ?: formData
-            }
-        }
-    }
+    ): String? =
+        teeFilterProperties
+            .takeIf { it.enabled }
+            ?.let { decodeBufferContent(request, it) ?: decodeFormDataContent(request, it) }
 
-    private fun encodeFormDataIfApplicable(request: Request): String? {
-        val charsetName = BodyCapturePolicy.resolveCharset(request.characterEncoding).name()
-        return request
-            .takeIf { isFormUrlEncoded(it) }
-            ?.parameterMap
-            ?.asSequence()
-            ?.flatMap { (key, values) -> values.asSequence().map { key to it } }
-            ?.joinToString("&") { (key, value) ->
-                "${encode(key, charsetName)}=${encode(value, charsetName)}"
-            }
-    }
+    private fun encodeFormDataIfApplicable(request: Request): String? =
+        BodyCapturePolicy.resolveCharset(request.characterEncoding).name().let { charsetName ->
+            request
+                .takeIf { isFormUrlEncoded(it) }
+                ?.parameterMap
+                ?.asSequence()
+                ?.flatMap { (key, values) -> values.asSequence().map { key to it } }
+                ?.joinToString("&") { (key, value) ->
+                    "${encode(key, charsetName)}=${encode(value, charsetName)}"
+                }
+        }
 }

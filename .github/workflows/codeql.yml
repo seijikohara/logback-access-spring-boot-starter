@@ -25,6 +25,8 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: java-kotlin
+          # 'none' skips compilation; sufficient for security scanning but may miss
+          # some data-flow analysis that requires compiled bytecode.
           build-mode: none
 
       - name: Perform CodeQL Analysis

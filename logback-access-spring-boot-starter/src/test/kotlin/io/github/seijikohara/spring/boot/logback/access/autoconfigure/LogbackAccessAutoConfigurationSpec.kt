@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.jetty.ConfigurableJettyWebServerFactory
 import org.springframework.boot.test.context.FilteredClassLoader
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
+import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner
 import org.springframework.boot.tomcat.ConfigurableTomcatWebServerFactory
 import org.springframework.context.annotation.Bean
@@ -168,12 +169,42 @@ class LogbackAccessAutoConfigurationSpec :
                 }
             }
 
+            test("does not create TeeFilter bean when tee-filter.enabled is explicitly false") {
+                baseRunner()
+                    .withPropertyValues("logback.access.tee-filter.enabled=false")
+                    .run { context ->
+                        assertThat(context).doesNotHaveBean("logbackAccessTeeFilter")
+                    }
+            }
+
             test("does not create TeeFilter bean when Tomcat is absent") {
                 baseRunner()
                     .withPropertyValues("logback.access.tee-filter.enabled=true")
                     .withClassLoader(FilteredClassLoader(Tomcat::class.java))
                     .run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessTeeFilter")
+                    }
+            }
+        }
+
+        context("reactive web application") {
+            test("creates LogbackAccessContext in reactive web context") {
+                ReactiveWebApplicationContextRunner()
+                    .withConfiguration(autoConfiguration)
+                    .withPropertyValues(
+                        "logback.access.config-location=${LogbackAccessProperties.FALLBACK_CONFIG}",
+                    ).run { context ->
+                        assertThat(context).hasSingleBean(LogbackAccessContext::class.java)
+                    }
+            }
+
+            test("does not create security filter in reactive web context") {
+                ReactiveWebApplicationContextRunner()
+                    .withConfiguration(autoConfiguration)
+                    .withPropertyValues(
+                        "logback.access.config-location=${LogbackAccessProperties.FALLBACK_CONFIG}",
+                    ).run { context ->
+                        assertThat(context).doesNotHaveBean("logbackAccessSecurityFilter")
                     }
             }
         }

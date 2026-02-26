@@ -29,7 +29,7 @@ internal object BodyCapturePolicy {
      */
     fun evaluate(
         contentType: String?,
-        payloadSize: Int,
+        payloadSize: Long,
         properties: TeeFilterProperties,
     ): String? =
         when {
@@ -42,26 +42,36 @@ internal object BodyCapturePolicy {
      * Resolves a [Charset] from the given encoding name, falling back to UTF-8
      * when the encoding is null or unsupported.
      */
-    fun resolveCharset(encoding: String?): Charset = encoding?.let { runCatching { Charset.forName(it) }.getOrNull() } ?: Charsets.UTF_8
+    fun resolveCharset(encoding: String?): Charset =
+        encoding?.let {
+            try {
+                Charset.forName(it)
+            } catch (_: Exception) {
+                null
+            }
+        } ?: Charsets.UTF_8
 
     private fun isAllowedContentType(
         contentType: String?,
         properties: TeeFilterProperties,
-    ): Boolean {
-        if (contentType == null) return true
-        val mimeType = contentType.substringBefore(';').trim().lowercase()
-        val patterns = properties.allowedContentTypes ?: DEFAULT_ALLOWED_CONTENT_TYPES
-        return patterns.any { matchesMimePattern(mimeType, it.lowercase()) }
-    }
+    ): Boolean =
+        contentType
+            ?.substringBefore(';')
+            ?.trim()
+            ?.lowercase()
+            ?.let { mimeType ->
+                (properties.allowedContentTypes ?: DEFAULT_ALLOWED_CONTENT_TYPES)
+                    .any { matchesMimePattern(mimeType, it.lowercase()) }
+            } ?: true
 
-    private fun selectBinarySentinel(contentType: String?): String {
-        val mimeType = contentType?.substringBefore(';')?.trim()?.lowercase()
-        return if (mimeType != null && mimeType.startsWith("image/")) {
-            IMAGE_CONTENTS_SUPPRESSED
-        } else {
-            BINARY_CONTENT_SUPPRESSED
-        }
-    }
+    private fun selectBinarySentinel(contentType: String?): String =
+        contentType
+            ?.substringBefore(';')
+            ?.trim()
+            ?.lowercase()
+            ?.takeIf { it.startsWith("image/") }
+            ?.let { IMAGE_CONTENTS_SUPPRESSED }
+            ?: BINARY_CONTENT_SUPPRESSED
 
     private fun matchesMimePattern(
         mimeType: String,
@@ -77,8 +87,9 @@ internal object BodyCapturePolicy {
             }
 
             pattern.contains("/*+") -> {
-                val (type, suffix) = pattern.split("/*+", limit = 2)
-                mimeType.startsWith("$type/") && mimeType.endsWith("+$suffix")
+                pattern.split("/*+", limit = 2).let { (type, suffix) ->
+                    mimeType.startsWith("$type/") && mimeType.endsWith("+$suffix")
+                }
             }
 
             else -> {

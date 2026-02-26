@@ -13,9 +13,8 @@ import java.util.Collections.unmodifiableMap
 internal object TomcatResponseDataExtractor {
     fun extractHeaders(response: Response): Map<String, String> =
         sortedMapOf<String, String>(String.CASE_INSENSITIVE_ORDER)
-            .also { headers ->
-                response.headerNames.associateWithTo(headers) { response.getHeader(it) }
-            }.let(::unmodifiableMap)
+            .apply { response.headerNames.forEach { name -> putIfAbsent(name, response.getHeader(name)) } }
+            .let(::unmodifiableMap)
 
     /**
      * Extracts response body content captured by TeeFilter.
@@ -30,11 +29,13 @@ internal object TomcatResponseDataExtractor {
         request: Request,
         response: Response,
         teeFilterProperties: TeeFilterProperties,
-    ): String? {
-        if (!teeFilterProperties.enabled) return null
-        return (request.getAttribute(LB_OUTPUT_BUFFER) as? ByteArray)?.let { buffer ->
-            BodyCapturePolicy.evaluate(response.contentType, buffer.size, teeFilterProperties)
-                ?: String(buffer, BodyCapturePolicy.resolveCharset(response.characterEncoding))
+    ): String? =
+        if (!teeFilterProperties.enabled) {
+            null
+        } else {
+            (request.getAttribute(LB_OUTPUT_BUFFER) as? ByteArray)?.let { buffer ->
+                BodyCapturePolicy.evaluate(response.contentType, buffer.size.toLong(), teeFilterProperties)
+                    ?: String(buffer, BodyCapturePolicy.resolveCharset(response.characterEncoding))
+            }
         }
-    }
 }

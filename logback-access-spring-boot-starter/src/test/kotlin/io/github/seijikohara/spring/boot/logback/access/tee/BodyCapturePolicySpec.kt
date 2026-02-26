@@ -17,73 +17,78 @@ class BodyCapturePolicySpec :
 
         context("evaluate — text content types") {
             test("allows text/plain") {
-                BodyCapturePolicy.evaluate("text/plain", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("text/plain", 100L, defaultProperties) shouldBe null
             }
 
             test("allows text/html with charset") {
-                BodyCapturePolicy.evaluate("text/html; charset=UTF-8", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("text/html; charset=UTF-8", 100L, defaultProperties) shouldBe null
             }
 
             test("allows application/json") {
-                BodyCapturePolicy.evaluate("application/json", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/json", 100L, defaultProperties) shouldBe null
             }
 
             test("allows application/xml") {
-                BodyCapturePolicy.evaluate("application/xml", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/xml", 100L, defaultProperties) shouldBe null
             }
 
             test("allows application/vnd.api+json") {
-                BodyCapturePolicy.evaluate("application/vnd.api+json", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/vnd.api+json", 100L, defaultProperties) shouldBe null
             }
 
             test("allows application/atom+xml") {
-                BodyCapturePolicy.evaluate("application/atom+xml", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/atom+xml", 100L, defaultProperties) shouldBe null
             }
 
             test("allows application/x-www-form-urlencoded") {
-                BodyCapturePolicy.evaluate("application/x-www-form-urlencoded", 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/x-www-form-urlencoded", 100L, defaultProperties) shouldBe null
             }
         }
 
         context("evaluate — binary content types") {
             test("suppresses image/png with IMAGE sentinel") {
-                BodyCapturePolicy.evaluate("image/png", 100, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("image/png", 100L, defaultProperties) shouldBe
                     "[IMAGE CONTENTS SUPPRESSED]"
             }
 
             test("suppresses image/jpeg with IMAGE sentinel") {
-                BodyCapturePolicy.evaluate("image/jpeg", 100, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("image/jpeg", 100L, defaultProperties) shouldBe
                     "[IMAGE CONTENTS SUPPRESSED]"
             }
 
             test("suppresses video/mp4 with BINARY sentinel") {
-                BodyCapturePolicy.evaluate("video/mp4", 100, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("video/mp4", 100L, defaultProperties) shouldBe
                     "[BINARY CONTENT SUPPRESSED]"
             }
 
             test("suppresses application/octet-stream with BINARY sentinel") {
-                BodyCapturePolicy.evaluate("application/octet-stream", 100, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("application/octet-stream", 100L, defaultProperties) shouldBe
                     "[BINARY CONTENT SUPPRESSED]"
             }
 
             test("suppresses audio/mpeg with BINARY sentinel") {
-                BodyCapturePolicy.evaluate("audio/mpeg", 100, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("audio/mpeg", 100L, defaultProperties) shouldBe
                     "[BINARY CONTENT SUPPRESSED]"
             }
         }
 
         context("evaluate — size limit") {
             test("suppresses payload exceeding maxPayloadSize") {
-                BodyCapturePolicy.evaluate("text/plain", 70000, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("text/plain", 70000L, defaultProperties) shouldBe
                     "[CONTENT TOO LARGE]"
             }
 
             test("allows payload at exactly maxPayloadSize") {
-                BodyCapturePolicy.evaluate("text/plain", 65536, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate("text/plain", 65536L, defaultProperties) shouldBe null
+            }
+
+            test("suppresses payload exceeding maxPayloadSize by one byte") {
+                BodyCapturePolicy.evaluate("text/plain", 65537L, defaultProperties) shouldBe
+                    "[CONTENT TOO LARGE]"
             }
 
             test("size check takes precedence over content type") {
-                BodyCapturePolicy.evaluate("application/octet-stream", 70000, defaultProperties) shouldBe
+                BodyCapturePolicy.evaluate("application/octet-stream", 70000L, defaultProperties) shouldBe
                     "[CONTENT TOO LARGE]"
             }
         }
@@ -94,7 +99,7 @@ class BodyCapturePolicySpec :
                     defaultProperties.copy(
                         allowedContentTypes = listOf("application/pdf"),
                     )
-                BodyCapturePolicy.evaluate("application/pdf", 100, customProperties) shouldBe null
+                BodyCapturePolicy.evaluate("application/pdf", 100L, customProperties) shouldBe null
             }
 
             test("rejects previously allowed type when custom list excludes it") {
@@ -102,14 +107,14 @@ class BodyCapturePolicySpec :
                     defaultProperties.copy(
                         allowedContentTypes = listOf("application/pdf"),
                     )
-                BodyCapturePolicy.evaluate("text/plain", 100, customProperties) shouldBe
+                BodyCapturePolicy.evaluate("text/plain", 100L, customProperties) shouldBe
                     "[BINARY CONTENT SUPPRESSED]"
             }
         }
 
         context("evaluate — null content type") {
             test("allows null content type (treated as text)") {
-                BodyCapturePolicy.evaluate(null, 100, defaultProperties) shouldBe null
+                BodyCapturePolicy.evaluate(null, 100L, defaultProperties) shouldBe null
             }
         }
 

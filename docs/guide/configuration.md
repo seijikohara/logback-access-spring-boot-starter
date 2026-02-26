@@ -16,10 +16,12 @@ logback:
       # request-attributes-enabled: true  # Auto-detected from RemoteIpValve
     tee-filter:
       enabled: false
-      # include-hosts: localhost
+      # include-hosts: localhost,example.com
       # exclude-hosts: internal.example.com
       # max-payload-size: 65536
-      # allowed-content-types: text/*,application/json
+      # allowed-content-types:
+      #   - "text/*"
+      #   - "application/json"
     filter:
       # include-url-patterns:
       #   - /api/.*
@@ -37,8 +39,8 @@ logback:
 | `logback.access.local-port-strategy` | `server` | Port resolution strategy: `server` or `local` |
 | `logback.access.tomcat.request-attributes-enabled` | `Auto-detected` | Enable Tomcat request attributes. Auto-detected from RemoteIpValve when not set |
 | `logback.access.tee-filter.enabled` | `false` | Enable request/response body capture |
-| `logback.access.tee-filter.include-hosts` | `null` | Comma-separated list of hosts to include |
-| `logback.access.tee-filter.exclude-hosts` | `null` | Comma-separated list of hosts to exclude |
+| `logback.access.tee-filter.include-hosts` | `null` (all hosts) | Comma-separated list of hosts to include |
+| `logback.access.tee-filter.exclude-hosts` | `null` (none) | Comma-separated list of hosts to exclude |
 | `logback.access.tee-filter.max-payload-size` | `65536` | Maximum payload size (bytes) to log before suppression |
 | `logback.access.tee-filter.allowed-content-types` | `null` | Content-Type patterns allowed for body capture (override mode) |
 | `logback.access.filter.include-url-patterns` | `null` | URL patterns to include (regex) |
@@ -46,7 +48,7 @@ logback:
 
 ## Configuration File Resolution
 
-When `logback.access.config-location` is set, that path is used directly (no fallback).
+When `logback.access.config-location` is set, that path is used directly (no fallback). If the specified file does not exist, the application will fail to start with an error.
 
 When not set, the starter searches in the following order:
 

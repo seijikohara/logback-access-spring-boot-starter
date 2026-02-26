@@ -8,8 +8,10 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.throwable.shouldHaveCauseInstanceOf
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.mock.env.MockEnvironment
+import java.util.regex.PatternSyntaxException
 
 class LogbackAccessContextSpec :
     FunSpec({
@@ -176,6 +178,36 @@ class LogbackAccessContextSpec :
                 } finally {
                     context.close()
                 }
+            }
+        }
+
+        context("invalid URL patterns") {
+            test("throws IllegalArgumentException for invalid include regex pattern") {
+                val properties =
+                    createProperties(
+                        includeUrlPatterns = listOf("[invalid"),
+                    )
+
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        createContext(properties)
+                    }
+                exception.message shouldContain "Invalid include URL pattern: '[invalid'"
+                exception.shouldHaveCauseInstanceOf<PatternSyntaxException>()
+            }
+
+            test("throws IllegalArgumentException for invalid exclude regex pattern") {
+                val properties =
+                    createProperties(
+                        excludeUrlPatterns = listOf("(unclosed"),
+                    )
+
+                val exception =
+                    shouldThrow<IllegalArgumentException> {
+                        createContext(properties)
+                    }
+                exception.message shouldContain "Invalid exclude URL pattern: '(unclosed'"
+                exception.shouldHaveCauseInstanceOf<PatternSyntaxException>()
             }
         }
 

@@ -11,7 +11,7 @@ import java.io.ObjectOutputStream
 class AccessEventDataSpec :
     FunSpec({
         test("data class preserves all fields") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
 
             assertSoftly {
                 data.timeStamp shouldBe 1000L
@@ -43,7 +43,7 @@ class AccessEventDataSpec :
 
         test("requestParameterArrayMap converts list to array") {
             val data =
-                createTestData(
+                TestAccessEventDataFactory.createTestData(
                     requestParameterMap = mapOf("key" to listOf("value1", "value2")),
                 )
 
@@ -52,7 +52,7 @@ class AccessEventDataSpec :
         }
 
         test("nullable fields can be null") {
-            val data = createMinimalData()
+            val data = TestAccessEventDataFactory.createMinimalData()
 
             assertSoftly {
                 data.elapsedTime shouldBe null
@@ -67,7 +67,7 @@ class AccessEventDataSpec :
         }
 
         test("data class is serializable") {
-            val original = createTestData()
+            val original = TestAccessEventDataFactory.createTestData()
 
             val baos = ByteArrayOutputStream()
             ObjectOutputStream(baos).use { it.writeObject(original) }
@@ -79,7 +79,7 @@ class AccessEventDataSpec :
         }
 
         test("requestParameterArrayMap is accessible after deserialization") {
-            val original = createTestData(requestParameterMap = mapOf("key" to listOf("v1", "v2")))
+            val original = TestAccessEventDataFactory.createTestData(requestParameterMap = mapOf("key" to listOf("v1", "v2")))
 
             val baos = ByteArrayOutputStream()
             ObjectOutputStream(baos).use { it.writeObject(original) }
@@ -91,7 +91,7 @@ class AccessEventDataSpec :
         }
 
         test("copy creates independent instance") {
-            val original = createTestData()
+            val original = TestAccessEventDataFactory.createTestData()
             val copied = original.copy(statusCode = 404)
 
             assertSoftly {
@@ -100,59 +100,3 @@ class AccessEventDataSpec :
             }
         }
     })
-
-private fun createTestData(requestParameterMap: Map<String, List<String>> = mapOf("foo" to listOf("bar"))): AccessEventData =
-    AccessEventData(
-        timeStamp = 1000L,
-        elapsedTime = 50L,
-        sequenceNumber = 1L,
-        threadName = "main",
-        serverName = "localhost",
-        localPort = 8080,
-        remoteAddr = "127.0.0.1",
-        remoteHost = "localhost",
-        remoteUser = "testuser",
-        protocol = "HTTP/1.1",
-        method = "GET",
-        requestURI = "/test",
-        queryString = "?foo=bar",
-        requestURL = "GET /test?foo=bar HTTP/1.1",
-        requestHeaderMap = mapOf("Host" to "localhost"),
-        cookieMap = mapOf("session" to "abc123"),
-        requestParameterMap = requestParameterMap,
-        attributeMap = mapOf("attr1" to "value1"),
-        sessionID = "session123",
-        requestContent = "request body",
-        statusCode = 200,
-        responseHeaderMap = mapOf("Content-Type" to "text/plain"),
-        contentLength = 13L,
-        responseContent = "response body",
-    )
-
-private fun createMinimalData(): AccessEventData =
-    AccessEventData(
-        timeStamp = 1000L,
-        elapsedTime = null,
-        sequenceNumber = null,
-        threadName = "main",
-        serverName = null,
-        localPort = 8080,
-        remoteAddr = "127.0.0.1",
-        remoteHost = "127.0.0.1",
-        remoteUser = null,
-        protocol = "HTTP/1.1",
-        method = "GET",
-        requestURI = null,
-        queryString = "",
-        requestURL = "GET / HTTP/1.1",
-        requestHeaderMap = emptyMap(),
-        cookieMap = emptyMap(),
-        requestParameterMap = emptyMap(),
-        attributeMap = emptyMap(),
-        sessionID = null,
-        requestContent = null,
-        statusCode = 200,
-        responseHeaderMap = emptyMap(),
-        contentLength = 0L,
-        responseContent = null,
-    )

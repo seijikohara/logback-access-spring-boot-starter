@@ -22,6 +22,7 @@ internal class TomcatValve(
     private val logbackAccessContext: LogbackAccessContext,
 ) : ValveBase(true),
     AccessLog {
+    @Volatile
     private var requestAttributesEnabledValue: Boolean = false
 
     override fun getRequestAttributesEnabled(): Boolean = requestAttributesEnabledValue
@@ -47,7 +48,7 @@ internal class TomcatValve(
         time: Long,
     ): Unit =
         createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled, time)
-            .let { data -> LogbackAccessEvent(data, request, response) }
+            .let(::LogbackAccessEvent)
             .let(logbackAccessContext::emit)
 
     companion object {

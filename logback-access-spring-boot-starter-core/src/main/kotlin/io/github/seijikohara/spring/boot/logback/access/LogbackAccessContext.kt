@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment
 import org.springframework.core.io.Resource
 import org.springframework.core.io.ResourceLoader
 import org.springframework.util.ResourceUtils.getURL
+import java.util.regex.PatternSyntaxException
 
 /**
  * Manages the Logback-access [AccessContext] lifecycle.
@@ -29,11 +30,11 @@ public class LogbackAccessContext(
 
     /** Compiled regex patterns for URL filtering, cached for performance. */
     private val includePatterns: List<Regex>? =
-        properties.filter.includeUrlPatterns?.map { Regex(it) }
+        properties.filter.includeUrlPatterns?.map { it.toValidRegex("include") }
 
     /** Compiled regex patterns for URL exclusion, cached for performance. */
     private val excludePatterns: List<Regex>? =
-        properties.filter.excludeUrlPatterns?.map { Regex(it) }
+        properties.filter.excludeUrlPatterns?.map { it.toValidRegex("exclude") }
 
     init {
         val (name, resource) = resolveConfig(properties, resourceLoader)
@@ -86,11 +87,11 @@ public class LogbackAccessContext(
     override fun close(): Unit =
         logger.debug { "Closing LogbackAccessContext: $this" }.also {
             accessContext.run {
-                stop()
-                reset()
                 detachAndStopAllAppenders()
                 copyOfAttachedFiltersList.forEach { it.stop() }
                 clearAllFilters()
+                stop()
+                reset()
             }
         }
 
@@ -110,5 +111,12 @@ public class LogbackAccessContext(
                     .map { it to resourceLoader.getResource(it) }
                     .firstOrNull { (_, resource) -> resource.exists() }
                 ?: (FALLBACK_CONFIG to resourceLoader.getResource(FALLBACK_CONFIG))
+
+        private fun String.toValidRegex(kind: String): Regex =
+            try {
+                Regex(this)
+            } catch (e: PatternSyntaxException) {
+                throw IllegalArgumentException("Invalid $kind URL pattern: '$this'", e)
+            }
     }
 }

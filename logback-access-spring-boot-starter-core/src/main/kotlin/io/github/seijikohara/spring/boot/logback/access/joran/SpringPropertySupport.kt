@@ -55,13 +55,11 @@ internal class SpringPropertyModelHandler(
             val name = m.name
             val source = m.source
             when {
-                name.isNullOrBlank() || source.isNullOrBlank() -> {
+                name.isNullOrBlank() || source.isNullOrBlank() ->
                     addError("""The "name" and "source" attributes of <springProperty> must be set""")
-                }
 
-                else -> {
+                else ->
                     setProperty(ic, name, environment.getProperty(source, m.defaultValue.orEmpty()), stringToScope(m.scope))
-                }
             }
         }
 }

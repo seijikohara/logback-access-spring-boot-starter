@@ -6,12 +6,14 @@ This page describes Tomcat-specific configuration options and behavior.
 
 When using Tomcat as the embedded server, the starter registers a `TomcatValve` that intercepts all HTTP requests and responses.
 
-```
-HTTP Request → Tomcat Connector → TomcatValve → Your Application
-                                          ↓
-                                   LogbackAccessContext
-                                          ↓
-                                   Appenders (Console, File, etc.)
+```mermaid
+flowchart LR
+    A[HTTP Request] --> B[Tomcat Connector]
+    B --> C[TomcatValve]
+    C --> D[Your Application]
+    D --> E[Response]
+    C -.->|after response| F[LogbackAccessContext]
+    F -.-> G[Appenders]
 ```
 
 ## Tomcat-Specific Properties
@@ -33,8 +35,8 @@ When `request-attributes-enabled` is `true`, the following Tomcat request attrib
 | `org.apache.catalina.AccessLog.RemoteAddr` | Client IP address |
 | `org.apache.catalina.AccessLog.RemoteHost` | Client hostname |
 | `org.apache.catalina.AccessLog.Protocol` | HTTP protocol version |
+| `org.apache.catalina.AccessLog.ServerName` | Server name |
 | `org.apache.catalina.AccessLog.ServerPort` | Server port |
-| `org.apache.tomcat.remoteAddr` | Client IP address (alternative) |
 
 These attributes are useful when behind a reverse proxy.
 
@@ -46,7 +48,7 @@ In addition to the standard variables, Tomcat supports all request attributes se
 
 ## Elapsed Time
 
-The `%D` and `%T` pattern variables report the request processing time. When Tomcat provides this value directly (via the `AccessLog.log(request, response, time)` contract), the starter uses it as-is. If the value is not available, the starter computes it from the request start time.
+The `%D` and `%T` pattern variables report the request processing time. When Tomcat provides this value directly (via the `AccessLog.log(request, response, time)` contract in nanoseconds), the starter converts it to milliseconds. If the value is not available, the starter computes it from the request start time.
 
 ## Behind a Reverse Proxy
 
@@ -77,7 +79,7 @@ logback:
 
 ## Spring Security Integration
 
-The starter captures authenticated usernames automatically when Spring Security is on the classpath:
+The starter captures authenticated usernames automatically when Spring Security is on the classpath (Servlet applications only):
 
 ```xml
 <pattern>%h %l %u [%t] "%r" %s %b</pattern>
@@ -86,6 +88,8 @@ The starter captures authenticated usernames automatically when Spring Security 
 The `%u` variable will show:
 - The authenticated username for authenticated requests
 - `-` for anonymous requests
+
+> **Note**: This applies to Servlet-based applications (Spring MVC). For reactive applications (Spring WebFlux on Tomcat), `%u` shows `-`.
 
 ## Example Configuration
 

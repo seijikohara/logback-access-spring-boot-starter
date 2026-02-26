@@ -4,6 +4,7 @@ import ch.qos.logback.access.common.AccessConstants.TEE_FILTER_EXCLUDES_PARAM
 import ch.qos.logback.access.common.AccessConstants.TEE_FILTER_INCLUDES_PARAM
 import ch.qos.logback.access.common.servlet.TeeFilter
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessProperties
+import org.apache.catalina.startup.Tomcat
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
@@ -23,16 +24,17 @@ import org.springframework.core.Ordered
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBooleanProperty(prefix = "logback.access.tee-filter", name = ["enabled"])
 @ConditionalOnWebApplication(type = SERVLET)
-@ConditionalOnClass(name = ["org.apache.catalina.startup.Tomcat"])
+@ConditionalOnClass(Tomcat::class)
 internal class TeeFilterConfiguration {
     @Bean
     fun logbackAccessTeeFilter(properties: LogbackAccessProperties): FilterRegistrationBean<TeeFilter> =
         FilterRegistrationBean(TeeFilter()).apply {
             order = Ordered.HIGHEST_PRECEDENCE + ORDER_OFFSET
             addUrlPatterns("/*")
-            val teeFilter = properties.teeFilter
-            teeFilter.includeHosts?.let { addInitParameter(TEE_FILTER_INCLUDES_PARAM, it) }
-            teeFilter.excludeHosts?.let { addInitParameter(TEE_FILTER_EXCLUDES_PARAM, it) }
+            with(properties.teeFilter) {
+                includeHosts?.takeIf { it.isNotBlank() }?.let { addInitParameter(TEE_FILTER_INCLUDES_PARAM, it) }
+                excludeHosts?.takeIf { it.isNotBlank() }?.let { addInitParameter(TEE_FILTER_EXCLUDES_PARAM, it) }
+            }
         }
 
     private companion object {

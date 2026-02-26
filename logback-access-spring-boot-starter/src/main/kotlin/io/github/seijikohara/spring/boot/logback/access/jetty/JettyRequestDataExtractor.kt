@@ -7,7 +7,10 @@ import org.eclipse.jetty.server.Request
 import java.util.Collections.unmodifiableMap
 
 /**
- * Extracts request data (headers, cookies, attributes) from Jetty [Request].
+ * Extracts and resolves request data from Jetty [Request].
+ *
+ * Provides extraction of headers, cookies, and attributes, as well as resolution
+ * of local port, remote user, and request URL.
  */
 internal object JettyRequestDataExtractor {
     fun resolveLocalPort(
@@ -25,14 +28,16 @@ internal object JettyRequestDataExtractor {
         "${request.method} ${request.httpURI.path}${request.httpURI.query?.let { "?$it" }.orEmpty()} ${request.connectionMetaData.protocol}"
 
     fun extractHeaders(request: Request): Map<String, String> =
-        request.headers
-            .associateTo(sortedMapOf(String.CASE_INSENSITIVE_ORDER)) { it.name to it.value }
+        sortedMapOf<String, String>(String.CASE_INSENSITIVE_ORDER)
+            .apply { request.headers.forEach { field -> putIfAbsent(field.name, field.value) } }
             .let(::unmodifiableMap)
 
     fun extractCookies(request: Request): Map<String, String> =
-        Request
-            .getCookies(request)
-            .associateTo(linkedMapOf()) { it.name to it.value }
+        try {
+            Request.getCookies(request)
+        } catch (_: Exception) {
+            emptyList()
+        }.associateTo(linkedMapOf()) { it.name to it.value }
             .let(::unmodifiableMap)
 
     fun extractAttributes(request: Request): Map<String, String> =
