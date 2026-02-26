@@ -20,6 +20,29 @@ class TomcatResponseDataExtractorSpec :
                 allowedContentTypes = null,
             )
 
+        context("extractHeaders") {
+            test("returns case-insensitive sorted header map") {
+                val response = mockk<Response>(relaxed = true)
+                every { response.headerNames } returns listOf("Content-Type", "X-Request-Id")
+                every { response.getHeader("Content-Type") } returns "application/json"
+                every { response.getHeader("X-Request-Id") } returns "abc-123"
+
+                val headers = TomcatResponseDataExtractor.extractHeaders(response)
+
+                headers["Content-Type"] shouldBe "application/json"
+                headers["X-Request-Id"] shouldBe "abc-123"
+            }
+
+            test("returns empty map when no headers") {
+                val response = mockk<Response>(relaxed = true)
+                every { response.headerNames } returns emptyList()
+
+                val headers = TomcatResponseDataExtractor.extractHeaders(response)
+
+                headers.size shouldBe 0
+            }
+        }
+
         test("extractContent uses response character encoding for byte array conversion") {
             val request = mockk<Request>(relaxed = true)
             val response = mockk<Response>(relaxed = true)

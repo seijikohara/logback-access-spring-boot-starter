@@ -29,6 +29,7 @@ internal class SecurityFilter(
             .getContext()
             .authentication
             ?.takeIf { it.isAuthenticated && !trustResolver.isAnonymous(it) }
-            ?.let { request.setAttribute(REMOTE_USER_ATTR, it.name) }
+            ?.name
+            ?.let { name -> request.setAttribute(REMOTE_USER_ATTR, name) }
             .let { filterChain.doFilter(request, response) }
 }

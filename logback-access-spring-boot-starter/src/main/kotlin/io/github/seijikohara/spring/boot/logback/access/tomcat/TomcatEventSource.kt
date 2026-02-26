@@ -4,6 +4,7 @@ import io.github.seijikohara.spring.boot.logback.access.AccessEventData
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext
 import org.apache.catalina.connector.Request
 import org.apache.catalina.connector.Response
+import java.util.concurrent.TimeUnit
 
 /**
  * Creates an [AccessEventData] snapshot from a Tomcat [Request]/[Response].
@@ -11,21 +12,24 @@ import org.apache.catalina.connector.Response
  * All values are extracted eagerly so the returned data is safe for
  * deferred processing without holding references to Tomcat objects.
  *
- * @param elapsedTime the processing time in milliseconds provided by the Tomcat AccessLog contract.
- *                    Falls back to computing from [Request.getCoyoteRequest] start time when negative.
+ * @param elapsedTimeNanos the processing time in nanoseconds provided by the Tomcat AccessLog contract.
+ *                         Converted to milliseconds before storing.
+ *                         Falls back to computing from [Request.getCoyoteRequest] start time when negative.
  */
 internal fun createAccessEventData(
     context: LogbackAccessContext,
     request: Request,
     response: Response,
     requestAttributesEnabled: Boolean,
-    elapsedTime: Long,
+    elapsedTimeNanos: Long,
 ): AccessEventData =
     TomcatRequestAttributeResolver(context, requestAttributesEnabled).let { resolver ->
         AccessEventData(
             timeStamp = System.currentTimeMillis(),
             elapsedTime =
-                elapsedTime.takeIf { it >= 0 }
+                elapsedTimeNanos
+                    .takeIf { it >= 0 }
+                    ?.let { TimeUnit.NANOSECONDS.toMillis(it) }
                     ?: (System.currentTimeMillis() - request.coyoteRequest.startTime).coerceAtLeast(0),
             sequenceNumber = context.accessContext.sequenceNumberGenerator?.nextSequenceNumber(),
             threadName = Thread.currentThread().name,

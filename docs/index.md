@@ -24,10 +24,10 @@ features:
     details: Zero-configuration setup for Tomcat and Jetty embedded servers. Add the dependency and start logging.
   - icon: 🔐
     title: Spring Security Integration
-    details: Automatically captures authenticated usernames in access logs via Spring Security.
+    details: Automatically captures authenticated usernames in access logs via Spring Security (Servlet only).
   - icon: 📝
     title: Request/Response Body Capture
-    details: Optional TeeFilter support for logging request and response body content.
+    details: Optional TeeFilter support for logging request and response body content (Tomcat only).
   - icon: 🎯
     title: URL Filtering
     details: Include/exclude URL patterns to control which requests are logged.
@@ -47,15 +47,15 @@ flowchart TB
         direction TB
         A[HTTP Request] --> B{Embedded Server}
         B -->|Tomcat| C[TomcatValve]
-        B -->|Jetty| D[JettyRequestLog]
+        B -.->|Jetty| D[JettyRequestLog]
     end
 
     subgraph core["logback-access-spring-boot-starter-core"]
         E[LogbackAccessContext]
     end
 
-    C --> E
-    D --> E
+    C -.->|after response| E
+    D -.->|after response| E
     E --> F[logback-access.xml]
     F --> G[Appenders]
     G -->|Console| H[Console Output]
@@ -63,7 +63,7 @@ flowchart TB
     G -->|JSON| J[Logstash/ELK]
 
     subgraph optional["Optional Integrations"]
-        K[Spring Security] -.->|Username| E
+        K[Spring Security] -.->|Request Attribute| E
         L[TeeFilter] -.->|Body Capture| E
     end
 ```

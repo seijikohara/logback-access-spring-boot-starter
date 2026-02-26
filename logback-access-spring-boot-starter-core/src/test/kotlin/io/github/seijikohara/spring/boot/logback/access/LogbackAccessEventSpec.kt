@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 class LogbackAccessEventSpec :
     FunSpec({
         test("delegates to AccessEventData for all properties") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             assertSoftly {
@@ -44,7 +44,7 @@ class LogbackAccessEventSpec :
         }
 
         test("returns NA for null string fields") {
-            val data = createMinimalData()
+            val data = TestAccessEventDataFactory.createMinimalData()
             val event = LogbackAccessEvent(data)
 
             assertSoftly {
@@ -56,7 +56,7 @@ class LogbackAccessEventSpec :
         }
 
         test("returns SENTINEL for null numeric fields") {
-            val data = createMinimalData()
+            val data = TestAccessEventDataFactory.createMinimalData()
             val event = LogbackAccessEvent(data)
 
             assertSoftly {
@@ -67,7 +67,7 @@ class LogbackAccessEventSpec :
         }
 
         test("returns empty string for null content fields") {
-            val data = createMinimalData()
+            val data = TestAccessEventDataFactory.createMinimalData()
             val event = LogbackAccessEvent(data)
 
             assertSoftly {
@@ -77,51 +77,68 @@ class LogbackAccessEventSpec :
         }
 
         test("getRequestHeader returns NA for missing header") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.getRequestHeader("X-Custom") shouldBe NA
         }
 
         test("getRequestHeader returns value for existing header") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             event.getRequestHeader("Host") shouldBe "localhost"
         }
 
         test("getResponseHeader returns NA for missing header") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.getResponseHeader("X-Custom") shouldBe NA
         }
 
+        test("getResponseHeader returns value for existing header") {
+            val data = TestAccessEventDataFactory.createTestData()
+            val event = LogbackAccessEvent(data)
+
+            event.getResponseHeader("Content-Type") shouldBe "text/plain"
+        }
+
         test("getCookie returns NA for missing cookie") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.getCookie("missing") shouldBe NA
         }
 
         test("getCookie returns value for existing cookie") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             event.getCookie("session") shouldBe "abc123"
         }
 
         test("getAttribute returns NA for missing attribute") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.getAttribute("missing") shouldBe NA
         }
 
         test("getRequestParameter returns NA array for missing parameter") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.getRequestParameter("missing") shouldBe arrayOf(NA)
         }
 
+        test("getRequestParameter returns independent arrays on each call") {
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
+
+            val first = event.getRequestParameter("missing")
+            val second = event.getRequestParameter("missing")
+
+            first shouldBe arrayOf(NA)
+            (first !== second) shouldBe true // different instances, not shared
+        }
+
         test("getRequestHeaderNames returns enumeration of header keys") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             val names = event.requestHeaderNames.toList()
@@ -129,14 +146,14 @@ class LogbackAccessEventSpec :
         }
 
         test("getResponseHeaderNameList returns list of header keys") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             event.responseHeaderNameList shouldContain "Content-Type"
         }
 
         test("setThreadName throws UnsupportedOperationException") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             shouldThrow<UnsupportedOperationException> {
                 event.setThreadName("new-thread")
@@ -144,13 +161,13 @@ class LogbackAccessEventSpec :
         }
 
         test("prepareForDeferredProcessing is a no-op") {
-            val event = LogbackAccessEvent(createTestData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createTestData())
 
             event.prepareForDeferredProcessing()
         }
 
         test("getRequest and getResponse return null by default") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             assertSoftly {
                 event.request shouldBe null
@@ -159,13 +176,13 @@ class LogbackAccessEventSpec :
         }
 
         test("getServerAdapter returns null") {
-            val event = LogbackAccessEvent(createMinimalData())
+            val event = LogbackAccessEvent(TestAccessEventDataFactory.createMinimalData())
 
             event.serverAdapter shouldBe null
         }
 
         test("toString contains request URL and status code") {
-            val data = createTestData()
+            val data = TestAccessEventDataFactory.createTestData()
             val event = LogbackAccessEvent(data)
 
             assertSoftly {
@@ -175,7 +192,7 @@ class LogbackAccessEventSpec :
         }
 
         test("event is serializable") {
-            val original = LogbackAccessEvent(createTestData())
+            val original = LogbackAccessEvent(TestAccessEventDataFactory.createTestData())
 
             val baos = ByteArrayOutputStream()
             ObjectOutputStream(baos).use { it.writeObject(original) }
@@ -188,62 +205,22 @@ class LogbackAccessEventSpec :
                 deserialized.method shouldBe original.method
                 deserialized.requestURI shouldBe original.requestURI
                 deserialized.statusCode shouldBe original.statusCode
+                deserialized.requestHeaderMap shouldBe original.requestHeaderMap
+                deserialized.getCookie("session") shouldBe original.getCookie("session")
+                deserialized.responseHeaderMap shouldBe original.responseHeaderMap
             }
         }
+
+        test("requestParameterMap is cached after first access") {
+            val data =
+                TestAccessEventDataFactory.createTestData(
+                    requestParameterMap = mapOf("key" to listOf("v1", "v2")),
+                )
+            val event = LogbackAccessEvent(data)
+
+            val first = event.requestParameterMap
+            val second = event.requestParameterMap
+
+            (first === second) shouldBe true // same cached instance (reference identity)
+        }
     })
-
-private fun createTestData(): AccessEventData =
-    AccessEventData(
-        timeStamp = 1000L,
-        elapsedTime = 50L,
-        sequenceNumber = 1L,
-        threadName = "main",
-        serverName = "localhost",
-        localPort = 8080,
-        remoteAddr = "127.0.0.1",
-        remoteHost = "localhost",
-        remoteUser = "testuser",
-        protocol = "HTTP/1.1",
-        method = "GET",
-        requestURI = "/test",
-        queryString = "?foo=bar",
-        requestURL = "GET /test?foo=bar HTTP/1.1",
-        requestHeaderMap = mapOf("Host" to "localhost"),
-        cookieMap = mapOf("session" to "abc123"),
-        requestParameterMap = mapOf("foo" to listOf("bar")),
-        attributeMap = mapOf("attr1" to "value1"),
-        sessionID = "session123",
-        requestContent = "request body",
-        statusCode = 200,
-        responseHeaderMap = mapOf("Content-Type" to "text/plain"),
-        contentLength = 13L,
-        responseContent = "response body",
-    )
-
-private fun createMinimalData(): AccessEventData =
-    AccessEventData(
-        timeStamp = 1000L,
-        elapsedTime = null,
-        sequenceNumber = null,
-        threadName = "main",
-        serverName = null,
-        localPort = 8080,
-        remoteAddr = "127.0.0.1",
-        remoteHost = "127.0.0.1",
-        remoteUser = null,
-        protocol = "HTTP/1.1",
-        method = "GET",
-        requestURI = null,
-        queryString = "",
-        requestURL = "GET / HTTP/1.1",
-        requestHeaderMap = emptyMap(),
-        cookieMap = emptyMap(),
-        requestParameterMap = emptyMap(),
-        attributeMap = emptyMap(),
-        sessionID = null,
-        requestContent = null,
-        statusCode = 200,
-        responseHeaderMap = emptyMap(),
-        contentLength = 0L,
-        responseContent = null,
-    )

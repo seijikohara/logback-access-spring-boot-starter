@@ -24,10 +24,10 @@ features:
     details: TomcatとJettyの組み込みサーバーに対するゼロコンフィグセットアップ。依存関係を追加するだけでロギング開始。
   - icon: 🔐
     title: Spring Security連携
-    details: Spring Securityによる認証済みユーザー名をアクセスログに自動記録。
+    details: Spring Securityによる認証済みユーザー名をアクセスログに自動記録（Servlet限定）。
   - icon: 📝
     title: リクエスト/レスポンスボディ記録
-    details: オプションのTeeFilterによるリクエストとレスポンスのボディ内容のログ記録。
+    details: オプションのTeeFilterによるリクエストとレスポンスのボディ内容のログ記録（Tomcat限定）。
   - icon: 🎯
     title: URLフィルタリング
     details: 包含/除外URLパターンでログ記録対象リクエストを制御。
@@ -47,15 +47,15 @@ flowchart TB
         direction TB
         A[HTTPリクエスト] --> B{組み込みサーバー}
         B -->|Tomcat| C[TomcatValve]
-        B -->|Jetty| D[JettyRequestLog]
+        B -.->|Jetty| D[JettyRequestLog]
     end
 
     subgraph core["logback-access-spring-boot-starter-core"]
         E[LogbackAccessContext]
     end
 
-    C --> E
-    D --> E
+    C -.->|レスポンス後| E
+    D -.->|レスポンス後| E
     E --> F[logback-access.xml]
     F --> G[Appenders]
     G -->|Console| H[コンソール出力]
@@ -63,7 +63,7 @@ flowchart TB
     G -->|JSON| J[Logstash/ELK]
 
     subgraph optional["オプション連携"]
-        K[Spring Security] -.->|ユーザー名| E
+        K[Spring Security] -.->|リクエスト属性| E
         L[TeeFilter] -.->|ボディキャプチャ| E
     end
 ```

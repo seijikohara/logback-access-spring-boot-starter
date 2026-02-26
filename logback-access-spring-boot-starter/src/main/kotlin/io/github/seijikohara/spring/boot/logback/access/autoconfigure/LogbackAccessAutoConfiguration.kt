@@ -48,11 +48,9 @@ class LogbackAccessAutoConfiguration {
         properties: LogbackAccessProperties,
         resourceLoader: ResourceLoader,
         environment: Environment,
-    ): LogbackAccessContext {
-        val context = LogbackAccessContext(properties, resourceLoader, environment)
-        logger.debug { "Created $context" }
-        return context
-    }
+    ): LogbackAccessContext =
+        LogbackAccessContext(properties, resourceLoader, environment)
+            .also { logger.debug { "Created $it" } }
 
     companion object {
         private val logger = KotlinLogging.logger {}

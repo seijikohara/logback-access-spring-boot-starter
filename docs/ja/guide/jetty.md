@@ -6,12 +6,14 @@
 
 組み込みサーバーとしてJettyを使用する場合、スターターはHTTPリクエストとレスポンスデータをキャプチャする`JettyRequestLog`を登録します。
 
-```
-HTTPリクエスト → Jetty Server → JettyRequestLog → アプリケーション
-                                          ↓
-                                   LogbackAccessContext
-                                          ↓
-                                   Appender (Console, Fileなど)
+```mermaid
+flowchart LR
+    A[HTTPリクエスト] --> B[Jetty Server]
+    B --> C[アプリケーション]
+    C --> D[レスポンス]
+    D -.-> E[JettyRequestLog]
+    E -.-> F[LogbackAccessContext]
+    F -.-> G[Appender]
 ```
 
 ## Jettyの使用
@@ -122,7 +124,7 @@ server:
 
 ## Spring Security連携
 
-Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を`%u`変数で自動的にキャプチャします。
+Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を`%u`変数で自動的にキャプチャします（Servletアプリケーション限定）。リアクティブアプリケーション（Jetty上のSpring WebFlux）では`%u`は`-`を表示します。
 
 ## 設定例
 

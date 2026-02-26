@@ -19,9 +19,9 @@ flowchart TB
         direction TB
         A[HTTP Request] --> B{Embedded Server}
         B -->|Tomcat| C[TomcatValve]
-        B -->|Jetty| D[JettyRequestLog]
-        C --> E[LogbackAccessContext]
-        D --> E
+        B -.->|Jetty| D[JettyRequestLog]
+        C -.->|after response| E[LogbackAccessContext]
+        D -.->|after response| E
         E --> F[logback-access.xml]
         F --> G[Appenders]
         G -->|Console| H[Console Output]
@@ -30,7 +30,7 @@ flowchart TB
     end
 
     subgraph Optional Integrations
-        K[Spring Security] -.->|Username| E
+        K[Spring Security] -.->|Request Attribute| E
         L[TeeFilter] -.->|Body Capture| E
     end
 ```
@@ -40,8 +40,8 @@ flowchart TB
 | Feature | Description |
 |---------|-------------|
 | **Auto-configuration** | Automatic setup for Tomcat and Jetty embedded servers |
-| **Spring Security** | Captures authenticated username in access logs |
-| **TeeFilter** | Records request/response body content |
+| **Spring Security** | Captures authenticated username in access logs (Servlet only) |
+| **TeeFilter** | Records request/response body content (Tomcat only) |
 | **Spring Profiles** | Environment-specific configuration with `<springProfile>` |
 | **Spring Properties** | Property injection with `<springProperty>` |
 | **URL Filtering** | Include/exclude patterns for selective logging |
@@ -188,11 +188,11 @@ sequenceDiagram
     participant AccessLog
 
     Client->>SecurityFilter: Request with credentials
-    SecurityFilter->>SecurityFilter: Authenticate
+    SecurityFilter->>SecurityFilter: Extract username from SecurityContext
+    SecurityFilter->>SecurityFilter: Store username as request attribute
     SecurityFilter->>Controller: Forward (authenticated)
     Controller-->>Client: Response
-    AccessLog->>SecurityFilter: Get SecurityContext
-    AccessLog->>AccessLog: Extract username
+    AccessLog->>AccessLog: Read username from request attribute
     AccessLog->>AccessLog: Log with username
 ```
 
@@ -363,7 +363,7 @@ TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the
 
 ### Jetty Request Parameters
 
-On Jetty 12, `requestParameterMap` returns an empty map to avoid consuming the request body. Use `%i{Content-Type}` and request body logging if parameter inspection is required.
+On Jetty 12, `requestParameterMap` returns an empty map to avoid consuming the request body. Use `%i{Content-Type}` to inspect the content type header. For full parameter inspection, consider using Tomcat instead of Jetty.
 
 ### Jetty Remote Host
 
@@ -376,9 +376,9 @@ See the [examples/](examples/) directory for complete working projects:
 | Module | Server | Framework | Description |
 |--------|--------|-----------|-------------|
 | `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage (TeeFilter excluded) |
+| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage (TeeFilter not supported) |
 | `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage (TeeFilter excluded) |
+| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
 
 ## Module Structure
 

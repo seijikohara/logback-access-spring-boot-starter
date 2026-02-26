@@ -25,7 +25,7 @@ flowchart TB
 |--------|--------|-----------|-------|-------------|
 | `common` | - | - | - | Shared controllers, configs, and test utilities |
 | `tomcat-mvc` | Tomcat | Spring MVC | 39 | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | 36 | Full feature coverage (TeeFilter disabled) |
+| `jetty-mvc` | Jetty | Spring MVC | 36 | Full feature coverage (TeeFilter not supported) |
 | `tomcat-webflux` | Tomcat | WebFlux | 32 | Reactive endpoint coverage |
 | `jetty-webflux` | Jetty | WebFlux | 32 | Reactive endpoint coverage |
 
@@ -68,7 +68,7 @@ classDiagram
     }
 
     class ReactiveRouterConfig {
-        +routerFunction() RouterFunction
+        +routes() RouterFunction
     }
 ```
 
@@ -332,7 +332,7 @@ For detailed logging with processing time:
 Output:
 
 ```
-127.0.0.1 - - [06/Feb/2026:15:30:45 +0900] "GET /api/hello HTTP/1.1" 200 13 "-" "Java-http-client/17.0.17" 45
+127.0.0.1 - - [06/Feb/2026:15:30:45 +0900] "GET /api/hello HTTP/1.1" 200 13 "-" "Java-http-client/21" 45
 ```
 
 ## Configuration Files

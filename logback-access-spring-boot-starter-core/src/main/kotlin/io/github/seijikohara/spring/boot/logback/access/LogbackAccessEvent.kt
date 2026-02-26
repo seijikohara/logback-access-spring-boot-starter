@@ -25,6 +25,12 @@ public class LogbackAccessEvent
         @Transient private val httpResponse: HttpServletResponse? = null,
     ) : IAccessEvent,
         Serializable {
+        @Transient
+        private var cachedParameterArrayMap: Map<String, Array<String>>? = null
+
+        private fun parameterArrayMap(): Map<String, Array<String>> =
+            cachedParameterArrayMap ?: data.requestParameterArrayMap.also { cachedParameterArrayMap = it }
+
         override fun getRequest(): HttpServletRequest? = httpRequest
 
         override fun getResponse(): HttpServletResponse? = httpResponse
@@ -74,9 +80,9 @@ public class LogbackAccessEvent
 
         override fun getCookie(key: String): String = data.cookieMap[key] ?: NA
 
-        override fun getRequestParameterMap(): Map<String, Array<String>> = data.requestParameterArrayMap
+        override fun getRequestParameterMap(): Map<String, Array<String>> = parameterArrayMap()
 
-        override fun getRequestParameter(key: String): Array<String> = data.requestParameterArrayMap[key] ?: EMPTY_PARAM_ARRAY
+        override fun getRequestParameter(key: String): Array<String> = parameterArrayMap()[key] ?: arrayOf(NA)
 
         override fun getAttribute(key: String): String = data.attributeMap[key] ?: NA
 
@@ -103,8 +109,5 @@ public class LogbackAccessEvent
 
         private companion object {
             private const val serialVersionUID: Long = 1L
-
-            /** Reusable empty parameter array to avoid repeated allocation. */
-            private val EMPTY_PARAM_ARRAY: Array<String> = arrayOf(NA)
         }
     }

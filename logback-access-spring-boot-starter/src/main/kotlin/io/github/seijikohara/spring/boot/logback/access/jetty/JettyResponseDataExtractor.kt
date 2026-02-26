@@ -8,8 +8,7 @@ import java.util.Collections.unmodifiableMap
  */
 internal object JettyResponseDataExtractor {
     fun extractHeaders(response: Response): Map<String, String> =
-        response.headers
-            .associateTo(sortedMapOf(String.CASE_INSENSITIVE_ORDER)) {
-                it.name to it.value
-            }.let(::unmodifiableMap)
+        sortedMapOf<String, String>(String.CASE_INSENSITIVE_ORDER)
+            .apply { response.headers.forEach { field -> putIfAbsent(field.name, field.value) } }
+            .let(::unmodifiableMap)
 }

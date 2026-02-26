@@ -22,7 +22,7 @@ export default withMermaid(
       ['link', { rel: 'icon', href: '/logback-access-spring-boot-starter/logo.svg', type: 'image/svg+xml' }],
       ['meta', { property: 'og:type', content: 'website' }],
       ['meta', { property: 'og:site_name', content: 'logback-access-spring-boot-starter' }],
-      ['meta', { property: 'og:image', content: 'https://seijikohara.github.io/logback-access-spring-boot-starter/og-image.png' }],
+      ['meta', { property: 'og:image', content: 'https://seijikohara.github.io/logback-access-spring-boot-starter/logo.svg' }],
       ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ],
 

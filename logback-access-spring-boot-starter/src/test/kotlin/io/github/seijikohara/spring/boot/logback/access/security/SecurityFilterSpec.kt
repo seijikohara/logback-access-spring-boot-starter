@@ -51,6 +51,27 @@ class SecurityFilterSpec :
             }
         }
 
+        context("authenticated user with null name") {
+            test("does not set REMOTE_USER_ATTR when authentication name is null") {
+                val auth =
+                    mockk<Authentication> {
+                        every { isAuthenticated } returns true
+                        every { name } returns null
+                    }
+                setAuthentication(auth)
+                val customResolver =
+                    mockk<AuthenticationTrustResolver> {
+                        every { isAnonymous(auth) } returns false
+                    }
+                val filter = SecurityFilter(customResolver)
+
+                filter.doFilter(request, response, filterChain)
+
+                verify(exactly = 0) { request.setAttribute(REMOTE_USER_ATTR, any()) }
+                verify { filterChain.doFilter(request, response) }
+            }
+        }
+
         context("anonymous authentication") {
             test("does not set REMOTE_USER_ATTR for AnonymousAuthenticationToken") {
                 setAuthentication(

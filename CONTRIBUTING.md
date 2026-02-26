@@ -54,16 +54,13 @@ Both tools run as part of `./gradlew build`. Fix any issues before submitting a 
 
 ## Testing
 
-- **Framework**: [Kotest](https://kotest.io/) with FunSpec style
-- **Mocking**: [MockK](https://mockk.io/)
+The project uses different test frameworks depending on the module:
 
-The project contains both unit tests and integration tests:
-
-| Location | Type | Description |
-|----------|------|-------------|
-| `logback-access-spring-boot-starter-core/src/test/` | Unit tests | Core API, Joran extensions, Properties (Kotest) |
-| `logback-access-spring-boot-starter/src/test/` | Unit tests | Body capture, Tomcat extractors, Security filter (Kotest) |
-| `examples/` | Integration tests | Full Spring Boot tests for Tomcat/Jetty × MVC/WebFlux |
+| Location | Type | Framework | Description |
+|----------|------|-----------|-------------|
+| `logback-access-spring-boot-starter-core/src/test/` | Unit tests | [Kotest](https://kotest.io/) (FunSpec) + [MockK](https://mockk.io/) | Core API, Joran extensions, Properties |
+| `logback-access-spring-boot-starter/src/test/` | Unit tests | Kotest (FunSpec) + MockK | Body capture, Tomcat extractors, Security filter |
+| `examples/` | Integration tests | JUnit 5 + AssertJ | Full Spring Boot tests for Tomcat/Jetty × MVC/WebFlux |
 
 Run tests only:
 

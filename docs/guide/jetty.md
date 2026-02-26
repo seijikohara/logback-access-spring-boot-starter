@@ -6,12 +6,14 @@ This page describes Jetty-specific configuration options and behavior.
 
 When using Jetty as the embedded server, the starter registers a `JettyRequestLog` that captures HTTP request and response data.
 
-```
-HTTP Request → Jetty Server → JettyRequestLog → Your Application
-                                          ↓
-                                   LogbackAccessContext
-                                          ↓
-                                   Appenders (Console, File, etc.)
+```mermaid
+flowchart LR
+    A[HTTP Request] --> B[Jetty Server]
+    B --> C[Your Application]
+    C --> D[Response]
+    D -.-> E[JettyRequestLog]
+    E -.-> F[LogbackAccessContext]
+    F -.-> G[Appenders]
 ```
 
 ## Using Jetty
@@ -122,7 +124,7 @@ server:
 
 ## Spring Security Integration
 
-The starter captures authenticated usernames automatically in the `%u` variable when Spring Security is on the classpath.
+The starter captures authenticated usernames automatically in the `%u` variable when Spring Security is on the classpath (Servlet applications only). For reactive applications (Spring WebFlux on Jetty), `%u` shows `-`.
 
 ## Example Configuration
 

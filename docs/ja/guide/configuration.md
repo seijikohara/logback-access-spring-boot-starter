@@ -10,16 +10,18 @@
 logback:
   access:
     enabled: true
-    # config-location: classpath:custom-access.xml  # Supports classpath: and file: prefixes
+    # config-location: classpath:custom-access.xml  # classpath: および file: プレフィックスに対応
     local-port-strategy: server
     tomcat:
-      # request-attributes-enabled: true  # Auto-detected from RemoteIpValve
+      # request-attributes-enabled: true  # RemoteIpValveの存在から自動判定
     tee-filter:
       enabled: false
-      # include-hosts: localhost
+      # include-hosts: localhost,example.com
       # exclude-hosts: internal.example.com
       # max-payload-size: 65536
-      # allowed-content-types: text/*,application/json
+      # allowed-content-types:
+      #   - "text/*"
+      #   - "application/json"
     filter:
       # include-url-patterns:
       #   - /api/.*
@@ -37,8 +39,8 @@ logback:
 | `logback.access.local-port-strategy` | `server` | ポート解決戦略: `server`または`local` |
 | `logback.access.tomcat.request-attributes-enabled` | `自動検出` | Tomcatリクエスト属性の有効化。未設定時、RemoteIpValveの存在から自動判定 |
 | `logback.access.tee-filter.enabled` | `false` | リクエスト/レスポンスボディキャプチャの有効化 |
-| `logback.access.tee-filter.include-hosts` | `null` | 含めるホストのカンマ区切りリスト |
-| `logback.access.tee-filter.exclude-hosts` | `null` | 除外するホストのカンマ区切りリスト |
+| `logback.access.tee-filter.include-hosts` | `null`（全ホスト） | 含めるホストのカンマ区切りリスト |
+| `logback.access.tee-filter.exclude-hosts` | `null`（なし） | 除外するホストのカンマ区切りリスト |
 | `logback.access.tee-filter.max-payload-size` | `65536` | ログ出力する最大ペイロードサイズ（バイト） |
 | `logback.access.tee-filter.allowed-content-types` | `null` | ボディキャプチャを許可するContent-Typeパターン（上書きモード） |
 | `logback.access.filter.include-url-patterns` | `null` | 含めるURLパターン（正規表現） |
@@ -46,7 +48,7 @@ logback:
 
 ## 設定ファイルの解決
 
-`logback.access.config-location`が設定されている場合、そのパスを直接使用します（フォールバックなし）。
+`logback.access.config-location`が設定されている場合、そのパスを直接使用します（フォールバックなし）。指定されたファイルが存在しない場合、アプリケーションの起動に失敗しエラーが発生します。
 
 未設定の場合、以下の順序で設定ファイルを検索します:
 

@@ -64,6 +64,7 @@ testing {
                 implementation(libs.assertj.core)
                 implementation(libs.spring.boot.starter.tomcat)
                 implementation(libs.spring.boot.starter.jetty)
+                implementation(libs.spring.boot.starter.webflux)
                 implementation(libs.spring.boot.starter.security)
             }
         }

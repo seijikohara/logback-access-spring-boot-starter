@@ -2,8 +2,10 @@ package io.github.seijikohara.spring.boot.logback.access.joran
 
 import ch.qos.logback.access.common.spi.AccessContext
 import ch.qos.logback.core.read.ListAppender
+import ch.qos.logback.core.status.ErrorStatus
 import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -197,6 +199,52 @@ class AccessJoranConfiguratorSpec :
                 context.start()
 
                 context.getAppender("notProdAppender").shouldNotBeNull()
+            }
+        }
+
+        context("springProperty error handling") {
+            test("reports error when source attribute is missing") {
+                val environment = MockEnvironment()
+                val context = AccessContext()
+                val configurator = AccessJoranConfigurator(environment)
+                configurator.context = context
+
+                val xml =
+                    """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <configuration>
+                        <springProperty name="myProp" scope="context"/>
+                        <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
+                        <appender-ref ref="list"/>
+                    </configuration>
+                    """.trimIndent()
+
+                configurator.doConfigure(ByteArrayInputStream(xml.toByteArray()))
+
+                val errors = context.statusManager.copyOfStatusList.filter { it is ErrorStatus }
+                errors shouldHaveAtLeastSize 1
+            }
+
+            test("reports error when name attribute is missing") {
+                val environment = MockEnvironment()
+                val context = AccessContext()
+                val configurator = AccessJoranConfigurator(environment)
+                configurator.context = context
+
+                val xml =
+                    """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <configuration>
+                        <springProperty source="some.key" scope="context"/>
+                        <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
+                        <appender-ref ref="list"/>
+                    </configuration>
+                    """.trimIndent()
+
+                configurator.doConfigure(ByteArrayInputStream(xml.toByteArray()))
+
+                val errors = context.statusManager.copyOfStatusList.filter { it is ErrorStatus }
+                errors shouldHaveAtLeastSize 1
             }
         }
 

@@ -6,8 +6,8 @@
 
 TeeFilterはロギング用にリクエストとレスポンスのボディ内容をキャプチャします。
 
-::: tip Servletアプリケーション限定
-TeeFilterはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）では使用できません。
+::: tip Tomcat Servletアプリケーション限定
+TeeFilterはTomcatベースのServlet Webアプリケーション（Spring MVC）が必要です。Jettyやリアクティブアプリケーション（Spring WebFlux）では使用できません。
 :::
 
 ### TeeFilterの有効化
