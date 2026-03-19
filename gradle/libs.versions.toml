@@ -1,14 +1,14 @@
 [versions]
 axion-release = "1.21.1"
 binary-compatibility-validator = "0.18.1"
-cyclonedx = "3.2.0"
+cyclonedx = "3.2.2"
 detekt = "2.0.0-alpha.2"
 dokka = "2.1.0"
-error-prone = "2.47.0"
-error-prone-plugin = "5.0.0"
+error-prone = "2.48.0"
+error-prone-plugin = "5.1.0"
 jspecify = "1.0.0"
-kotest = "6.1.3"
-kotlin = "2.3.10"
+kotest = "6.1.7"
+kotlin = "2.3.20"
 kotlin-logging = "8.0.01"
 logback-access = "2.0.12"
 logstash-logback-encoder = "9.0"
@@ -16,16 +16,18 @@ maven-publish = "0.36.0"
 mockk = "1.14.9"
 nullaway = "0.13.1"
 nullaway-plugin = "3.0.0"
-spotless = "8.2.1"
+spotless = "8.4.0"
 spring-boot = "4.0.3"
 version-catalog-update = "1.1.0"
 
 [libraries]
+assertj-core = { module = "org.assertj:assertj-core" }
+error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
 gradle-dokka-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
-error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
 kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5" }
@@ -35,8 +37,6 @@ logback-access-common = { module = "ch.qos.logback.access:logback-access-common"
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
-assertj-core = { module = "org.assertj:assertj-core" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
