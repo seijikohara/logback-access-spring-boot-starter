@@ -22,8 +22,10 @@ internal object TomcatResponseDataExtractor {
      * Returns `null` immediately when TeeFilter is disabled.
      *
      * Evaluates body capture policy (content type and size) before conversion.
-     * Uses the response's character encoding for byte-to-string conversion,
-     * falling back to UTF-8 when the encoding is not specified or unsupported.
+     * Resolves the charset from the explicit `charset` parameter of the Content-Type header.
+     * Falls back to UTF-8 when no charset is specified, because RFC 8259 §8.1 mandates UTF-8
+     * for JSON and Tomcat returns ISO-8859-1 (the HTTP/1.1 default) from
+     * `response.characterEncoding` when no charset is set in the Content-Type header.
      */
     fun extractContent(
         request: Request,
@@ -35,7 +37,15 @@ internal object TomcatResponseDataExtractor {
         } else {
             (request.getAttribute(LB_OUTPUT_BUFFER) as? ByteArray)?.let { buffer ->
                 BodyCapturePolicy.evaluate(response.contentType, buffer.size.toLong(), teeFilterProperties)
-                    ?: String(buffer, BodyCapturePolicy.resolveCharset(response.characterEncoding))
+                    ?: String(buffer, BodyCapturePolicy.resolveCharset(resolveContentTypeCharset(response.contentType)))
             }
         }
+
+    private fun resolveContentTypeCharset(contentType: String?): String? =
+        contentType
+            ?.splitToSequence(';')
+            ?.drop(1)
+            ?.map { it.trim() }
+            ?.firstOrNull { it.startsWith("charset=", ignoreCase = true) }
+            ?.substringAfter('=')
 }

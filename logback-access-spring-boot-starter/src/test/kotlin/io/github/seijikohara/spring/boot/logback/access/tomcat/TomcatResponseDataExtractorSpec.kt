@@ -43,25 +43,23 @@ class TomcatResponseDataExtractorSpec :
             }
         }
 
-        test("extractContent uses response character encoding for byte array conversion") {
+        test("extractContent respects explicit charset in Content-Type header") {
             val request = mockk<Request>(relaxed = true)
             val response = mockk<Response>(relaxed = true)
             val isoBytes = "café".toByteArray(Charsets.ISO_8859_1)
             every { request.getAttribute(LB_OUTPUT_BUFFER) } returns isoBytes
-            every { response.characterEncoding } returns "ISO-8859-1"
-            every { response.contentType } returns "text/plain"
+            every { response.contentType } returns "text/plain; charset=ISO-8859-1"
 
             val content = TomcatResponseDataExtractor.extractContent(request, response, defaultProperties)
 
             content shouldBe "café"
         }
 
-        test("extractContent falls back to UTF-8 when response encoding is null") {
+        test("extractContent falls back to UTF-8 when Content-Type has no charset") {
             val request = mockk<Request>(relaxed = true)
             val response = mockk<Response>(relaxed = true)
             val utf8Bytes = "hello".toByteArray(Charsets.UTF_8)
             every { request.getAttribute(LB_OUTPUT_BUFFER) } returns utf8Bytes
-            every { response.characterEncoding } returns null
             every { response.contentType } returns "text/plain"
 
             val content = TomcatResponseDataExtractor.extractContent(request, response, defaultProperties)
@@ -115,6 +113,23 @@ class TomcatResponseDataExtractorSpec :
             val content = TomcatResponseDataExtractor.extractContent(request, response, defaultProperties)
 
             content shouldBe "[CONTENT TOO LARGE]"
+        }
+
+        test("extractContent uses UTF-8 for JSON when Tomcat returns ISO-8859-1 as default charset") {
+            // Tomcat returns "ISO-8859-1" from response.characterEncoding even when no charset is
+            // set in the Content-Type header, because ISO-8859-1 is the HTTP/1.1 default.
+            // RFC 8259 Section 8.1 requires UTF-8 for JSON, so the body must be decoded as UTF-8.
+            val request = mockk<Request>(relaxed = true)
+            val response = mockk<Response>(relaxed = true)
+            val cyrillicJson = """{"detail":"Невозможно распарсить тело запроса в формат JSON"}"""
+            val utf8Bytes = cyrillicJson.toByteArray(Charsets.UTF_8)
+            every { request.getAttribute(LB_OUTPUT_BUFFER) } returns utf8Bytes
+            every { response.characterEncoding } returns "ISO-8859-1"
+            every { response.contentType } returns "application/json"
+
+            val content = TomcatResponseDataExtractor.extractContent(request, response, defaultProperties)
+
+            content shouldBe cyrillicJson
         }
 
         test("extractContent returns null when TeeFilter is disabled") {
