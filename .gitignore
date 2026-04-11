@@ -17,3 +17,9 @@ META-INF/
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/node_modules
+
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/
+.claude/agent-memory-local/
+CLAUDE.local.md
