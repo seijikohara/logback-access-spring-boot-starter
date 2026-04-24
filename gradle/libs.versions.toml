@@ -17,7 +17,7 @@ mockk = "1.14.9"
 nullaway = "0.13.4"
 nullaway-plugin = "3.0.0"
 spotless = "8.4.0"
-spring-boot = "4.0.5"
+spring-boot = "4.0.6"
 version-catalog-update = "1.1.0"
 
 [libraries]
