@@ -5,42 +5,44 @@
 | Version              | Supported          |
 |----------------------|--------------------|
 | Latest minor release | :white_check_mark: |
-| Previous releases    | :x:                |
+| Older releases       | :x:                |
 
-Only the latest minor release receives security patches. Users are encouraged to upgrade to the latest version.
+Security patches are released only against the latest minor version. Upgrade to the latest minor release to stay covered.
 
 ## Reporting a Vulnerability
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+**Do not report security vulnerabilities through public GitHub issues, discussions, or pull requests.**
 
-Instead, use [GitHub Private Vulnerability Reporting](https://github.com/seijikohara/logback-access-spring-boot-starter/security/advisories/new) to submit a report. This ensures the vulnerability can be assessed and addressed before public disclosure.
+Submit the report through [GitHub Private Vulnerability Reporting](https://github.com/seijikohara/logback-access-spring-boot-starter/security/advisories/new) so that the issue can be triaged and fixed before public disclosure.
 
 ### What to Include
 
-- A description of the vulnerability
-- Steps to reproduce the issue
-- Potential impact assessment
-- Suggested fix (if any)
+- A description of the vulnerability.
+- Steps to reproduce.
+- An assessment of the potential impact.
+- A suggested fix or workaround, if available.
 
 ### Response Timeline
 
-- **Initial response**: within 7 days
-- **Fix development**: best effort, targeting 30 days
-- **Public disclosure**: coordinated disclosure after the fix is released (maximum 90 days)
+- **Initial response**: within 7 days of the report.
+- **Fix development**: best effort, targeting 30 days.
+- **Public disclosure**: coordinated, after the fix is released. Maximum 90 days from the initial report.
 
 ## Disclosure Policy
 
-This project follows a coordinated disclosure process:
+The project follows a coordinated disclosure process:
 
-1. The reporter submits a vulnerability via GitHub Private Vulnerability Reporting
-2. The maintainers acknowledge receipt within 7 days
-3. A fix is developed and tested
-4. A new release is published with the fix
-5. The vulnerability is publicly disclosed via a GitHub Security Advisory
+1. The reporter submits the vulnerability via GitHub Private Vulnerability Reporting.
+2. The maintainers acknowledge receipt within 7 days.
+3. A fix is developed, reviewed, and tested.
+4. A new release is published with the fix.
+5. The vulnerability is publicly disclosed through a GitHub Security Advisory crediting the reporter (unless they request anonymity).
 
 ## Scope
 
-This policy covers the following packages published to Maven Central:
+This policy covers the following Maven Central artifacts:
 
 - `io.github.seijikohara:logback-access-spring-boot-starter-core`
 - `io.github.seijikohara:logback-access-spring-boot-starter`
+
+Vulnerabilities in transitive dependencies (Logback Access, Spring Boot, Tomcat, Jetty, etc.) should be reported to the respective projects. Reports that describe how this starter exposes such a vulnerability are in scope.

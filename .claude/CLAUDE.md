@@ -2,96 +2,71 @@
 
 ## Project Overview
 
-A Spring Boot Starter library that integrates [Logback Access](https://logback.qos.ch/access.html) with Spring Boot, providing automatic HTTP access logging for Tomcat and Jetty servers.
+Spring Boot starter that integrates [Logback Access](https://logback.qos.ch/access.html) with Spring Boot 4, providing automatic HTTP access logging for Tomcat and Jetty embedded servers.
 
 - **Group ID**: `io.github.seijikohara`
 - **License**: Apache 2.0
 - **Java**: 21+ (toolchain enforced)
-- **Kotlin**: 2.x with explicit API mode (core module)
+- **Kotlin**: 2.x with `explicitApi()` on the core module
 - **Spring Boot**: 4.x
 
-## Module Architecture
+## Module Layout
 
-| Module | Artifact | Responsibility |
-|--------|----------|----------------|
-| `logback-access-spring-boot-starter-core` | Published to Maven Central | Public API, data models, Joran XML configuration extensions |
-| `logback-access-spring-boot-starter` | Published to Maven Central | Spring Boot auto-configuration, Tomcat/Jetty/Security/TeeFilter integration |
-| `examples/common` | Not published | Shared test utilities for example apps |
-| `examples/tomcat-mvc` | Not published | Integration tests: Tomcat + Spring MVC |
-| `examples/tomcat-webflux` | Not published | Integration tests: Tomcat + WebFlux |
-| `examples/jetty-mvc` | Not published | Integration tests: Jetty + Spring MVC |
-| `examples/jetty-webflux` | Not published | Integration tests: Jetty + WebFlux |
+| Module | Published | Responsibility |
+|--------|:---------:|----------------|
+| `logback-access-spring-boot-starter-core` | ✓ | Public API, data models, Joran XML configuration extensions. Must not depend on Tomcat, Jetty, or Spring Security. |
+| `logback-access-spring-boot-starter` | ✓ | Auto-configuration and Tomcat / Jetty / Spring Security / TeeFilter integrations. |
+| `examples/common` | — | Shared controllers, security/router config, abstract test base classes, test utilities. |
+| `examples/{tomcat,jetty}-{mvc,webflux}` | — | Integration tests covering the four server × framework combinations. |
 
-**Placement rule**: New public API types go in **core**. Server-specific integrations go in **starter**.
+**Placement rule**: place new public API types in **core**; place server-specific integrations in **starter**.
 
 ## Build Commands
 
 ```bash
-# Full build (compile + Spotless + Detekt + tests)
-./gradlew clean build
-
-# Run tests only
-./gradlew test
-
-# Fix formatting
-./gradlew spotlessApply
-
-# Generate KDoc
-./gradlew dokkaGenerateHtml
-
-# Check API compatibility
-./gradlew apiCheck
-
-# Dump API (after intentional public API changes)
-./gradlew apiDump
+./gradlew clean build            # Compile, Spotless, Detekt, all tests
+./gradlew test                   # Tests only
+./gradlew spotlessApply          # Auto-fix formatting
+./gradlew apiCheck               # Verify public API has not drifted
+./gradlew apiDump                # Update .api files after an intentional API change
+./gradlew dokkaGenerateHtml      # Generate KDoc HTML
 ```
 
-## Code Style
+Always run `./gradlew clean build` before claiming a change is complete.
 
-- **Formatter**: Spotless with ktlint (runs as part of `./gradlew build`)
-- **Static analysis**: Detekt (config at `config/detekt/detekt.yml`)
-- **Explicit API**: The core module uses `kotlin { explicitApi() }` — all public declarations must have explicit visibility and return types
-- **Public API documentation**: Detekt enforces KDoc on public classes, functions, and properties (test sources excluded)
-- **Null safety** (examples modules only): Error-prone + NullAway + JSpecify annotations are applied in `examples/` subprojects for Java null safety analysis
+## Detailed Rules
 
-Always run `./gradlew spotlessApply` before committing if formatting issues arise.
+Detailed conventions are split into [path-scoped rules](rules/) that load when relevant files are touched:
 
-## Testing
+| Rule | Scope |
+|------|-------|
+| [`rules/architecture.md`](rules/architecture.md) | Core/starter module boundaries, auto-configuration entry point, API compatibility. |
+| [`rules/code-style.md`](rules/code-style.md) | Kotlin formatting, `explicitApi()`, KDoc, naming. |
+| [`rules/dependencies.md`](rules/dependencies.md) | Version catalog, dependency scopes, build plugin conventions. |
+| [`rules/testing.md`](rules/testing.md) | Kotest / JUnit / AssertJ frameworks and test placement. |
+| [`rules/documentation.md`](rules/documentation.md) | Markdown style, VitePress en/ja parity, Mermaid notation, table/list conventions. |
 
-| Location | Framework | Style |
-|----------|-----------|-------|
-| `*-core/src/test/kotlin/` | Kotest (FunSpec) + MockK | Unit tests |
-| `*-starter/src/test/kotlin/` | Kotest (FunSpec) + MockK | Unit tests |
-| `*-core/src/test/java/` | JUnit 5 | Java interop tests |
-| `examples/` | JUnit 5 + AssertJ | Integration tests (Spring Boot Test) |
-
-- Unit tests use **Kotest FunSpec** style with **MockK** for mocking
-- Integration tests in `examples/` use **JUnit 5** with **AssertJ** assertions
-- TeeFilter is Tomcat-only; `JettyTeeFilterTest` is annotated `@Disabled` because Jetty 12's RequestLog API cannot access Servlet request attributes set by TeeFilter
-
-## Dependency Management
-
-- Versions are centralized in `gradle/libs.versions.toml`
-- Spring Boot BOM is used as a platform dependency
-- Kotest BOM is used for Kotest version alignment
-- Automated updates via Renovate (`renovate.json`)
+Refer to these files instead of reproducing their content here.
 
 ## Version & Release
 
-- Version is derived from Git tags using axion-release-plugin (e.g., tag `v1.2.0` → version `1.2.0`)
-- Published to Maven Central via `gradle-maven-publish-plugin` with GPG signing
-- API compatibility is tracked by `binary-compatibility-validator` (`.api` files in core module)
-- SBOM is generated by CycloneDX plugin
+- Version is derived from Git tags by `axion-release-plugin` (tag `v1.2.0` → version `1.2.0`).
+- Published to Maven Central via `gradle-maven-publish-plugin` with GPG signing.
+- Public API compatibility is enforced by `binary-compatibility-validator` (`.api` files in the core module).
+- SBOM is produced by the CycloneDX Gradle plugin.
 
 ## CI/CD
 
-- **Test workflow** (`test.yml`): Runs on push/PR, matrix of Java 21 and 25
-- **Release workflow** (`release.yml`): Manual dispatch with version input, publishes to Maven Central
-- **CodeQL** (`codeql.yml`): Security analysis
-- **Docs** (`docs.yml`): VitePress documentation build
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `test.yml` | push / pull request | Build and test on Java 21 and 25. |
+| `release.yml` | manual dispatch | Publish to Maven Central. |
+| `codeql.yml` | scheduled / push | CodeQL security analysis. |
+| `docs.yml` | push to `main` | Build the VitePress documentation site. |
 
 ## Git Conventions
 
-- Branch from `main`
-- Use [Conventional Commits](https://www.conventionalcommits.org/) (see @CONTRIBUTING.md)
-- CI must pass before merge
+- Branch from `main`.
+- Use [Conventional Commits](https://www.conventionalcommits.org/); details are in @CONTRIBUTING.md.
+- CI must pass before merge.
+- Do not append Claude attribution trailers (e.g., `Co-Authored-By: Claude`) to commits or PR descriptions.

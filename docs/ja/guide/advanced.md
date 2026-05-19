@@ -1,13 +1,13 @@
 # 高度な設定
 
-このページでは、高度な機能と設定について説明します。
+このページでは、TeeFilterによるボディキャプチャ、URLフィルタリング、JSON出力、Spring Security連携、トラブルシューティングを説明します。
 
 ## TeeFilter
 
-TeeFilterはロギング用にリクエストとレスポンスのボディ内容をキャプチャします。
+TeeFilterはLogback Accessのコンポーネントで、リクエストとレスポンスのボディをバッファリングし、`%requestContent`と`%responseContent`パターン変数から参照できるようにします。
 
 ::: tip Tomcat Servletアプリケーション限定
-TeeFilterはTomcatベースのServlet Webアプリケーション（Spring MVC）が必要です。Jettyやリアクティブアプリケーション（Spring WebFlux）では使用できません。
+スターターは、Tomcatがクラスパスに存在し、アプリケーションがServletベース（Spring MVC）である場合にのみTeeFilterを登録します。Jettyやリアクティブアプリケーション（Spring WebFlux）では利用できません。
 :::
 
 ### TeeFilterの有効化
@@ -25,15 +25,15 @@ logback:
 
 | プロパティ | 説明 | デフォルト |
 |-----------|------|-----------|
-| `enabled` | ボディキャプチャの有効/無効 | `false` |
-| `include-hosts` | 含めるホストのカンマ区切りリスト | 全ホスト |
-| `exclude-hosts` | 除外するホストのカンマ区切りリスト | なし |
-| `max-payload-size` | ログ出力する最大ペイロードサイズ（バイト） | `65536` |
-| `allowed-content-types` | ボディキャプチャを許可するContent-Typeパターン（上書きモード） | 下記参照 |
+| `enabled` | ボディキャプチャを有効/無効にする。 | `false` |
+| `include-hosts` | フィルタを適用するホスト名のカンマ区切りリスト。 | 全ホスト |
+| `exclude-hosts` | フィルタを適用しないホスト名のカンマ区切りリスト。 | なし |
+| `max-payload-size` | ログ出力に含まれる最大ペイロードサイズ（バイト）。超過分はセンチネル値に置換される。 | `65536` |
+| `allowed-content-types` | ボディキャプチャを許可するContent-Typeパターン。指定するとデフォルト一覧を完全に置き換える。 | 下記参照 |
 
 ### ボディ内容へのアクセス
 
-`%requestContent`と`%responseContent`パターンを使用:
+キャプチャしたボディはパターン変数`%requestContent`と`%responseContent`から参照します。
 
 ```xml
 <pattern>%h "%r" %s %requestContent %responseContent</pattern>
@@ -41,7 +41,7 @@ logback:
 
 ### ボディキャプチャポリシー
 
-ボディ内容はログ出力に含める前にキャプチャポリシーで評価されます。バイナリコンテンツタイプや巨大なペイロードは自動的に抑制され、センチネル値に置換されます。
+キャプチャしたバイト列をログ出力に含める前に、スターターはレスポンスの`Content-Type`とペイロードサイズに基づきキャプチャポリシーを評価します。バイナリコンテンツや巨大なペイロードはセンチネル値に置換されます。
 
 **デフォルトで許可されるコンテンツタイプ:**
 
@@ -74,35 +74,35 @@ logback:
         - "application/pdf"
 ```
 
-`allowed-content-types`を指定すると、デフォルトは完全に置換されます（上書きモード）。
+`allowed-content-types`を指定するとデフォルト一覧は完全に置き換えられます（上書きモード）。キャプチャするタイプはすべて明示的に列挙してください。
 
 ::: warning
-`max-payload-size`設定はキャプチャされたコンテンツがログ出力に含まれるかどうかのみを制御します。TeeFilterはこの制限に関係なく、完全なボディをメモリにバッファリングします。本番環境ではホストフィルタリングを使用してキャプチャ範囲を制限してください。
+`max-payload-size`はログ出力に含まれるサイズのみを制御します。TeeFilterはこの値に関係なく、リクエスト/レスポンスの全ボディをメモリにバッファリングします。本番環境では`include-hosts` / `exclude-hosts`でキャプチャ範囲を限定してください。
 :::
 
 ::: info
-`tee-filter.enabled`が`false`（デフォルト）の場合、`%requestContent`と`%responseContent`は空の出力を生成します。これにはリクエストパラメータから再構成されるフォームデータ（`application/x-www-form-urlencoded`）も含まれます。TeeFilterを明示的に有効化しない限り、ボディキャプチャは完全に無効化されます。
+`tee-filter.enabled`が`false`（デフォルト）の場合、`%requestContent`と`%responseContent`は常に空を返します。これにより、`application/x-www-form-urlencoded`リクエストのフォームデータ再構成パスも抑制されます。TeeFilterを明示的に有効化しない限り、フォームに送信された認証情報などがアクセスログに漏洩することはありません。
 :::
 
 ### 文字エンコーディング
 
-TeeFilterでキャプチャされたボディコンテンツは、リクエストまたはレスポンスの`Content-Type`ヘッダーで指定された文字エンコーディングを使用してバイトからテキストに変換されます。エンコーディングが指定されていない場合や、サポートされていないエンコーディングの場合は、UTF-8がフォールバックとして使用されます。
+スターターは`Content-Type`ヘッダーに宣言されたcharsetを使ってキャプチャしたバイト列をデコードします。charsetが省略されている、またはサポートされていない場合はUTF-8にフォールバックします。
 
-これにより、適切な`Content-Type`のcharsetがクライアントまたはサーバーで設定されている場合、Shift_JISやISO-8859-1などの非ASCIIコンテンツが正しくデコードされます。
+クライアントまたはサーバーが`Content-Type`に適切な`charset`パラメータを設定していれば、Shift_JISやISO-8859-1などの非ASCIIペイロードも正しくデコードされます。
 
 ### パフォーマンスへの影響
 
 ::: warning
-ボディキャプチャはメモリ使用量を増加させ、パフォーマンスに影響を与える可能性があります。ホストフィルタリングを使用して、特定の環境に限定してキャプチャしてください。
+ボディキャプチャは各リクエスト/レスポンスをメモリにバッファリングします。`include-hosts` / `exclude-hosts`でキャプチャ範囲を限定し、コストが必要な環境にとどまるようにしてください。
 :::
 
 ## URLフィルタリング
 
-包含パターンと除外パターンを使用して、ログに記録するURLを制御します。
+包含パターンと除外パターンで、ログに記録するリクエストURIを選択します。両リストともJava正規表現を受け付けます。
 
 ### 除外パターン
 
-ヘルスチェックとアクチュエーターエンドポイントを除外:
+ヘルスチェックやアクチュエーターをアクセスログから除外します。
 
 ```yaml
 logback:
@@ -117,7 +117,7 @@ logback:
 
 ### 包含パターン
 
-APIエンドポイントのみをログに記録:
+APIエンドポイントのみをログに記録します。
 
 ```yaml
 logback:
@@ -129,13 +129,13 @@ logback:
 
 ### パターン評価順序
 
-1. 包含パターンが定義されている場合、URLは少なくとも1つにマッチする必要がある
-2. 除外パターンが定義されている場合、マッチするURLは除外される
-3. 両方にマッチする場合、除外が優先
+1. `include-url-patterns`が定義されている場合、リクエストURIは少なくとも1つにマッチしなければならない。マッチしないURIは記録されない。
+2. `exclude-url-patterns`が定義されている場合、マッチしたURIは記録されない。
+3. 両方が定義されている場合、除外が優先される。記録されるのは包含パターンにマッチし、かつどの除外パターンにもマッチしないURIのみ。
 
 ### パターンマッチングの動作
 
-パターンはJava正規表現を使用し、**部分一致**で評価します。パターンがリクエストURIの任意の位置に見つかればマッチします。完全一致にはアンカー（`^`、`$`）を使用してください。
+パターンはJava正規表現を使用し、**部分一致**で評価します。パターンがリクエストURIの任意の位置に見つかればマッチします。完全一致には`^`と`$`でアンカーします。
 
 | パターン | マッチする | マッチしない |
 |---------|----------|------------|
@@ -151,11 +151,11 @@ logback:
 
 ## JSONロギング
 
-ログ集約システム向けにアクセスログをJSON形式で出力します。
+ログ集約システム（Logstash、OpenSearchなど）向けにアクセスログをJSON形式で出力します。
 
 ### Logstash Encoderの使用
 
-依存関係を追加:
+`logstash-logback-encoder`を依存関係に追加します。
 
 ::: code-group
 
@@ -218,24 +218,24 @@ JSON出力にカスタムフィールドを追加:
 
 ## Spring Security連携
 
-Spring Securityがクラスパスにある場合、スターターは認証済みユーザー名を自動的にキャプチャします。
+Spring Securityがクラスパスにある場合、スターターは`SecurityContextHolder`から認証済みユーザー名を解決し、`%u`ログ変数に書き込みます。
 
 ::: tip Servletアプリケーション限定
-ユーザー名の自動キャプチャにはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）ではアクセスロギングは動作しますが、`%u`変数は`-`を表示します。
+ユーザー名のキャプチャにはServletベースのWebアプリケーション（Spring MVC）が必要です。リアクティブアプリケーション（Spring WebFlux）ではアクセスロギング自体は動作しますが、`%u`は常に`-`になります。
 :::
 
 ### 動作の仕組み
 
-スターターは認証済みプリンシパルの`SecurityContextHolder`をチェックします:
+スターターは、Spring Securityのフィルタチェーンの後段で動作する内部Servletフィルタを登録します。
 
-1. 認証済みリクエスト: ユーザー名が`%u`でキャプチャされる
-2. 匿名リクエスト: `%u`変数は`-`を表示
+1. 認証済みリクエスト: フィルタが`Authentication.getName()`をリクエスト属性に書き込み、アクセスイベントソースがそれを`%u`変数にコピーする。
+2. 匿名リクエスト: 属性は書き込まれず、`%u`は`-`になる。
 
-匿名認証トークン（`AnonymousAuthenticationToken`など）は`AuthenticationTrustResolver`を使用して除外されます。アクセスログには実際に認証されたユーザーのみが記録されます。
+フィルタは`AuthenticationTrustResolver`を参照して匿名トークン（`AnonymousAuthenticationToken`など）を真に認証されたリクエストから区別します。アクセスログには認証されたユーザーのみが記録されます。
 
 ### 信頼解決のカスタマイズ
 
-スターターはデフォルトの`AuthenticationTrustResolver` Bean（`AuthenticationTrustResolverImpl`）を提供します。独自のBeanを定義することでオーバーライドできます:
+スターターは、`AuthenticationTrustResolver`型のBeanが他に存在しない場合、デフォルトの`AuthenticationTrustResolverImpl` Beanを登録します。同型のBeanを宣言することで上書きできます。
 
 ```java
 @Bean
@@ -244,13 +244,9 @@ public AuthenticationTrustResolver authenticationTrustResolver() {
 }
 ```
 
-### カスタムプリンシパル抽出
-
-スターターはデフォルトで`SecurityContextHolder.getContext().getAuthentication().getName()`を使用します。
-
 ## 複数Appender
 
-ログを複数の宛先に送信:
+ログを複数の出力先に同時に送信します。
 
 ```xml
 <configuration>
@@ -282,36 +278,35 @@ public AuthenticationTrustResolver authenticationTrustResolver() {
 
 ## パフォーマンスのヒント
 
-アクセスロギングのパフォーマンスを最適化するには:
-
-1. 本番環境のファイルロギングにはサイズ制限付きの`RollingFileAppender`を使用
-2. [URLフィルタリング](#urlフィルタリング)を有効にしてログ量を削減
-3. JSONロギングには、[logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder)が独自の非同期機能を提供
-4. ボディキャプチャが不要な場合はTeeFilterを無効化
+- 本番環境のファイル出力にはサイズと履歴制限を設定した`RollingFileAppender`を使う。
+- ログ量が多く価値の低いエンドポイント（ヘルスチェック、メトリクス）は[URLフィルタリング](#urlフィルタリング)で除外する。
+- JSON出力が必要な場合、`logstash-logback-encoder`が独自の非同期Appenderを提供している。
+- ボディの内容がアクセスログに本当に必要でない限り、TeeFilterは無効のままにする。
 
 ## トラブルシューティング
 
-### ログが表示されない
+### ログが出力されない
 
-1. `logback.access.enabled`が`true`であることを確認
-2. 設定ファイルが存在し、有効なXMLであることを確認
-3. Appender名のタイプミスをチェック
+1. `logback.access.enabled`が`true`であることを確認する。
+2. 設定ファイルがクラスパス上に存在し、有効なXMLであることを確認する。
+3. `<appender-ref>`のAppender名にタイプミスがないかを確認する。
 
-### ユーザー名が表示されない
+### ユーザー名が出力されない
 
-1. Spring Securityがクラスパスにあることを確認
-2. ユーザーが実際に認証されていることを確認
-3. ログフォーマットに`%u`パターンが含まれていることを確認
+1. Spring Securityがクラスパスにあることを確認する。
+2. リクエストが認証済みであることを確認する（匿名トークンではないこと）。
+3. パターンに`%u`が含まれていることを確認する。
+4. アプリケーションがServletベースであることを確認する。リアクティブアプリケーションでは`%u`は常に`-`になる。
 
 ### パフォーマンスの問題
 
-1. ファイルロギングには非同期Appenderを使用
-2. URLフィルタリングを有効にしてログ量を削減
-3. 不要な場合はボディキャプチャ（TeeFilter）を無効化
-4. サイズ制限付きのローリングファイルAppenderを使用
+1. ファイルAppenderを`AsyncAppender`でラップし、I/Oをリクエストスレッドから切り離す。
+2. [URLフィルタリング](#urlフィルタリング)でログ量を制限する。
+3. ボディキャプチャが不要な場合はTeeFilterを無効化する。
+4. `RollingFileAppender`にサイズと履歴の制限を設定する。
 
 ## 関連ページ
 
-- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシの設定
-- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項
-- [設定リファレンス](/ja/guide/configuration) — 全プロパティリファレンスとXML設定
+- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシ設定。
+- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項。
+- [設定リファレンス](/ja/guide/configuration) — 全プロパティリファレンスとXML設定。

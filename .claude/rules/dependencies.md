@@ -9,29 +9,34 @@ paths:
 
 ## Version Catalog
 
-- All dependency versions are declared in `gradle/libs.versions.toml`
-- Never hardcode versions in `build.gradle.kts` — always use `libs.*` references
-- Use BOM/platform dependencies for version alignment (Spring Boot BOM, Kotest BOM)
+- Declare every dependency version in `gradle/libs.versions.toml` under `[versions]`.
+- Never hardcode versions in `build.gradle.kts`. Always reference them via `libs.*`.
+- Use BOM / platform dependencies to keep related artifacts aligned. The project uses the Spring Boot BOM (`libs.spring.boot.dependencies`) and the Kotest BOM (`libs.kotest.bom`).
 
-## Adding Dependencies
+## Adding a Dependency
 
-1. Add the version to `[versions]` in `libs.versions.toml`
-2. Add the library to `[libraries]` with a `version.ref`
-3. Reference as `libs.<library.name>` in `build.gradle.kts`
+1. Add the version to `[versions]` in `libs.versions.toml`.
+2. Add the artifact to `[libraries]` with `version.ref` pointing at that version key.
+3. Reference it from the module's `build.gradle.kts` as `libs.<library.name>`.
+4. After adding, run `./gradlew --write-verification-metadata sha256 clean build` to refresh `gradle/verification-metadata.xml`, and commit the result with the dependency change.
 
-## Dependency Scopes in Starter Module
+## Dependency Scopes in the Starter Module
 
-- `api`: Core module and Spring Boot platform BOM
-- `implementation`: Required runtime dependencies (spring-boot-starter, kotlin-logging)
-- `compileOnly`: Optional server/framework dependencies (Tomcat, Jetty, WebMVC, WebFlux, Security)
-- Test dependencies get full implementations of compile-only deps
+| Scope | Use for |
+|-------|---------|
+| `api` | The core module (`api(project(":logback-access-spring-boot-starter-core"))`) and the Spring Boot platform BOM. |
+| `implementation` | Required runtime dependencies (e.g., `spring-boot-starter`, `kotlin-logging`). |
+| `compileOnly` | Optional server/framework dependencies (Tomcat, Jetty, Spring WebMVC, Spring WebFlux, Spring Security). |
+| `testImplementation` | Full implementations of the `compileOnly` dependencies, plus Kotest, MockK, etc. |
+
+The `compileOnly` scope is critical: it lets the starter compile against multiple optional servers without dragging them onto user classpaths.
 
 ## Automated Updates
 
-- Renovate (`renovate.json`) manages automated dependency update PRs
-- Review and merge dependency PRs after CI passes
+- Renovate (`renovate.json`) opens dependency-update pull requests automatically.
+- Review the PR, wait for CI, and merge once green. Regenerate `verification-metadata.xml` if Renovate's bot did not.
 
-## Build Plugins (buildSrc)
+## Build Plugins (`buildSrc`)
 
-- `maven-publish-conventions.gradle.kts` in `buildSrc/` provides shared publishing configuration
-- Applied via `id("maven-publish-conventions")` in module build files
+- `buildSrc/src/main/kotlin/maven-publish-conventions.gradle.kts` centralizes the publishing configuration shared by the two published modules.
+- Apply it from a module's `build.gradle.kts` with `id("maven-publish-conventions")`.

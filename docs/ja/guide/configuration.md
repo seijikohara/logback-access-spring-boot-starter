@@ -1,10 +1,10 @@
 # 設定
 
-このページでは、logback-access-spring-boot-starterで使用可能なすべての設定オプションを説明します。
+このページでは、logback-access-spring-boot-starterのすべての設定オプションを一覧します。
 
 ## アプリケーションプロパティ
 
-`application.yml`または`application.properties`でSpring Bootプロパティを使用して設定します:
+`application.yml`または`application.properties`でスターターを設定します。
 
 ```yaml
 logback:
@@ -34,29 +34,29 @@ logback:
 
 | プロパティ | デフォルト | 説明 |
 |-----------|----------|------|
-| `logback.access.enabled` | `true` | アクセスロギングの有効/無効 |
-| `logback.access.config-location` | 自動検出 | logback-access設定ファイルへのパス。`classpath:`および`file:` URLプレフィックスに対応 |
-| `logback.access.local-port-strategy` | `server` | ポート解決戦略: `server`または`local` |
-| `logback.access.tomcat.request-attributes-enabled` | `自動検出` | Tomcatリクエスト属性の有効化。未設定時、RemoteIpValveの存在から自動判定 |
-| `logback.access.tee-filter.enabled` | `false` | リクエスト/レスポンスボディキャプチャの有効化 |
-| `logback.access.tee-filter.include-hosts` | `null`（全ホスト） | 含めるホストのカンマ区切りリスト |
-| `logback.access.tee-filter.exclude-hosts` | `null`（なし） | 除外するホストのカンマ区切りリスト |
-| `logback.access.tee-filter.max-payload-size` | `65536` | ログ出力する最大ペイロードサイズ（バイト） |
-| `logback.access.tee-filter.allowed-content-types` | `null` | ボディキャプチャを許可するContent-Typeパターン（上書きモード） |
-| `logback.access.filter.include-url-patterns` | `null` | 含めるURLパターン（正規表現） |
-| `logback.access.filter.exclude-url-patterns` | `null` | 除外するURLパターン（正規表現） |
+| `logback.access.enabled` | `true` | アクセスロギングを有効/無効にする。 |
+| `logback.access.config-location` | 自動検出 | logback-access設定ファイルへのパス。`classpath:`および`file:` URLプレフィックスに対応。 |
+| `logback.access.local-port-strategy` | `server` | アクセスログに記録するポート: `server`（クライアントが指定したポート。`RemoteIpValve`使用時は`X-Forwarded-Port`を反映）または`local`（接続を受け付けたローカルインターフェースのポート）。 |
+| `logback.access.tomcat.request-attributes-enabled` | 自動検出 | `RemoteIpValve`が設定するアクセスログ属性を反映する。未設定時、パイプラインに`RemoteIpValve`が存在すれば自動的に有効化する。 |
+| `logback.access.tee-filter.enabled` | `false` | リクエスト/レスポンスボディキャプチャを有効にする（Tomcat Servlet限定）。 |
+| `logback.access.tee-filter.include-hosts` | `null`（全ホスト） | フィルタを適用するホスト名のカンマ区切りリスト。 |
+| `logback.access.tee-filter.exclude-hosts` | `null`（なし） | フィルタを適用しないホスト名のカンマ区切りリスト。 |
+| `logback.access.tee-filter.max-payload-size` | `65536` | ログ出力に含まれる最大ペイロードサイズ（バイト）。超過分はセンチネル値に置換される。 |
+| `logback.access.tee-filter.allowed-content-types` | `null` | ボディキャプチャを許可するContent-Typeパターン。指定するとデフォルト一覧を完全に置き換える（上書きモード）。 |
+| `logback.access.filter.include-url-patterns` | `null`（全URL） | Java正規表現パターン。リクエストURIが少なくとも1つにマッチする必要がある。部分一致のため、完全一致は`^...$`を使う。 |
+| `logback.access.filter.exclude-url-patterns` | `null`（なし） | Java正規表現パターン。マッチしたリクエストURIはログに記録されない。両方指定時は除外が優先される。 |
 
 ## 設定ファイルの解決
 
-`logback.access.config-location`が設定されている場合、そのパスを直接使用します（フォールバックなし）。指定されたファイルが存在しない場合、アプリケーションの起動に失敗しエラーが発生します。
+`logback.access.config-location`が設定されている場合、スターターはそのパスを直接読み込み、フォールバックは行いません。ファイルが存在しない場合はアプリケーションの起動に失敗します。
 
-未設定の場合、以下の順序で設定ファイルを検索します:
+未設定時は、以下の順序でクラスパスを検索し、最初に存在するリソースを使用します。
 
-1. `classpath:logback-access-test.xml`（テスト用）
-2. `classpath:logback-access.xml`
-3. `classpath:logback-access-test-spring.xml`（Spring機能付きテスト用）
-4. `classpath:logback-access-spring.xml`
-5. 組み込みフォールバック設定
+1. `classpath:logback-access-test.xml` — テスト時のみ採用される。
+2. `classpath:logback-access.xml` — メインの設定ファイル。
+3. `classpath:logback-access-test-spring.xml` — `<springProfile>` / `<springProperty>` を利用するテスト用バリアント。
+4. `classpath:logback-access-spring.xml` — `<springProfile>` / `<springProperty>` を利用する本番用バリアント。
+5. スターターに同梱された組み込みフォールバック設定。リクエストを`common`形式でコンソールに出力する。
 
 ## XML設定
 
@@ -79,7 +79,7 @@ logback:
 
 ### Springプロパティの使用
 
-設定にSpringプロパティを注入:
+Springの`Environment`から値を取り込むには`<springProperty>`を使用します。この拡張機能を利用するには、設定ファイル名を`logback-access-spring.xml`（またはテスト用の`-test-spring.xml`）にする必要があります。
 
 ```xml
 <configuration>
@@ -96,12 +96,12 @@ logback:
 ```
 
 ::: warning デフォルトスコープ
-`<springProperty>`のデフォルトスコープは`LOCAL`です。LOCALスコープのプロパティは、XML設定処理中の変数置換（`${varName}`など）でのみ使用可能です。`context.getProperty()`でプログラム的にアクセスするには、`scope="context"`を設定してください。
+`<springProperty>`のデフォルトスコープは`LOCAL`です。`LOCAL`スコープのプロパティはXML解析時の変数置換（`${varName}`）でのみ参照可能です。`context.getProperty()`でプログラム的に値を取得する場合は`scope="context"`を指定してください。
 :::
 
 ### Springプロファイルの使用
 
-環境別に異なるAppenderを設定:
+環境ごとにAppenderを切り替えるには`<springProfile>`を使用します。
 
 ```xml
 <configuration>
@@ -132,15 +132,15 @@ logback:
 
 ### プロファイル式
 
-Springプロファイル式は否定と複数プロファイルをサポート:
+`<springProfile>`は否定とカンマ区切りの複数プロファイル指定をサポートします。
 
 ```xml
-<!-- 本番環境以外でアクティブ -->
+<!-- "prod"がアクティブでないときに有効 -->
 <springProfile name="!prod">
     ...
 </springProfile>
 
-<!-- devまたはstagingでアクティブ -->
+<!-- "dev"または"staging"のいずれかがアクティブなときに有効 -->
 <springProfile name="dev, staging">
     ...
 </springProfile>
@@ -148,7 +148,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 
 ## File Appender
 
-アクセスログをファイルに出力:
+アクセスログをファイルに出力します。
 
 ```xml
 <appender name="file" class="ch.qos.logback.core.FileAppender">
@@ -161,7 +161,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 
 ## Rolling File Appender
 
-時間またはサイズに基づいてログをローテーション:
+時間とサイズの両方でログをローテーションします。
 
 ```xml
 <appender name="rolling" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -180,7 +180,7 @@ Springプロファイル式は否定と複数プロファイルをサポート:
 
 ## アクセスロギングの無効化
 
-プロパティを設定してアクセスロギングを無効化:
+スターター全体を無効化します。
 
 ```yaml
 logback:
@@ -188,7 +188,7 @@ logback:
     enabled: false
 ```
 
-またはSpringプロファイルを使用:
+特定のプロファイルだけで無効化するには、`logback.access.enabled`と`spring.config.activate.on-profile`を組み合わせます。
 
 ```yaml
 spring:
@@ -208,6 +208,6 @@ logback:
 
 ## 関連ページ
 
-- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシの設定
-- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項
-- [高度な設定](/ja/guide/advanced) — TeeFilter、URLフィルタリング、JSONロギング、Spring Security
+- [Tomcat連携](/ja/guide/tomcat) — Tomcat固有のプロパティとリバースプロキシ設定。
+- [Jetty連携](/ja/guide/jetty) — Jetty固有の動作と既知の制限事項。
+- [高度な設定](/ja/guide/advanced) — TeeFilter、URLフィルタリング、JSONロギング、Spring Security。
