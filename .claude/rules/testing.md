@@ -6,46 +6,49 @@ paths:
 
 # Testing Conventions
 
-## Unit Tests (Core & Starter Modules)
+## Unit Tests (core and starter modules)
 
-- Framework: **Kotest** with **FunSpec** style
-- Mocking: **MockK**
-- Place in `src/test/kotlin/` mirroring the main source package structure
-- Name test classes as `<ClassName>Spec` (e.g., `LogbackAccessPropertiesSpec`)
+- **Framework**: [Kotest](https://kotest.io/) with the `FunSpec` style.
+- **Mocking**: [MockK](https://mockk.io/).
+- **Location**: `src/test/kotlin/`, mirroring the package layout of the main source.
+- **Class name**: `<TypeUnderTest>Spec` (for example, `LogbackAccessPropertiesSpec`).
 
 ### Kotest FunSpec Pattern
 
 ```kotlin
 class ExampleSpec : FunSpec({
-    test("should do something") {
+    test("returns the resolved username when an authenticated principal is present") {
         // arrange
         // act
-        // assert using Kotest matchers
+        // assert with Kotest matchers
     }
 })
 ```
 
-## Java Interop Tests (Core Module)
+Prefer behavioral test names (`"returns ..."`, `"throws ... when ..."`) over generic names (`"test1"`).
 
-- Framework: **JUnit 5**
-- Place in `src/test/java/`
-- Verify that the Kotlin API is usable from Java
+## Java Interop Tests (core module)
 
-## Integration Tests (examples/)
+- **Framework**: JUnit 5.
+- **Location**: `src/test/java/` in `logback-access-spring-boot-starter-core`.
+- **Purpose**: verify that the Kotlin public API is consumable from Java without `kotlin.Unit` / `kotlin.Pair` leaks, default-argument issues, or nullability surprises.
 
-- Framework: **JUnit 5** with **AssertJ** assertions
-- Use `@SpringBootTest` with a random port
-- Four example apps cover the matrix: Tomcat/Jetty x MVC/WebFlux
-- TeeFilter tests are Tomcat-only (skipped on Jetty)
-- Shared test utilities live in `examples/common`
+## Integration Tests (`examples/*`)
+
+- **Framework**: JUnit 5 with AssertJ assertions.
+- **Pattern**: `@SpringBootTest(webEnvironment = RANDOM_PORT)` against a real embedded server, plus the project's `HttpClientTestUtils` to issue requests.
+- **Coverage matrix**: four runnable apps — `tomcat-mvc`, `tomcat-webflux`, `jetty-mvc`, `jetty-webflux` — exercise the cross product of server (Tomcat / Jetty) and stack (Servlet MVC / reactive WebFlux).
+- **TeeFilter tests** are Tomcat-only. The Jetty equivalent (`JettyTeeFilterTest`) is annotated `@Disabled` because Jetty 12's `RequestLog` API runs below the Servlet layer and cannot see attributes that TeeFilter writes to the Servlet request.
+- **Shared utilities** (`HttpClientTestUtils`, `AccessEventTestUtils`, abstract base classes) live in `examples/common`.
 
 ## Running Tests
 
 ```bash
-./gradlew test          # all tests
-./gradlew :examples:tomcat-mvc:test   # specific module
+./gradlew test                                  # All unit tests across modules
+./gradlew :examples:tomcat-mvc:test             # One example app
+./gradlew :examples:tomcat-mvc:test --tests "*BasicAccessLogTest*"  # One test class
 ```
 
-## Verification
+## Verification before Submitting
 
-Always run `./gradlew clean build` before submitting changes. This executes Spotless, Detekt, and all tests.
+Run `./gradlew clean build` before claiming work is complete. The task executes Spotless, Detekt, all unit tests, and the integration tests under `examples/*`.

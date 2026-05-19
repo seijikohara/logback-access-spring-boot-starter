@@ -9,13 +9,13 @@
   <img src="logo.svg" alt="logback-access-spring-boot-starter" width="200" height="200">
 </p>
 
-Spring Boot auto-configuration for [Logback Access](https://logback.qos.ch/access.html). This library provides HTTP access logging for Tomcat and Jetty embedded servers with seamless Spring integration.
+Spring Boot auto-configuration for [Logback Access](https://logback.qos.ch/access.html). The starter wires HTTP access logging into Tomcat and Jetty embedded servers, integrates with Spring Security and Spring profiles, and supports request/response body capture through Logback Access's TeeFilter.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    subgraph Spring Boot Application
+    subgraph app["Spring Boot Application"]
         direction TB
         A[HTTP Request] --> B{Embedded Server}
         B -->|Tomcat| C[TomcatValve]
@@ -26,10 +26,10 @@ flowchart TB
         F --> G[Appenders]
         G -->|Console| H[Console Output]
         G -->|File| I[File Output]
-        G -->|JSON| J[Logstash/ELK]
+        G -->|JSON| J["Logstash/ELK"]
     end
 
-    subgraph Optional Integrations
+    subgraph opt["Optional Integrations"]
         K[Spring Security] -.->|Request Attribute| E
         L[TeeFilter] -.->|Body Capture| E
     end
@@ -39,19 +39,19 @@ flowchart TB
 
 | Feature | Description |
 |---------|-------------|
-| **Auto-configuration** | Automatic setup for Tomcat and Jetty embedded servers |
-| **Spring Security** | Captures authenticated username in access logs (Servlet only) |
-| **TeeFilter** | Records request/response body content (Tomcat only) |
-| **Spring Profiles** | Environment-specific configuration with `<springProfile>` |
-| **Spring Properties** | Property injection with `<springProperty>` |
-| **URL Filtering** | Include/exclude patterns for selective logging |
+| **Auto-configuration** | Zero-configuration setup for Tomcat and Jetty embedded servers. |
+| **Spring Security** | Writes the authenticated username to the `%u` log variable (Servlet only). |
+| **TeeFilter** | Captures request and response bodies for `%requestContent` / `%responseContent` (Tomcat Servlet only). |
+| **Spring Profiles** | Environment-specific configuration via `<springProfile>`. |
+| **Spring Properties** | Injects values from the Spring `Environment` via `<springProperty>`. |
+| **URL Filtering** | Regex-based include/exclude lists to control which URIs are logged. |
 
 ## Requirements
 
 | Component | Version |
 |-----------|---------|
-| Java | 21+ |
-| Spring Boot | 4.0+ |
+| Java | 21 or later |
+| Spring Boot | 4.0 or later |
 
 ## Installation
 
@@ -85,11 +85,15 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 
 ## Quick Start
 
-### Step 1: Add Dependency
+### Step 1: Add the Dependency
 
-Add the starter to your project using the installation instructions above.
+Pick the snippet that matches the build system (see [Installation](#installation) for all three formats):
 
-### Step 2: Create Configuration
+```kotlin
+implementation("io.github.seijikohara:logback-access-spring-boot-starter:VERSION")
+```
+
+### Step 2: Create the Configuration File
 
 Create `src/main/resources/logback-access.xml`:
 
@@ -105,9 +109,9 @@ Create `src/main/resources/logback-access.xml`:
 </configuration>
 ```
 
-### Step 3: Run Application
+### Step 3: Run the Application
 
-Access logs appear in the console:
+Start the application and issue an HTTP request. Each request produces a log line on the console:
 
 ```
 127.0.0.1 - - [06/Feb/2026:10:30:45 +0900] "GET /api/hello HTTP/1.1" 200 13
@@ -117,13 +121,15 @@ Access logs appear in the console:
 
 ### Properties Reference
 
+The most common properties are listed below. For the complete reference, see the [configuration guide](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/configuration).
+
 | Property | Description | Default |
 |----------|-------------|---------|
-| `logback.access.enabled` | Enable/disable access logging | `true` |
-| `logback.access.config-location` | Custom configuration file path | Auto-detected |
-| `logback.access.local-port-strategy` | Port resolution: `server` or `local` | `server` |
-| `logback.access.filter.include-url-patterns` | Regex patterns for URLs to include | All URLs |
-| `logback.access.filter.exclude-url-patterns` | Regex patterns for URLs to exclude | None |
+| `logback.access.enabled` | Enable or disable access logging. | `true` |
+| `logback.access.config-location` | Path to the configuration file. Supports `classpath:` and `file:` URL prefixes. | Auto-detected |
+| `logback.access.local-port-strategy` | Port reported by `%p`: `server` (the port the client addressed) or `local` (the local interface port). | `server` |
+| `logback.access.filter.include-url-patterns` | Java regex list; the request URI must match at least one entry to be logged. | All URIs |
+| `logback.access.filter.exclude-url-patterns` | Java regex list; matching URIs are dropped. Exclude takes precedence over include. | None |
 
 ### Configuration File Resolution
 
@@ -140,41 +146,41 @@ flowchart LR
     E -->|Not Found| F[Use Fallback Config]
 ```
 
-The starter searches for configuration files in the classpath in the order shown above.
+When `logback.access.config-location` is unset, the starter scans the classpath in the order above and loads the first file it finds. If none are present, it falls back to a configuration bundled with the starter that logs to the console in the `common` format. Setting `config-location` bypasses this resolution — the file must exist or the application fails to start.
 
 ### Log Pattern Elements
 
+A subset of the most common conversion words is listed below. For the complete reference (cookies, attributes, body capture, query string, etc.), see the [pattern variables guide](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/getting-started#pattern-variables).
+
 | Conversion | Description | Example |
 |------------|-------------|---------|
-| `%h` | Remote host | `127.0.0.1` |
-| `%l` | Remote log name | `-` |
-| `%u` | Authenticated user | `admin` |
-| `%t` | Timestamp | `06/Feb/2026:10:30:45 +0900` |
-| `%r` | Request line | `GET /api/hello HTTP/1.1` |
-| `%s` | Status code | `200` |
-| `%b` | Response size (bytes) | `1234` |
-| `%D` | Processing time (ms) | `45` |
-| `%T` | Processing time (seconds) | `0` |
-| `%I` | Thread name | `http-nio-8080-exec-1` |
-| `%i{Header}` | Request header | `%i{User-Agent}` |
-
-For the complete list of pattern variables, see the [documentation](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/getting-started#pattern-variables).
+| `%h` | Remote host. On Jetty, always an IP address. | `127.0.0.1` |
+| `%l` | Remote log name. Always `-`. | `-` |
+| `%u` | Authenticated user name, or `-` when anonymous. | `admin` |
+| `%t` | Request timestamp. | `06/Feb/2026:10:30:45 +0900` |
+| `%r` | Request line (method, URI with query string, protocol). | `GET /api/hello HTTP/1.1` |
+| `%s` | HTTP status code. | `200` |
+| `%b` | Response body size in bytes. | `1234` |
+| `%D` | Processing time in milliseconds. | `45` |
+| `%T` | Processing time in seconds. | `0` |
+| `%I` | Thread name that processed the request. | `http-nio-8080-exec-1` |
+| `%{name}i` | Value of request header `name`. | `%{User-Agent}i` |
 
 ## Server Integration
 
 ### Tomcat
 
-The starter registers a custom `Valve` implementing `AccessLog` automatically when it detects Tomcat.
+When Tomcat is on the classpath, the starter registers an Engine-level `Valve` implementing `AccessLog`. Tomcat invokes the valve after each request completes.
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `logback.access.tomcat.request-attributes-enabled` | Enable request attributes for RemoteIpValve | Auto-detected |
+| `logback.access.tomcat.request-attributes-enabled` | Honor `RemoteIpValve` access-log attributes (`org.apache.catalina.AccessLog.RemoteAddr`, etc.) so `%h`, `%a`, and `%p` reflect the forwarded client. | Auto-detected from the presence of `RemoteIpValve` |
 
 ### Jetty
 
-The starter registers a custom `RequestLog` implementation automatically when it detects Jetty.
+When Jetty is on the classpath, the starter installs a `RequestLog` on the Jetty `Server`. Jetty invokes the `RequestLog` after each request completes.
 
-> **Note**: Jetty 12 uses a native RequestLog API that operates at the core server level, separate from the Servlet API. This architectural difference affects TeeFilter compatibility. See [Known Limitations](#known-limitations) for details.
+> **Note**: Jetty 12 exposes `RequestLog` at the core server level, below the Servlet API. This breaks TeeFilter compatibility on Jetty — see [Known Limitations](#known-limitations).
 
 ## Advanced Features
 
@@ -183,32 +189,35 @@ The starter registers a custom `RequestLog` implementation automatically when it
 ```mermaid
 sequenceDiagram
     participant Client
-    participant SecurityFilter
+    participant SS as Spring Security chain
+    participant SF as Starter SecurityFilter
     participant Controller
-    participant AccessLog
+    participant AL as Valve / RequestLog
 
-    Client->>SecurityFilter: Request with credentials
-    SecurityFilter->>SecurityFilter: Extract username from SecurityContext
-    SecurityFilter->>SecurityFilter: Store username as request attribute
-    SecurityFilter->>Controller: Forward (authenticated)
-    Controller-->>Client: Response
-    AccessLog->>AccessLog: Read username from request attribute
-    AccessLog->>AccessLog: Log with username
+    Client->>SS: HTTP request
+    SS->>SS: Authenticate, populate SecurityContextHolder
+    SS->>SF: Forward
+    SF->>SF: Read Authentication.name from SecurityContextHolder
+    SF->>SF: Skip if AuthenticationTrustResolver.isAnonymous
+    SF->>SF: Write username to request attribute
+    SF->>Controller: Forward
+    Controller-->>Client: HTTP response
+    AL->>AL: Read username attribute, emit access event with %u
 ```
 
-The starter captures the authenticated username automatically when Spring Security is on the classpath (Servlet applications only):
+When Spring Security is on the classpath (Servlet only), the starter writes the authenticated user name to `%u`:
 
 ```
 127.0.0.1 - admin [06/Feb/2026:10:30:45 +0900] "GET /api/secure HTTP/1.1" 200 14
 ```
 
-No additional configuration is required. For reactive applications (Spring WebFlux), access logging works but `%u` shows `-`.
+No additional configuration is required. On reactive applications (Spring WebFlux), access logging still operates but `%u` always renders as `-`.
 
 ### TeeFilter (Body Capture)
 
-> **Note**: TeeFilter is available for Servlet applications (Spring MVC with Tomcat) only. It is not supported on Jetty 12.
+> **Note**: TeeFilter is available on Servlet applications with Tomcat only. The starter does not register it on Jetty or on reactive applications (Spring WebFlux).
 
-Enable TeeFilter to capture request and response bodies:
+Enable TeeFilter to buffer request and response bodies:
 
 ```yaml
 logback:
@@ -217,23 +226,25 @@ logback:
       enabled: true
 ```
 
-Use `%requestContent` and `%responseContent` patterns to access captured content.
+Reference the captured bodies with `%requestContent` and `%responseContent`.
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `logback.access.tee-filter.enabled` | Enable TeeFilter | `false` |
-| `logback.access.tee-filter.include-hosts` | Hosts to include (comma-separated) | All |
-| `logback.access.tee-filter.exclude-hosts` | Hosts to exclude (comma-separated) | None |
-| `logback.access.tee-filter.max-payload-size` | Maximum payload size (bytes) to log | `65536` |
-| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns for body capture (override mode) | Text, JSON, XML, and form types |
+| `logback.access.tee-filter.enabled` | Enable body capture. | `false` |
+| `logback.access.tee-filter.include-hosts` | Comma-separated host names that activate the filter. | All hosts |
+| `logback.access.tee-filter.exclude-hosts` | Comma-separated host names that bypass the filter. | None |
+| `logback.access.tee-filter.max-payload-size` | Maximum payload size in bytes that appears in log output. Larger bodies are replaced with a sentinel. | `65536` |
+| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns allowed for body capture. When set, this list completely replaces the built-in defaults. | `text/*`, `application/json`, `application/xml`, `application/*+json`, `application/*+xml`, `application/x-www-form-urlencoded` |
 
-> **Security Warning**: TeeFilter captures request/response bodies which may contain sensitive data (passwords, tokens, PII). Use `include-hosts`/`exclude-hosts` to limit scope, and consider implementing custom masking in production environments.
+> **Security Warning**: Captured bodies can contain credentials, tokens, and personally identifiable information. Restrict the capture scope with `include-hosts` / `exclude-hosts`, and apply masking before the data leaves the host.
+>
+> Note also that `max-payload-size` only limits what reaches the log output — TeeFilter still buffers the full body in memory regardless.
 
-For details on TeeFilter configuration and platform compatibility, see the [documentation](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced#teefilter).
+For details on the body capture policy and platform compatibility, see the [advanced guide](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced#teefilter).
 
 ### URL Pattern Filtering
 
-Filter access logs using regex patterns. Patterns use **partial matching** — a pattern matches if found anywhere in the request URI. Use anchors (`^`, `$`) for exact matching.
+Filter access logs with Java regex patterns. Matching is **partial** — a pattern matches if it occurs anywhere in the request URI. Anchor with `^` and `$` for an exact match.
 
 ```yaml
 logback:
@@ -245,6 +256,8 @@ logback:
         - ^/actuator/.*
         - ^/health$
 ```
+
+Evaluation order: a URI is logged only when it matches an include pattern (or no include list is defined) **and** matches no exclude pattern.
 
 ```mermaid
 flowchart LR
@@ -261,13 +274,13 @@ flowchart LR
 
 ### JSON Logging (Logstash/ELK)
 
-For structured JSON logging, add [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder):
+For structured output suitable for log aggregation, add [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder):
 
 ```kotlin
 implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 ```
 
-Configure `logback-access.xml`:
+Configure `logback-access.xml` to use the access encoder:
 
 ```xml
 <configuration>
@@ -278,7 +291,7 @@ Configure `logback-access.xml`:
 </configuration>
 ```
 
-Output:
+Sample output:
 
 ```json
 {
@@ -297,7 +310,7 @@ Output:
 }
 ```
 
-Add custom fields:
+Attach static fields with `<customFields>`:
 
 ```xml
 <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder">
@@ -307,7 +320,7 @@ Add custom fields:
 
 ### Spring Profiles
 
-Use `<springProfile>` for environment-specific configuration:
+Activate different appenders per environment with `<springProfile>`. The configuration file must be named `logback-access-spring.xml` (or `-test-spring.xml`) for the Spring extensions to apply.
 
 ```xml
 <configuration>
@@ -334,7 +347,7 @@ Use `<springProfile>` for environment-specific configuration:
 
 ### Spring Properties
 
-Inject Spring Environment values with `<springProperty>`:
+Inject values from the Spring `Environment` with `<springProperty>`:
 
 ```xml
 <configuration>
@@ -349,7 +362,7 @@ Inject Spring Environment values with `<springProperty>`:
 </configuration>
 ```
 
-Use `scope="context"` to access properties programmatically after configuration:
+The default scope is `LOCAL`, which only resolves the value during XML parsing for variable substitution (`${appName}`). To read the value programmatically via `context.getProperty()`, set `scope="context"`:
 
 ```xml
 <springProperty name="appName" source="spring.application.name" scope="context"/>
@@ -357,39 +370,39 @@ Use `scope="context"` to access properties programmatically after configuration:
 
 ## Known Limitations
 
-### Jetty TeeFilter
+### TeeFilter on Jetty 12
 
-TeeFilter is not supported on Jetty 12. The Jetty RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets request attributes (`LB_INPUT_BUFFER`/`LB_OUTPUT_BUFFER`) on the Servlet request, but these attributes are not visible to the RequestLog.
+The Jetty 12 `RequestLog` API operates at the core server level, below the Servlet container. TeeFilter writes its captured buffers as Servlet request attributes (`LB_INPUT_BUFFER` / `LB_OUTPUT_BUFFER`), which the Jetty `RequestLog` cannot read. As a result, `%requestContent` and `%responseContent` always render as empty on Jetty.
 
-### Jetty Request Parameters
+### Request Parameters on Jetty 12
 
-On Jetty 12, `requestParameterMap` returns an empty map to avoid consuming the request body. Use `%i{Content-Type}` to inspect the content type header. For full parameter inspection, consider using Tomcat instead of Jetty.
+On Jetty 12, the starter exposes `requestParameterMap` as an empty map. Calling `getParameter*` on a Jetty `Request` would consume the body for `application/x-www-form-urlencoded` requests, so the starter deliberately skips this path. Read the raw header with `%{Content-Type}i` instead, or switch to Tomcat if full parameter access is required.
 
-### Jetty Remote Host
+### Remote Host on Jetty 12
 
-On Jetty 12, `remoteHost` returns the same value as `remoteAddr` (no reverse DNS lookup is performed).
+Jetty does not perform reverse DNS lookups. `%h` always renders the IP address (the same value as `%a`).
 
 ## Examples
 
-See the [examples/](examples/) directory for complete working projects:
+The [examples/](examples/) directory contains runnable Spring Boot applications used as the project's integration tests:
 
-| Module | Server | Framework | Description |
-|--------|--------|-----------|-------------|
-| `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage (TeeFilter not supported) |
-| `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage |
+| Module | Server | Framework | Notes |
+|--------|--------|-----------|-------|
+| `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage, including TeeFilter and Spring Security. |
+| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage except TeeFilter. |
+| `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoints; `%u` always renders as `-`. |
+| `jetty-webflux` | Jetty | WebFlux | Reactive endpoints; `%u` always renders as `-`. |
 
 ## Module Structure
 
-The library is split into two artifacts:
+The library is published as two Maven artifacts:
 
-| Artifact | Module Name (JPMS) | Description |
-|----------|-------------------|-------------|
-| `logback-access-spring-boot-starter` | `io.github.seijikohara.logback.access.spring` | Auto-configuration and server integrations (Tomcat, Jetty) |
-| `logback-access-spring-boot-starter-core` | `io.github.seijikohara.logback.access.core` | Public API classes (transitive dependency — no need to declare separately) |
+| Artifact | Automatic-Module-Name (JPMS) | Description |
+|----------|------------------------------|-------------|
+| `logback-access-spring-boot-starter` | `io.github.seijikohara.logback.access.spring` | Auto-configuration and server integrations (Tomcat, Jetty, Spring Security, TeeFilter). |
+| `logback-access-spring-boot-starter-core` | `io.github.seijikohara.logback.access.core` | Public API and data models. Pulled in transitively. Declare it separately only when extending the API. |
 
-Most users only need to declare the starter dependency:
+In typical use, declare only the starter:
 
 ```kotlin
 implementation("io.github.seijikohara:logback-access-spring-boot-starter:$version")
@@ -397,7 +410,7 @@ implementation("io.github.seijikohara:logback-access-spring-boot-starter:$versio
 
 ## Acknowledgments
 
-This project was inspired by [akkinoc/logback-access-spring-boot-starter](https://github.com/akkinoc/logback-access-spring-boot-starter). When Spring Boot 4.0 introduced breaking changes, this project was created as an independent implementation to support the new version.
+This project was inspired by [akkinoc/logback-access-spring-boot-starter](https://github.com/akkinoc/logback-access-spring-boot-starter). When Spring Boot 4.0 introduced breaking changes, this project was created as an independent implementation targeting the new major version.
 
 ## License
 

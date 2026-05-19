@@ -1,23 +1,23 @@
 # Getting Started
 
-This guide explains how to add HTTP access logging to your Spring Boot application.
+This guide walks through adding HTTP access logging to a Spring Boot application.
 
 ## Prerequisites
 
 - Java 21 or later
 - Spring Boot 4.0 or later
-- Tomcat or Jetty embedded server
+- Tomcat or Jetty as the embedded server
 
 ## Module Structure
 
-The library consists of two Maven artifacts:
+The library is published as two Maven artifacts:
 
 | Artifact | Description |
 |----------|-------------|
-| `logback-access-spring-boot-starter` | Auto-configuration and server integrations (Tomcat, Jetty, Security, TeeFilter) |
-| `logback-access-spring-boot-starter-core` | Public API classes (transitive dependency — no need to declare separately) |
+| `logback-access-spring-boot-starter` | Auto-configuration and server integrations (Tomcat, Jetty, Spring Security, TeeFilter). |
+| `logback-access-spring-boot-starter-core` | Public API and data models. Pulled in transitively — declare it separately only when you write extensions against the API. |
 
-Most users only need to declare the starter dependency. The core module is automatically included as a transitive dependency.
+In typical use, declare only the starter dependency; the core module follows transitively.
 
 ## Installation
 
@@ -47,7 +47,7 @@ implementation 'io.github.seijikohara:logback-access-spring-boot-starter:VERSION
 
 ## Basic Configuration
 
-Create a `logback-access.xml` file in `src/main/resources`:
+Create `src/main/resources/logback-access.xml`:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -61,52 +61,52 @@ Create a `logback-access.xml` file in `src/main/resources`:
 </configuration>
 ```
 
-This configuration outputs access logs in the Common Log Format (CLF).
+This pattern matches the NCSA Common Log Format (CLF). The starter loads this file automatically — see [Configuration File Resolution](/guide/configuration#configuration-file-resolution) for the full lookup order.
 
 ## Pattern Variables
 
-The following pattern variables are available:
+The following conversion words are available in the pattern:
 
 | Variable | Description |
 |----------|-------------|
-| `%h` | Remote host (IP address) |
-| `%a` | Remote IP address |
-| `%A` | Local IP address |
-| `%p` | Local port |
-| `%l` | Remote log name (always `-`) |
-| `%u` | Remote user (from authentication) |
-| `%t` | Request timestamp |
-| `%r` | Request line (method, URI, protocol) |
-| `%s` | HTTP status code |
-| `%b` | Response body size in bytes |
-| `%D` | Request processing time in milliseconds |
-| `%T` | Request processing time in seconds |
-| `%I` | Thread name |
-| `%{xxx}i` | Request header `xxx` |
-| `%{xxx}o` | Response header `xxx` |
-| `%{xxx}c` | Cookie value `xxx` |
-| `%{xxx}r` | Request attribute `xxx` |
-| `%queryString` | Query string (includes `?` prefix, e.g., `?name=value`) |
-| `%requestContent` | Request body (requires TeeFilter) |
-| `%responseContent` | Response body (requires TeeFilter) |
+| `%h` | Remote host. On Jetty, always an IP address (no reverse DNS lookup). |
+| `%a` | Remote IP address. |
+| `%A` | Local IP address. |
+| `%p` | Local port. See [local-port-strategy](/guide/configuration#property-reference) to choose between the addressed port and the local interface port. |
+| `%l` | Remote log name. Always `-`. |
+| `%u` | Authenticated user name, or `-` when anonymous. Requires Spring Security on Servlet applications. |
+| `%t` | Request timestamp. |
+| `%r` | Request line: method, URI (with query string), protocol. |
+| `%s` | HTTP status code. |
+| `%b` | Response body size in bytes. |
+| `%D` | Request processing time in milliseconds. |
+| `%T` | Request processing time in seconds. |
+| `%I` | Thread name that processed the request. |
+| `%{name}i` | Value of request header `name`. |
+| `%{name}o` | Value of response header `name`. |
+| `%{name}c` | Value of cookie `name`. |
+| `%{name}r` | Value of request attribute `name`. |
+| `%queryString` | Query string with leading `?`, or empty when none. |
+| `%requestContent` | Request body. Empty unless TeeFilter is enabled (Tomcat only). |
+| `%responseContent` | Response body. Empty unless TeeFilter is enabled (Tomcat only). |
 
 ::: tip Alternative Syntax
-For header, cookie, and attribute patterns, both `%{name}i` and `%i{name}` forms are supported. The examples in this documentation use the `%i{name}` form.
+For header, response header, cookie, and attribute conversion words, both the `%{name}i` and `%i{name}` forms are accepted. This documentation uses the `%{name}i` form throughout.
 :::
 
 ## Combined Log Format
 
-For a more detailed output similar to Apache's Combined Log Format:
+For Apache's Combined Log Format, append the `Referer` and `User-Agent` headers:
 
 ```xml
-<pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}"</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b "%{Referer}i" "%{User-Agent}i"</pattern>
 ```
 
-## Verify Installation
+## Verify the Installation
 
-1. Start your Spring Boot application
-2. Make an HTTP request to any endpoint
-3. Check the console output for access log entries
+1. Start the Spring Boot application.
+2. Issue an HTTP request to any endpoint.
+3. Confirm that an access-log entry appears on the console.
 
 Example output:
 
@@ -116,7 +116,7 @@ Example output:
 
 ## Next Steps
 
-- [Configuration Reference](/guide/configuration) - Learn about all configuration options
-- [Tomcat Integration](/guide/tomcat) - Tomcat-specific settings
-- [Jetty Integration](/guide/jetty) - Jetty-specific settings
-- [Advanced Topics](/guide/advanced) - TeeFilter, URL filtering, and more
+- [Configuration Reference](/guide/configuration) — All application properties and XML configuration options.
+- [Tomcat Integration](/guide/tomcat) — Tomcat-specific behavior and reverse-proxy setup.
+- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations.
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security.

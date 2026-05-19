@@ -1,13 +1,13 @@
 # Advanced Topics
 
-This page covers advanced features and configurations.
+This page covers TeeFilter body capture, URL filtering, JSON output, Spring Security integration, and troubleshooting.
 
 ## TeeFilter
 
-The TeeFilter captures request and response body content for logging.
+TeeFilter is the Logback Access component that buffers request and response bodies so they can be referenced from the `%requestContent` and `%responseContent` pattern variables.
 
 ::: tip Tomcat Servlet Applications Only
-TeeFilter requires a Tomcat-based Servlet web application (Spring MVC). It is not available for Jetty or reactive applications (Spring WebFlux).
+The starter registers TeeFilter only when Tomcat is on the classpath and the application is Servlet-based (Spring MVC). It is not available on Jetty or on reactive applications (Spring WebFlux).
 :::
 
 ### Enable TeeFilter
@@ -25,15 +25,15 @@ logback:
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `enabled` | Enable or disable body capture | `false` |
-| `include-hosts` | Comma-separated list of hosts to include | all hosts |
-| `exclude-hosts` | Comma-separated list of hosts to exclude | none |
-| `max-payload-size` | Maximum payload size (bytes) to log before suppression | `65536` |
-| `allowed-content-types` | Content-Type patterns allowed for body capture (override mode) | see below |
+| `enabled` | Enable or disable body capture. | `false` |
+| `include-hosts` | Comma-separated host names that activate the filter. | All hosts |
+| `exclude-hosts` | Comma-separated host names that bypass the filter. | None |
+| `max-payload-size` | Maximum payload size in bytes that appears in log output. Larger bodies are replaced with a sentinel. | `65536` |
+| `allowed-content-types` | Content-Type patterns allowed for body capture. When set, this list completely replaces the built-in defaults. | See below |
 
 ### Accessing Body Content
 
-Use the `%requestContent` and `%responseContent` patterns:
+Reference the captured bodies with the `%requestContent` and `%responseContent` pattern variables:
 
 ```xml
 <pattern>%h "%r" %s %requestContent %responseContent</pattern>
@@ -41,7 +41,7 @@ Use the `%requestContent` and `%responseContent` patterns:
 
 ### Body Capture Policy
 
-Body content is evaluated against a capture policy before being included in log output. Binary content types and oversized payloads are automatically suppressed and replaced with sentinel values.
+Before captured bytes reach the log output, the starter evaluates a capture policy against the response's `Content-Type` and payload size. Binary content and oversized payloads are replaced with a sentinel.
 
 **Default allowed content types:**
 
@@ -74,35 +74,35 @@ logback:
         - "application/pdf"
 ```
 
-When `allowed-content-types` is specified, it completely replaces the defaults (override mode).
+Supplying `allowed-content-types` completely replaces the built-in list (override mode). Add every type that should be captured.
 
 ::: warning
-The `max-payload-size` setting only controls whether captured content appears in log output. TeeFilter still buffers the full body in memory regardless of this limit. Use host filtering to limit capture scope in production.
+`max-payload-size` controls only what reaches the log output. TeeFilter still buffers the full request and response bodies in memory regardless of this value. Restrict the capture scope with `include-hosts` / `exclude-hosts` in production.
 :::
 
 ::: info
-When `tee-filter.enabled` is `false` (the default), `%requestContent` and `%responseContent` produce empty output. This includes form data (`application/x-www-form-urlencoded`) that would otherwise be reconstructed from request parameters. Body capture is completely disabled unless TeeFilter is explicitly enabled.
+When `tee-filter.enabled` is `false` (the default), `%requestContent` and `%responseContent` always render as empty. This also suppresses the form-data reconstruction path for `application/x-www-form-urlencoded` requests, so credentials submitted as form fields never leak into the access log unless TeeFilter is explicitly enabled.
 :::
 
 ### Character Encoding
 
-Body content captured by TeeFilter is converted from bytes to text using the character encoding specified in the request or response `Content-Type` header. When no encoding is specified or the encoding is unsupported, UTF-8 is used as the fallback.
+The starter decodes captured bytes using the charset declared in the `Content-Type` header. When the header omits a charset or specifies an unsupported one, the starter falls back to UTF-8.
 
-This means non-ASCII content (such as Shift_JIS or ISO-8859-1) is decoded correctly when the appropriate `Content-Type` charset is set by the client or server.
+Non-ASCII payloads (for example Shift_JIS or ISO-8859-1) decode correctly as long as the client or server sets the matching `charset` parameter on `Content-Type`.
 
 ### Performance Considerations
 
 ::: warning
-Body capture increases memory usage and may impact performance. Use host filtering to limit capture to specific environments.
+Body capture buffers each request and response in memory. Limit the capture scope with `include-hosts` / `exclude-hosts` so the cost is bounded to the environments that truly need it.
 :::
 
 ## URL Filtering
 
-Control which URLs are logged using include and exclude patterns.
+Choose which request URIs are logged using include and exclude patterns. Both lists accept Java regular expressions.
 
 ### Exclude Patterns
 
-Exclude health check and actuator endpoints:
+Drop health checks and the actuator from access logs:
 
 ```yaml
 logback:
@@ -129,13 +129,13 @@ logback:
 
 ### Pattern Evaluation Order
 
-1. If include patterns are defined, the URL must match at least one
-2. If exclude patterns are defined, matching URLs are excluded
-3. Exclude takes precedence when both match
+1. When `include-url-patterns` is defined, the request URI must match at least one entry; otherwise the URI is dropped.
+2. When `exclude-url-patterns` is defined, a matching URI is dropped.
+3. If both lists are defined, exclude takes precedence — a URI is logged only when it matches an include pattern and matches no exclude pattern.
 
 ### Pattern Matching Behavior
 
-Patterns use Java regular expressions with **partial matching**. A pattern matches if it is found anywhere within the request URI. Use anchors (`^`, `$`) for exact matching.
+Patterns use Java regular expressions with **partial matching**: a pattern matches if it is found anywhere in the request URI. Anchor with `^` and `$` for an exact match.
 
 | Pattern | Matches | Does NOT Match |
 |---------|---------|----------------|
@@ -151,11 +151,11 @@ To match an exact path, use anchored patterns. For example, `^/actuator/health$`
 
 ## JSON Logging
 
-Output access logs in JSON format for log aggregation systems.
+Emit access logs as JSON for downstream log-aggregation systems (Logstash, OpenSearch, etc.).
 
-### Using Logstash Encoder
+### Using the Logstash Encoder
 
-Add the dependency:
+Add `logstash-logback-encoder` as a dependency:
 
 ::: code-group
 
@@ -218,24 +218,24 @@ Add custom fields to JSON output:
 
 ## Spring Security Integration
 
-The starter captures authenticated usernames automatically when Spring Security is on the classpath.
+When Spring Security is on the classpath, the starter resolves the authenticated username from `SecurityContextHolder` and writes it to the `%u` log variable.
 
 ::: tip Servlet Applications Only
-Automatic username capture requires a Servlet-based web application (Spring MVC). For reactive applications (Spring WebFlux), access logging still works but the `%u` variable will show `-`.
+Username capture requires a Servlet-based web application (Spring MVC). On reactive applications (Spring WebFlux), access logging still operates but `%u` always renders as `-`.
 :::
 
 ### How It Works
 
-The starter checks the `SecurityContextHolder` for the authenticated principal:
+The starter registers an internal Servlet filter that runs after the Spring Security filter chain:
 
-1. Authenticated requests: The starter captures the username in `%u`
-2. Anonymous requests: The `%u` variable shows `-`
+1. Authenticated request: the filter writes `Authentication.getName()` to a request attribute, and the access event sources copy it into the `%u` variable.
+2. Anonymous request: no attribute is written and `%u` renders as `-`.
 
-Anonymous authentication tokens (such as `AnonymousAuthenticationToken`) are excluded using an `AuthenticationTrustResolver`. Only genuinely authenticated users appear in the access log.
+The filter consults an `AuthenticationTrustResolver` to distinguish anonymous tokens (such as `AnonymousAuthenticationToken`) from genuinely authenticated requests, so only authenticated users appear in the access log.
 
 ### Customizing Trust Resolution
 
-The starter provides a default `AuthenticationTrustResolver` bean (`AuthenticationTrustResolverImpl`). You can override it by defining your own bean:
+The starter registers a default `AuthenticationTrustResolverImpl` bean when no other bean of type `AuthenticationTrustResolver` is present. Override it by declaring a bean of the same type:
 
 ```java
 @Bean
@@ -243,10 +243,6 @@ public AuthenticationTrustResolver authenticationTrustResolver() {
     return new MyCustomTrustResolver();
 }
 ```
-
-### Custom Principal Extraction
-
-The starter uses `SecurityContextHolder.getContext().getAuthentication().getName()` by default.
 
 ## Multiple Appenders
 
@@ -282,36 +278,35 @@ Send logs to multiple destinations:
 
 ## Performance Tips
 
-For optimal access logging performance:
-
-1. Use `RollingFileAppender` with size limits for production file logging
-2. Enable [URL filtering](#url-filtering) to reduce log volume
-3. For JSON logging, [logstash-logback-encoder](https://github.com/logfellow/logstash-logback-encoder) provides its own async capabilities
-4. Disable TeeFilter when body capture is not needed
+- Use `RollingFileAppender` with size and history limits for production file logging.
+- Enable [URL filtering](#url-filtering) to drop high-volume, low-value endpoints (health checks, metrics).
+- When JSON output is required, `logstash-logback-encoder` provides its own asynchronous appenders.
+- Leave TeeFilter disabled unless body content is actually needed in the log.
 
 ## Troubleshooting
 
 ### Logs Not Appearing
 
-1. Check that `logback.access.enabled` is `true`
-2. Verify the configuration file exists and is valid XML
-3. Check for typos in appender names
+1. Confirm that `logback.access.enabled` is `true`.
+2. Verify the configuration file exists on the classpath and is valid XML.
+3. Check appender names in `<appender-ref>` for typos.
 
 ### Missing Username
 
-1. Ensure Spring Security is on the classpath
-2. Verify the user is actually authenticated
-3. Check that the `%u` pattern is in your log format
+1. Confirm Spring Security is on the classpath.
+2. Verify the request is authenticated (and not an anonymous token).
+3. Confirm the pattern contains `%u`.
+4. Confirm the application is Servlet-based — reactive applications always render `%u` as `-`.
 
 ### Performance Issues
 
-1. Use async appenders for file logging
-2. Enable URL filtering to reduce log volume
-3. Disable body capture (TeeFilter) if not needed
-4. Use rolling file appenders with size limits
+1. Wrap file appenders with `AsyncAppender` to decouple I/O from request threads.
+2. Restrict the log volume with [URL filtering](#url-filtering).
+3. Disable TeeFilter when body capture is not needed.
+4. Apply size and history limits on `RollingFileAppender`.
 
 ## See Also
 
-- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse proxy configuration
-- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations
-- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration
+- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse-proxy setup.
+- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations.
+- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration.

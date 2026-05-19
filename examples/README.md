@@ -1,39 +1,37 @@
 # Examples
 
-Sample projects demonstrating logback-access-spring-boot-starter features. Each module serves as an integration test to verify library functionality.
+Sample Spring Boot applications that exercise logback-access-spring-boot-starter end to end. Each module serves as an integration test that verifies library functionality against a real embedded server.
 
 ## Project Structure
 
 ```mermaid
 flowchart TB
-    subgraph examples/
+    subgraph ex["examples/"]
         direction TB
-        common[common<br/>Shared code]
-        tomcat-mvc[tomcat-mvc<br/>39 tests]
-        jetty-mvc[jetty-mvc<br/>36 tests]
-        tomcat-webflux[tomcat-webflux<br/>32 tests]
-        jetty-webflux[jetty-webflux<br/>32 tests]
+        common["common (shared test code)"]
+        tm["tomcat-mvc"]
+        jm["jetty-mvc"]
+        tw["tomcat-webflux"]
+        jw["jetty-webflux"]
 
-        common --> tomcat-mvc
-        common --> jetty-mvc
-        common --> tomcat-webflux
-        common --> jetty-webflux
+        common --> tm
+        common --> jm
+        common --> tw
+        common --> jw
     end
 ```
 
-| Module | Server | Framework | Tests | Description |
-|--------|--------|-----------|-------|-------------|
-| `common` | - | - | - | Shared controllers, configs, and test utilities |
-| `tomcat-mvc` | Tomcat | Spring MVC | 39 | Full feature coverage |
-| `jetty-mvc` | Jetty | Spring MVC | 36 | Full feature coverage (TeeFilter not supported) |
-| `tomcat-webflux` | Tomcat | WebFlux | 32 | Reactive endpoint coverage |
-| `jetty-webflux` | Jetty | WebFlux | 32 | Reactive endpoint coverage |
-
-**Total: 135 active tests** (139 total, 4 TeeFilter tests skipped on Jetty)
+| Module | Server | Framework | Description |
+|--------|--------|-----------|-------------|
+| `common` | — | — | Shared controllers, security/router configuration, abstract test base classes, and test utilities. |
+| `tomcat-mvc` | Tomcat | Spring MVC | Full feature coverage, including TeeFilter and Spring Security. |
+| `jetty-mvc` | Jetty | Spring MVC | Full feature coverage except TeeFilter (see [Jetty Limitations](#jetty-limitations)). |
+| `tomcat-webflux` | Tomcat | WebFlux | Reactive endpoint coverage. `%u` always renders as `-`. |
+| `jetty-webflux` | Jetty | WebFlux | Reactive endpoint coverage. `%u` always renders as `-`. |
 
 ## Common Module
 
-The `common` module provides shared code to eliminate duplication across example projects.
+The `common` module hosts the shared production and test code so each example app stays minimal.
 
 ### Shared Application Code
 
@@ -74,10 +72,10 @@ classDiagram
 
 | Package | Class | Description |
 |---------|-------|-------------|
-| `mvc` | `MvcExampleController` | REST controller for MVC examples |
-| `mvc` | `MvcSecurityConfig` | Spring Security configuration |
-| `webflux` | `ReactiveExampleController` | Reactive REST controller |
-| `webflux` | `ReactiveRouterConfig` | RouterFunction configuration |
+| `mvc` | `MvcExampleController` | REST controller used by the Spring MVC examples. |
+| `mvc` | `MvcSecurityConfig` | Spring Security configuration used by the Spring MVC examples. |
+| `webflux` | `ReactiveExampleController` | Reactive REST controller used by the WebFlux examples. |
+| `webflux` | `ReactiveRouterConfig` | `RouterFunction` configuration used by the WebFlux examples. |
 
 ### Abstract Base Test Classes
 
@@ -118,32 +116,32 @@ classDiagram
     ReactiveAccessLogTest --|> AbstractReactiveAccessLogTest
 ```
 
-| Package | Class | Tests | Description |
-|---------|-------|-------|-------------|
-| (root) | `AbstractBasicAccessLogTest` | 7 | HTTP method tests |
-| (root) | `AbstractSecurityTest` | 4 | Spring Security integration |
-| `test.mvc` | `AbstractTeeFilterTest` | 4 | Request/response body capture |
-| `test.mvc` | `AbstractLocalPortStrategyTest` | 2 | Port resolution strategy |
-| `test.common` | `AbstractJsonLoggingTest` | 4 | LogstashAccessEncoder |
-| `test.common` | `AbstractSpringPropertyScopeTest` | 3 | springProperty scope |
-| `test.common` | `AbstractDisabledAccessLogTest` | 2 | Disabled configuration |
-| `test.webflux` | `AbstractReactiveAccessLogTest` | 9 | Reactive endpoint tests |
-| `test.webflux` | `AbstractReactiveLocalPortStrategyTest` | 2 | Port resolution strategy |
-| `test.webflux` | `AbstractRouterFunctionTest` | 2 | RouterFunction tests |
+| Package | Class | Coverage |
+|---------|-------|----------|
+| (root) | `AbstractBasicAccessLogTest` | HTTP method coverage (GET / POST / PUT / DELETE, query string, repeated requests, 404). |
+| (root) | `AbstractSecurityTest` | Authenticated vs anonymous principal handling, 401 response, invalid credentials. |
+| `test.mvc` | `AbstractTeeFilterTest` | Request/response body capture via TeeFilter. |
+| `test.mvc` | `AbstractLocalPortStrategyTest` | `local-port-strategy` resolution on the Servlet stack. |
+| `test.common` | `AbstractJsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `test.common` | `AbstractSpringPropertyScopeTest` | `<springProperty>` `LOCAL` vs `context` scope. |
+| `test.common` | `AbstractDisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
+| `test.webflux` | `AbstractReactiveAccessLogTest` | Reactive endpoint coverage. |
+| `test.webflux` | `AbstractReactiveLocalPortStrategyTest` | `local-port-strategy` resolution on the reactive stack. |
+| `test.webflux` | `AbstractRouterFunctionTest` | Functional routing coverage. |
 
 ### Test Utilities
 
 | Class | Description |
 |-------|-------------|
-| `HttpClientTestUtils` | HTTP client wrapper with Basic auth support |
-| `AccessEventTestUtils` | Access event retrieval with polling |
+| `HttpClientTestUtils` | HTTP client wrapper around `java.net.http.HttpClient` with Basic auth support. |
+| `AccessEventTestUtils` | Retrieves access events from a `ListAppender` with polling-based waits. |
 
 ## Requirements
 
 | Component | Version |
 |-----------|---------|
-| Java | 21+ |
-| Gradle | 8.x |
+| Java | 21 or later |
+| Gradle | Provided by the Gradle Wrapper (no separate installation needed) |
 
 ## Running Tests
 
@@ -172,106 +170,108 @@ classDiagram
 
 | Feature | Tomcat MVC | Jetty MVC | Tomcat WebFlux | Jetty WebFlux |
 |---------|:----------:|:---------:|:--------------:|:-------------:|
-| Basic HTTP Methods | ✓ | ✓ | ✓ | ✓ |
-| Query String | ✓ | ✓ | ✓ | ✓ |
-| Path Variables | ✓ | ✓ | ✓ | ✓ |
-| 404 Response | ✓ | ✓ | ✓ | ✓ |
-| Spring Security | ✓ | ✓ | - | - |
-| TeeFilter | ✓ | ✗ | - | - |
-| LocalPortStrategy | ✓ | ✓ | ✓ | ✓ |
-| URL Filtering | ✓ | ✓ | ✓ | ✓ |
-| JSON Logging | ✓ | ✓ | ✓ | ✓ |
-| Spring Profiles | ✓ | ✓ | ✓ | ✓ |
-| springProperty | ✓ | ✓ | ✓ | ✓ |
-| Disabled Config | ✓ | ✓ | ✓ | ✓ |
-| RouterFunction | - | - | ✓ | ✓ |
-| Delayed Response | - | - | ✓ | ✓ |
+| Basic HTTP methods | ✓ | ✓ | ✓ | ✓ |
+| Query string | ✓ | ✓ | ✓ | ✓ |
+| Path variables | ✓ | ✓ | ✓ | ✓ |
+| 404 response | ✓ | ✓ | ✓ | ✓ |
+| Spring Security `%u` | ✓ | ✓ | — | — |
+| TeeFilter body capture | ✓ | ✗ | — | — |
+| `local-port-strategy` | ✓ | ✓ | ✓ | ✓ |
+| URL filtering | ✓ | ✓ | ✓ | ✓ |
+| JSON logging | ✓ | ✓ | ✓ | ✓ |
+| Spring profiles | ✓ | ✓ | ✓ | ✓ |
+| `<springProperty>` | ✓ | ✓ | ✓ | ✓ |
+| `logback.access.enabled=false` | ✓ | ✓ | ✓ | ✓ |
+| `RouterFunction` | — | — | ✓ | ✓ |
+| Delayed reactive response | — | — | ✓ | ✓ |
 
-**Legend**: ✓ = Supported | ✗ = Not supported | - = Not applicable
+**Legend**: ✓ = supported / ✗ = not supported / — = not applicable
 
 ## Jetty Limitations
 
 ### TeeFilter
 
-TeeFilter is not supported on Jetty 12. The architectural reason:
+TeeFilter is not supported on Jetty 12. The Jetty 12 `RequestLog` API operates at the core server level, below the Servlet container; TeeFilter writes its captured buffers (`LB_INPUT_BUFFER` / `LB_OUTPUT_BUFFER`) as Servlet request attributes, which the `RequestLog` cannot read.
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Jetty Core
-    participant Servlet API
-    participant RequestLog
-    participant TeeFilter
+    participant Core as Jetty core
+    participant Servlet as Servlet API
+    participant Tee as TeeFilter
+    participant RL as RequestLog
 
-    Client->>Jetty Core: HTTP Request
-    Jetty Core->>Servlet API: Wrap as ServletRequest
-    Servlet API->>TeeFilter: Filter chain
-    TeeFilter->>TeeFilter: Set LB_INPUT_BUFFER attribute
-    TeeFilter-->>Client: Response
-    TeeFilter->>TeeFilter: Set LB_OUTPUT_BUFFER attribute
+    Client->>Core: HTTP request
+    Core->>Servlet: Wrap as ServletRequest
+    Servlet->>Tee: Run filter chain
+    Tee->>Tee: Write LB_INPUT_BUFFER attribute
+    Tee-->>Client: Response
+    Tee->>Tee: Write LB_OUTPUT_BUFFER attribute
 
-    Note over Jetty Core,RequestLog: RequestLog operates at Core level
-    Jetty Core->>RequestLog: log(Request, Response)
-    RequestLog->>RequestLog: Cannot access Servlet attributes
+    Note over Core,RL: RequestLog runs at the core layer
+    Core->>RL: log(Request, Response)
+    RL->>RL: Cannot read Servlet attributes
 ```
 
-The Jetty 12 RequestLog API operates at the core server level, separate from the Servlet API. TeeFilter sets `LB_INPUT_BUFFER`/`LB_OUTPUT_BUFFER` attributes on the Servlet request, but these attributes are not visible to the RequestLog.
+The `JettyTeeFilterTest` class in `jetty-mvc` is annotated `@Disabled` to make this limitation explicit.
 
 ## Test Classes by Module
 
-### Tomcat MVC (39 tests)
+Each example app composes the abstract base classes from `common` to cover the feature matrix on its server. Test counts are not listed here because they evolve frequently; run `./gradlew :examples:<module>:test --info` to see the executed tests for a given module.
 
-| Test Class | Tests | Description |
-|------------|-------|-------------|
-| `BasicAccessLogTest` | 9 | Access log emission + path variable |
-| `SecurityIntegrationTest` | 5 | Spring Security integration |
-| `TeeFilterTest` | 4 | Request/response body capture |
-| `LocalPortStrategyTest` | 2 | Port resolution strategy |
-| `UrlFilteringTest` | 6 | URL pattern filtering |
-| `JsonLoggingTest` | 4 | JSON logging |
-| `SpringProfileTest` | 4 | Profile-specific appenders |
-| `SpringPropertyScopeTest` | 3 | springProperty scope |
-| `DisabledAccessLogTest` | 2 | Disabled state |
+### Tomcat MVC
 
-### Jetty MVC (36 tests, 4 skipped)
+| Test Class | Coverage |
+|------------|----------|
+| `BasicAccessLogTest` | Access log emission for the standard HTTP methods. |
+| `SecurityIntegrationTest` | Spring Security `%u` capture. |
+| `TeeFilterTest` | Request/response body capture via TeeFilter. |
+| `LocalPortStrategyTest` | `local-port-strategy` resolution. |
+| `UrlFilteringTest` | URL pattern filtering. |
+| `JsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `SpringProfileTest` | Profile-specific appenders. |
+| `SpringPropertyScopeTest` | `<springProperty>` scopes. |
+| `DisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
 
-| Test Class | Tests | Description |
-|------------|-------|-------------|
-| `JettyBasicAccessLogTest` | 7 | Access log emission |
-| `JettySecurityTest` | 4 | Spring Security integration |
-| `JettyTeeFilterTest` | 4 (skipped) | Disabled - TeeFilter not supported |
-| `JettyLocalPortStrategyTest` | 2 | Port resolution strategy |
-| `JettyUrlFilteringTest` | 6 | URL pattern filtering |
-| `JettyJsonLoggingTest` | 4 | JSON logging |
-| `JettySpringProfileTest` | 4 | Profile-specific appenders |
-| `JettySpringPropertyScopeTest` | 3 | springProperty scope |
-| `JettyDisabledAccessLogTest` | 2 | Disabled state |
+### Jetty MVC
 
-### Tomcat WebFlux (32 tests)
+| Test Class | Coverage |
+|------------|----------|
+| `JettyBasicAccessLogTest` | Access log emission for the standard HTTP methods. |
+| `JettySecurityTest` | Spring Security `%u` capture. |
+| `JettyTeeFilterTest` | `@Disabled` — TeeFilter is not supported on Jetty 12 (see [Jetty Limitations](#jetty-limitations)). |
+| `JettyLocalPortStrategyTest` | `local-port-strategy` resolution. |
+| `JettyUrlFilteringTest` | URL pattern filtering. |
+| `JettyJsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `JettySpringProfileTest` | Profile-specific appenders. |
+| `JettySpringPropertyScopeTest` | `<springProperty>` scopes. |
+| `JettyDisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
 
-| Test Class | Tests | Description |
-|------------|-------|-------------|
-| `ReactiveAccessLogTest` | 9 | Reactive endpoint logging |
-| `RouterFunctionTest` | 2 | RouterFunction logging |
-| `UrlFilteringTest` | 6 | URL pattern filtering |
-| `LocalPortStrategyTest` | 2 | Port resolution strategy |
-| `JsonLoggingTest` | 4 | JSON logging |
-| `SpringProfileTest` | 4 | Profile-specific appenders |
-| `SpringPropertyScopeTest` | 3 | springProperty scope |
-| `DisabledAccessLogTest` | 2 | Disabled state |
+### Tomcat WebFlux
 
-### Jetty WebFlux (32 tests)
+| Test Class | Coverage |
+|------------|----------|
+| `ReactiveAccessLogTest` | Reactive endpoint access log emission. |
+| `RouterFunctionTest` | `RouterFunction` route coverage. |
+| `UrlFilteringTest` | URL pattern filtering. |
+| `LocalPortStrategyTest` | `local-port-strategy` resolution. |
+| `JsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `SpringProfileTest` | Profile-specific appenders. |
+| `SpringPropertyScopeTest` | `<springProperty>` scopes. |
+| `DisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
 
-| Test Class | Tests | Description |
-|------------|-------|-------------|
-| `ReactiveAccessLogTest` | 9 | Reactive endpoint logging |
-| `RouterFunctionTest` | 2 | RouterFunction logging |
-| `UrlFilteringTest` | 6 | URL pattern filtering |
-| `LocalPortStrategyTest` | 2 | Port resolution strategy |
-| `JsonLoggingTest` | 4 | JSON logging |
-| `SpringProfileTest` | 4 | Profile-specific appenders |
-| `SpringPropertyScopeTest` | 3 | springProperty scope |
-| `DisabledAccessLogTest` | 2 | Disabled state |
+### Jetty WebFlux
+
+| Test Class | Coverage |
+|------------|----------|
+| `ReactiveAccessLogTest` | Reactive endpoint access log emission. |
+| `RouterFunctionTest` | `RouterFunction` route coverage. |
+| `UrlFilteringTest` | URL pattern filtering. |
+| `LocalPortStrategyTest` | `local-port-strategy` resolution. |
+| `JsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `SpringProfileTest` | Profile-specific appenders. |
+| `SpringPropertyScopeTest` | `<springProperty>` scopes. |
+| `DisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
 
 ## Log Output Examples
 
@@ -323,10 +323,10 @@ Common Log Format (CLF) pattern in `logback-access.xml`:
 
 ### Extended Pattern
 
-For detailed logging with processing time:
+For detailed logging that includes referer, user agent, and processing time:
 
 ```xml
-<pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+<pattern>%h %l %u [%t] "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D</pattern>
 ```
 
 Output:
@@ -341,20 +341,20 @@ Output:
 
 | File | Purpose |
 |------|---------|
-| `application.yml` | Base configuration |
-| `application-teefilter.yml` | TeeFilter enablement |
-| `application-dev.yml` | Dev profile settings |
-| `application-prod.yml` | Prod profile settings |
+| `application.yml` | Base configuration. |
+| `application-teefilter.yml` | Enables TeeFilter for the relevant tests. |
+| `application-dev.yml` | Settings activated by the `dev` profile. |
+| `application-prod.yml` | Settings activated by the `prod` profile. |
 
-### Logback-access Configuration
+### Logback Access Configuration
 
 | File | Purpose |
 |------|---------|
-| `logback-access.xml` | Production (console appender) |
-| `logback-access-test.xml` | Testing (list appender) |
-| `logback-access-spring-profile.xml` | Profile-specific configuration |
-| `logback-access-spring-property.xml` | springProperty testing |
-| `logback-access-json.xml` | JSON logging with LogstashAccessEncoder |
+| `logback-access.xml` | Production-style configuration with the console appender. |
+| `logback-access-test.xml` | Test configuration using a `ListAppender` for assertions. |
+| `logback-access-spring-profile.xml` | Profile-specific configuration with `<springProfile>`. |
+| `logback-access-spring-property.xml` | Verifies `<springProperty>` resolution. |
+| `logback-access-json.xml` | JSON output via `LogstashAccessEncoder`. |
 
 ## Test Utilities
 
@@ -394,9 +394,9 @@ var events = AccessEventTestUtils.awaitEvents(appender, 1, 10000L);
 
 ## Configuration Properties
 
-### enabled=false
+### Disabling access logging
 
-Setting `logback.access.enabled=false` disables auto-configuration:
+Setting `logback.access.enabled=false` skips the auto-configuration entirely; no `logbackAccessContext` bean is registered:
 
 ```java
 @SpringBootTest(properties = "logback.access.enabled=false")
@@ -408,48 +408,46 @@ class DisabledAccessLogTest {
 }
 ```
 
-### localPortStrategy
-
-Port resolution strategy:
+### `local-port-strategy`
 
 | Value | Description |
 |-------|-------------|
-| `SERVER` (default) | Retrieves port from Host header or X-Forwarded-Port |
-| `LOCAL` | Retrieves actual connection port |
+| `server` (default) | The port the client addressed. With `RemoteIpValve` and `request-attributes-enabled`, this honors `X-Forwarded-Port`. |
+| `local` | The port of the local interface that accepted the connection. |
 
 ```yaml
 logback:
   access:
-    local-port-strategy: LOCAL
+    local-port-strategy: local
 ```
 
-### springProperty scope
+### `<springProperty>` scope
 
-The `scope="context"` attribute makes values accessible programmatically:
+The default `LOCAL` scope only resolves values during XML parsing for variable substitution. To read the value programmatically via `context.getProperty()`, set `scope="context"`:
 
 ```xml
 <springProperty name="appName" source="spring.application.name"
                 defaultValue="default" scope="context"/>
 ```
 
-Values are accessible via `context.getProperty("appName")`.
+The value is then accessible via `context.getProperty("appName")`.
 
 ## Troubleshooting
 
-### Events Not Emitted
+### Access events are not emitted
 
-1. Verify `logback.access.enabled=true`
-2. Verify `logback-access-test.xml` exists on classpath
-3. Verify ListAppender is correctly configured
+1. Confirm `logback.access.enabled=true` (the default).
+2. Confirm `logback-access-test.xml` is on the classpath in test scope.
+3. Confirm the `ListAppender` is referenced by `<appender-ref>` in the configuration.
 
-### TeeFilter Not Capturing Body
+### TeeFilter does not capture the body
 
-1. Verify `logback.access.tee-filter.enabled=true`
-2. Verify Content-Type is appropriate (binary content excluded)
-3. **Jetty users**: TeeFilter is not supported on Jetty 12
+1. Confirm `logback.access.tee-filter.enabled=true`.
+2. Confirm the `Content-Type` is in the allowed list (binary content is suppressed).
+3. On Jetty 12, TeeFilter is not supported — switch to Tomcat or remove the assertion.
 
-### Security Username Not Logged
+### Spring Security username is not logged
 
-1. Verify Spring Security is enabled
-2. Verify request is authenticated
-3. Verify SecurityFilter is correctly registered
+1. Confirm Spring Security is on the classpath.
+2. Confirm the request is authenticated (and not represented by an anonymous token).
+3. Confirm the application is Servlet-based — reactive applications always render `%u` as `-`.

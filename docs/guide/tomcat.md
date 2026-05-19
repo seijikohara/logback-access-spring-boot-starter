@@ -1,10 +1,10 @@
 # Tomcat Integration
 
-This page describes Tomcat-specific configuration options and behavior.
+This page describes Tomcat-specific configuration and behavior.
 
 ## How It Works
 
-When using Tomcat as the embedded server, the starter registers a `TomcatValve` that intercepts all HTTP requests and responses.
+When Tomcat is the embedded server, the starter registers an Engine-level `Valve` that implements `AccessLog`. Tomcat invokes the valve after each request completes, and the starter emits the access event through the configured appenders.
 
 ```mermaid
 flowchart LR
@@ -22,37 +22,41 @@ flowchart LR
 logback:
   access:
     tomcat:
-      # Auto-detected from RemoteIpValve when not set
+      # Auto-detected from the presence of RemoteIpValve when not set
       request-attributes-enabled: true
 ```
 
+| Property | Default | Description |
+|----------|---------|-------------|
+| `logback.access.tomcat.request-attributes-enabled` | Auto-detected | Honor `RemoteIpValve` access-log attributes. When unset, the starter enables this automatically if a `RemoteIpValve` is present in the pipeline. |
+
 ### Request Attributes
 
-When `request-attributes-enabled` is `true`, the following Tomcat request attributes are available:
+When `request-attributes-enabled` is `true`, the starter consults the following Tomcat access-log attributes (typically set by `RemoteIpValve`) instead of the raw connection values, so the access log reflects the client side of a reverse proxy:
 
-| Attribute | Description |
-|-----------|-------------|
-| `org.apache.catalina.AccessLog.RemoteAddr` | Client IP address |
-| `org.apache.catalina.AccessLog.RemoteHost` | Client hostname |
-| `org.apache.catalina.AccessLog.Protocol` | HTTP protocol version |
-| `org.apache.catalina.AccessLog.ServerName` | Server name |
-| `org.apache.catalina.AccessLog.ServerPort` | Server port |
+| Attribute | Affects | Description |
+|-----------|---------|-------------|
+| `org.apache.catalina.AccessLog.RemoteAddr` | `%h`, `%a` | Forwarded client IP address. |
+| `org.apache.catalina.AccessLog.RemoteHost` | `%h` (when present) | Forwarded client hostname. |
+| `org.apache.catalina.AccessLog.Protocol` | `%H`, `%r` | Forwarded protocol (e.g., `https`). |
+| `org.apache.catalina.AccessLog.ServerName` | Server name | Forwarded server name from the `Host` header. |
+| `org.apache.catalina.AccessLog.ServerPort` | `%p` (under `server` strategy) | Forwarded server port. |
 
-These attributes are useful when behind a reverse proxy.
+When `request-attributes-enabled` is unset, the starter auto-enables it if a `RemoteIpValve` is detected in the Tomcat pipeline.
 
 ## Pattern Variables
 
-For standard pattern variables, see [Getting Started — Pattern Variables](/guide/getting-started#pattern-variables).
+For the full pattern variable reference, see [Getting Started — Pattern Variables](/guide/getting-started#pattern-variables).
 
-In addition to the standard variables, Tomcat supports all request attributes set by `RemoteIpValve` (e.g., `%{org.apache.catalina.AccessLog.RemoteAddr}r`). When `request-attributes-enabled` is `true`, these attributes reflect the real client information from behind a reverse proxy.
+Arbitrary request attributes can also be read with the generic `%{name}r` converter (for example, `%{org.apache.catalina.AccessLog.RemoteAddr}r`). The five attributes listed above are additionally consulted internally to derive the standard variables.
 
 ## Elapsed Time
 
-The `%D` and `%T` pattern variables report the request processing time. When Tomcat provides this value directly (via the `AccessLog.log(request, response, time)` contract in nanoseconds), the starter converts it to milliseconds. If the value is not available, the starter computes it from the request start time.
+The `%D` and `%T` pattern variables report the request processing time. Tomcat's `AccessLog.log(request, response, time)` contract delivers the value in nanoseconds; the starter converts it to milliseconds before storing. If Tomcat does not supply a value, the starter falls back to `System.currentTimeMillis() - request.coyoteRequest.startTime`.
 
 ## Behind a Reverse Proxy
 
-When running behind a proxy (nginx, Apache, load balancer), configure the `RemoteIpValve` to get the real client IP:
+When the application sits behind a proxy (nginx, Apache, a load balancer), enable Spring Boot's `RemoteIpValve` so that `%h` and related variables reflect the original client:
 
 ```yaml
 server:
@@ -62,11 +66,11 @@ server:
       protocol-header: X-Forwarded-Proto
 ```
 
-The access log will then show the real client IP instead of the proxy's IP.
+The starter auto-detects the valve and starts honoring its access-log attributes. The access log then reports the forwarded client address instead of the proxy's address.
 
 ## Local Port Strategy
 
-Control which port is logged:
+Choose which port the `%p` variable reports:
 
 ```yaml
 logback:
@@ -74,26 +78,27 @@ logback:
     local-port-strategy: server  # or 'local'
 ```
 
-- `server`: Use the server port (e.g., 8080)
-- `local`: Use the local connection port
+- `server`: the port the client addressed. With `RemoteIpValve` and `request-attributes-enabled`, this honors `X-Forwarded-Port`.
+- `local`: the port of the local interface that accepted the connection.
 
 ## Spring Security Integration
 
-The starter captures authenticated usernames automatically when Spring Security is on the classpath (Servlet applications only):
+When Spring Security is on the classpath (Servlet only), the starter writes the authenticated username to `%u`:
 
 ```xml
 <pattern>%h %l %u [%t] "%r" %s %b</pattern>
 ```
 
-The `%u` variable will show:
-- The authenticated username for authenticated requests
-- `-` for anonymous requests
+The `%u` variable renders as:
 
-> **Note**: This applies to Servlet-based applications (Spring MVC). For reactive applications (Spring WebFlux on Tomcat), `%u` shows `-`.
+- the authenticated username, or
+- `-` for anonymous requests.
+
+See [Advanced Topics — Spring Security Integration](/guide/advanced#spring-security-integration) for details. On reactive applications (Spring WebFlux on Tomcat), `%u` always renders as `-`.
 
 ## Example Configuration
 
-Complete example for a production Tomcat setup:
+A production-style configuration that writes to a rolling file with the application name prefixed and excludes high-frequency operational endpoints:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -108,7 +113,7 @@ Complete example for a production Tomcat setup:
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D</pattern>
+            <pattern>%h %l %u [%t] "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D</pattern>
         </encoder>
     </appender>
 
@@ -132,5 +137,5 @@ logback:
 
 ## See Also
 
-- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration
-- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security
+- [Configuration Reference](/guide/configuration) — Full property reference and XML configuration.
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security.

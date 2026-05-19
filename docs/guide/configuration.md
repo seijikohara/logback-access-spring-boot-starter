@@ -1,10 +1,10 @@
 # Configuration
 
-This page describes all available configuration options for logback-access-spring-boot-starter.
+This page lists every configuration option for logback-access-spring-boot-starter.
 
 ## Application Properties
 
-Configure the starter using Spring Boot properties in `application.yml` or `application.properties`:
+Configure the starter from `application.yml` or `application.properties`:
 
 ```yaml
 logback:
@@ -34,29 +34,29 @@ logback:
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `logback.access.enabled` | `true` | Enable or disable access logging |
-| `logback.access.config-location` | Auto-detected | Path to logback-access configuration file. Supports `classpath:` and `file:` URL prefixes |
-| `logback.access.local-port-strategy` | `server` | Port resolution strategy: `server` or `local` |
-| `logback.access.tomcat.request-attributes-enabled` | `Auto-detected` | Enable Tomcat request attributes. Auto-detected from RemoteIpValve when not set |
-| `logback.access.tee-filter.enabled` | `false` | Enable request/response body capture |
-| `logback.access.tee-filter.include-hosts` | `null` (all hosts) | Comma-separated list of hosts to include |
-| `logback.access.tee-filter.exclude-hosts` | `null` (none) | Comma-separated list of hosts to exclude |
-| `logback.access.tee-filter.max-payload-size` | `65536` | Maximum payload size (bytes) to log before suppression |
-| `logback.access.tee-filter.allowed-content-types` | `null` | Content-Type patterns allowed for body capture (override mode) |
-| `logback.access.filter.include-url-patterns` | `null` | URL patterns to include (regex) |
-| `logback.access.filter.exclude-url-patterns` | `null` | URL patterns to exclude (regex) |
+| `logback.access.enabled` | `true` | Enable or disable access logging. |
+| `logback.access.config-location` | Auto-detected | Path to the logback-access configuration file. Supports `classpath:` and `file:` URL prefixes. |
+| `logback.access.local-port-strategy` | `server` | Port to report in access logs: `server` (the port the client addressed; honors `X-Forwarded-Port` via `RemoteIpValve`) or `local` (the port of the local interface that accepted the connection). |
+| `logback.access.tomcat.request-attributes-enabled` | Auto-detected | Honor `RemoteIpValve` access-log attributes. When unset, the starter enables this automatically if a `RemoteIpValve` is present in the pipeline. |
+| `logback.access.tee-filter.enabled` | `false` | Enable request/response body capture (Tomcat servlet only). |
+| `logback.access.tee-filter.include-hosts` | `null` (all hosts) | Comma-separated host names to include. |
+| `logback.access.tee-filter.exclude-hosts` | `null` (none) | Comma-separated host names to exclude. |
+| `logback.access.tee-filter.max-payload-size` | `65536` | Maximum payload size in bytes that appears in log output. Larger bodies are replaced with a sentinel. |
+| `logback.access.tee-filter.allowed-content-types` | `null` | Content-Type patterns allowed for body capture. When set, completely replaces the built-in defaults (override mode). |
+| `logback.access.filter.include-url-patterns` | `null` (all URLs) | Java regex patterns; the request URI must match at least one to be logged. Patterns use partial matching — use `^...$` for exact match. |
+| `logback.access.filter.exclude-url-patterns` | `null` (none) | Java regex patterns; matching request URIs are dropped. Exclude takes precedence over include. |
 
 ## Configuration File Resolution
 
-When `logback.access.config-location` is set, that path is used directly (no fallback). If the specified file does not exist, the application will fail to start with an error.
+When `logback.access.config-location` is set, the starter loads that path directly and skips every fallback. If the file does not exist, the application fails to start.
 
-When not set, the starter searches in the following order:
+When the property is unset, the starter searches the classpath in this order and uses the first existing resource:
 
-1. `classpath:logback-access-test.xml` (for testing)
-2. `classpath:logback-access.xml`
-3. `classpath:logback-access-test-spring.xml` (for testing with Spring features)
-4. `classpath:logback-access-spring.xml`
-5. Built-in fallback configuration
+1. `classpath:logback-access-test.xml` — picked up by tests only.
+2. `classpath:logback-access.xml` — the primary configuration file.
+3. `classpath:logback-access-test-spring.xml` — test variant with `<springProfile>` / `<springProperty>` support.
+4. `classpath:logback-access-spring.xml` — production variant with `<springProfile>` / `<springProperty>` support.
+5. A built-in fallback bundled with the starter, which logs requests in the `common` format to the console.
 
 ## XML Configuration
 
@@ -79,7 +79,7 @@ When not set, the starter searches in the following order:
 
 ### Using Spring Properties
 
-Inject Spring properties into your configuration:
+Inject values from the Spring `Environment` with `<springProperty>` — the configuration file must be named `logback-access-spring.xml` (or `-test-spring.xml`) for the extension to be applied:
 
 ```xml
 <configuration>
@@ -96,12 +96,12 @@ Inject Spring properties into your configuration:
 ```
 
 ::: warning Default Scope
-The default scope for `<springProperty>` is `LOCAL`. Properties with LOCAL scope are only available during XML configuration processing for variable substitution (e.g., `${varName}`). To access properties programmatically via `context.getProperty()`, set `scope="context"`.
+`<springProperty>` defaults to `LOCAL` scope. `LOCAL` properties are only resolved during XML parsing for variable substitution (`${varName}`). To read the value programmatically via `context.getProperty()`, set `scope="context"`.
 :::
 
 ### Using Spring Profiles
 
-Configure different appenders for different environments:
+Activate different appenders per environment with `<springProfile>`:
 
 ```xml
 <configuration>
@@ -132,15 +132,15 @@ Configure different appenders for different environments:
 
 ### Profile Expressions
 
-Spring profile expressions support negation and multiple profiles:
+`<springProfile>` supports negation and a comma-separated list of profiles:
 
 ```xml
-<!-- Active when NOT in production -->
+<!-- Active when "prod" is NOT active -->
 <springProfile name="!prod">
     ...
 </springProfile>
 
-<!-- Active in dev OR staging -->
+<!-- Active when either "dev" or "staging" is active -->
 <springProfile name="dev, staging">
     ...
 </springProfile>
@@ -180,7 +180,7 @@ Rotate logs based on time or size:
 
 ## Disabling Access Logging
 
-Set the property to disable access logging:
+Disable the starter globally:
 
 ```yaml
 logback:
@@ -188,7 +188,7 @@ logback:
     enabled: false
 ```
 
-Or use a Spring profile:
+Or disable it only for a specific profile by combining `logback.access.enabled` with `spring.config.activate.on-profile`:
 
 ```yaml
 spring:
@@ -208,6 +208,6 @@ logback:
 
 ## See Also
 
-- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse proxy configuration
-- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations
-- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security
+- [Tomcat Integration](/guide/tomcat) — Tomcat-specific properties and reverse-proxy setup.
+- [Jetty Integration](/guide/jetty) — Jetty-specific behavior and known limitations.
+- [Advanced Topics](/guide/advanced) — TeeFilter, URL filtering, JSON logging, and Spring Security.
