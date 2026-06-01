@@ -60,7 +60,7 @@ class AccessJoranConfiguratorSpec :
                 context.getProperty("myProp") shouldBe "fallback"
             }
 
-            test("uses empty string when property not found and no defaultValue") {
+            test("leaves the property undefined when not found and no defaultValue") {
                 val environment = MockEnvironment()
                 val context = AccessContext()
                 val configurator = AccessJoranConfigurator(environment)
@@ -78,7 +78,7 @@ class AccessJoranConfiguratorSpec :
 
                 configurator.doConfigure(ByteArrayInputStream(xml.toByteArray()))
 
-                context.getProperty("myProp") shouldBe ""
+                context.getProperty("myProp").shouldBeNull()
             }
         }
 
