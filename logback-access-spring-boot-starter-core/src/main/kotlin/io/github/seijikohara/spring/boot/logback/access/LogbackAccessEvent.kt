@@ -56,9 +56,9 @@ public class LogbackAccessEvent
 
         override fun getLocalPort(): Int = data.localPort
 
-        override fun getRemoteAddr(): String = data.remoteAddr
+        override fun getRemoteAddr(): String = data.remoteAddr ?: NA
 
-        override fun getRemoteHost(): String = data.remoteHost
+        override fun getRemoteHost(): String = data.remoteHost ?: NA
 
         override fun getRemoteUser(): String = data.remoteUser ?: NA
 
@@ -78,6 +78,9 @@ public class LogbackAccessEvent
 
         override fun getRequestHeader(key: String): String = data.requestHeaderMap[key] ?: NA
 
+        // getCookies() (plural) is intentionally not overridden: IAccessEvent's default returns an
+        // empty list. The built-in %requestCookie{name} converter uses getCookie(key), which is
+        // backed by data.cookieMap, so the standard pattern is unaffected.
         override fun getCookie(key: String): String = data.cookieMap[key] ?: NA
 
         override fun getRequestParameterMap(): Map<String, Array<String>> = parameterArrayMap()
