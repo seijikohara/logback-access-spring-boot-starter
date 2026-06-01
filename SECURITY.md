@@ -38,6 +38,23 @@ The project follows a coordinated disclosure process:
 4. A new release is published with the fix.
 5. The vulnerability is publicly disclosed through a GitHub Security Advisory crediting the reporter (unless they request anonymity).
 
+## Hardening and Logging Sensitive Data
+
+Access logs record attacker-controlled request data. Configure logging defensively:
+
+- **Log injection / forging.** The request line, URI, query string, header values, and cookie
+  values are written to the log verbatim. When logging to a line-oriented sink, escape carriage
+  returns and line feeds (for example with Logback's `%replace`) or use a structured JSON encoder,
+  so an attacker cannot inject forged log lines via control characters in a header or URI.
+- **Secrets in patterns.** Avoid `%{Authorization}i`, `%{Cookie}i`, `%{Set-Cookie}o`, individual
+  cookie values, and the session ID in production patterns. These can expose bearer tokens,
+  credentials, and session identifiers.
+- **Request/response bodies.** TeeFilter is disabled by default. Enable it only when body capture is
+  required, restrict it with `allowed-content-types` and `include-hosts` / `exclude-hosts`, and note
+  that it buffers full bodies in memory regardless of `max-payload-size`.
+
+See the [advanced guide](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced) for body-capture configuration and platform behavior.
+
 ## Scope
 
 This policy covers the following Maven Central artifacts:
