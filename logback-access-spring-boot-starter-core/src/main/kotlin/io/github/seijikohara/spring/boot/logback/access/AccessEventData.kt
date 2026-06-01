@@ -26,10 +26,10 @@ public data class AccessEventData(
     val serverName: String?,
     /** Local port on which the request was received. */
     val localPort: Int,
-    /** IP address of the remote client. */
-    val remoteAddr: String,
-    /** Hostname of the remote client. On Jetty, this equals [remoteAddr] (no reverse DNS lookup). */
-    val remoteHost: String,
+    /** IP address of the remote client, or null when the remote address is unavailable. */
+    val remoteAddr: String?,
+    /** Hostname of the remote client, or null when unavailable. On Jetty, this equals [remoteAddr] (no reverse DNS lookup). */
+    val remoteHost: String?,
     /** Authenticated username, or null if not authenticated. */
     val remoteUser: String?,
     /** Protocol and version (e.g., "HTTP/1.1"). */

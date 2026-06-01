@@ -55,6 +55,16 @@ class LogbackAccessEventSpec :
             }
         }
 
+        test("returns NA when remoteAddr and remoteHost are null") {
+            val data = TestAccessEventDataFactory.createMinimalData().copy(remoteAddr = null, remoteHost = null)
+            val event = LogbackAccessEvent(data)
+
+            assertSoftly {
+                event.remoteAddr shouldBe NA
+                event.remoteHost shouldBe NA
+            }
+        }
+
         test("returns SENTINEL for null numeric fields") {
             val data = TestAccessEventDataFactory.createMinimalData()
             val event = LogbackAccessEvent(data)

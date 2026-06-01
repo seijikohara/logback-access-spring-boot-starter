@@ -25,7 +25,10 @@ internal fun createAccessEventData(
 ): AccessEventData =
     AccessEventData(
         timeStamp = System.currentTimeMillis(),
-        elapsedTime = request.beginNanoTime.takeIf { it > 0 }?.let { NANOSECONDS.toMillis(System.nanoTime() - it) },
+        // beginNanoTime is a raw System.nanoTime() reading, which may legitimately be negative or
+        // zero. A valid request always has it set by the time RequestLog.log fires, so compute the
+        // duration directly rather than treating the raw clock value as a positivity flag.
+        elapsedTime = NANOSECONDS.toMillis(System.nanoTime() - request.beginNanoTime).coerceAtLeast(0),
         sequenceNumber = context.accessContext.sequenceNumberGenerator?.nextSequenceNumber(),
         threadName = Thread.currentThread().name,
         serverName = Request.getServerName(request),

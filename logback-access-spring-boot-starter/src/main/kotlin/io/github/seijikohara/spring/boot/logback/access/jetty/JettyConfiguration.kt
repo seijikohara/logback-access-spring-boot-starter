@@ -13,6 +13,10 @@ import org.springframework.context.annotation.Configuration
 
 /**
  * Registers Jetty-specific access logging infrastructure.
+ *
+ * The customizer assigns the [JettyRequestLog] to Jetty's single [org.eclipse.jetty.server.Server.setRequestLog]
+ * slot, so the starter takes ownership of the Jetty request log. Supply your own
+ * `logbackAccessJettyCustomizer` bean to override this behavior.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Server::class, ConfigurableJettyWebServerFactory::class)
