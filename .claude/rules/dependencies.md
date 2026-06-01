@@ -18,7 +18,6 @@ paths:
 1. Add the version to `[versions]` in `libs.versions.toml`.
 2. Add the artifact to `[libraries]` with `version.ref` pointing at that version key.
 3. Reference it from the module's `build.gradle.kts` as `libs.<library.name>`.
-4. After adding, run `./gradlew --write-verification-metadata sha256 clean build` to refresh `gradle/verification-metadata.xml`, and commit the result with the dependency change.
 
 ## Dependency Scopes in the Starter Module
 
@@ -34,7 +33,7 @@ The `compileOnly` scope is critical: it lets the starter compile against multipl
 ## Automated Updates
 
 - Renovate (`renovate.json`) opens dependency-update pull requests automatically.
-- Review the PR, wait for CI, and merge once green. Regenerate `verification-metadata.xml` if Renovate's bot did not.
+- Review the PR, wait for CI, and merge once green.
 
 ## Build Plugins (`buildSrc`)
 
