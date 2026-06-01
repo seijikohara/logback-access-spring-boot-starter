@@ -37,6 +37,7 @@ logback-access-common = { module = "ch.qos.logback.access:logback-access-common"
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
+spring-boot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
 spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 spring-boot-starter-jetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
