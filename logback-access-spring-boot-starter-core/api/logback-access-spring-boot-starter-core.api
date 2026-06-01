@@ -42,7 +42,6 @@ public final class io/github/seijikohara/spring/boot/logback/access/AccessEventD
 	public final fun getRemoteUser ()Ljava/lang/String;
 	public final fun getRequestContent ()Ljava/lang/String;
 	public final fun getRequestHeaderMap ()Ljava/util/Map;
-	public final fun getRequestParameterArrayMap ()Ljava/util/Map;
 	public final fun getRequestParameterMap ()Ljava/util/Map;
 	public final fun getRequestURI ()Ljava/lang/String;
 	public final fun getRequestURL ()Ljava/lang/String;

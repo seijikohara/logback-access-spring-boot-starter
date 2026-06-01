@@ -66,8 +66,10 @@ public data class AccessEventData(
     /**
      * Array-backed parameter map for [ch.qos.logback.access.common.spi.IAccessEvent] compatibility.
      * Computed on each access from [requestParameterMap] to ensure correct behavior after deserialization.
+     * Internal: this is an implementation shim consumed only by [LogbackAccessEvent]; external callers
+     * should use the immutable, list-valued [requestParameterMap] instead.
      */
-    val requestParameterArrayMap: Map<String, Array<String>>
+    internal val requestParameterArrayMap: Map<String, Array<String>>
         get() = requestParameterMap.mapValues { (_, values) -> values.toTypedArray() }
 
     public companion object {
