@@ -41,7 +41,7 @@ public abstract class AbstractTeeFilterTest {
     @BeforeEach
     void setUpTeeFilterAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
-        listAppender.list.clear();
+        AccessEventTestUtils.reset(listAppender);
     }
 
     protected ListAppender<IAccessEvent> getListAppender() {
