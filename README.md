@@ -234,7 +234,7 @@ Reference the captured bodies with `%requestContent` and `%responseContent`.
 | `logback.access.tee-filter.include-hosts` | Comma-separated host names that activate the filter. | All hosts |
 | `logback.access.tee-filter.exclude-hosts` | Comma-separated host names that bypass the filter. | None |
 | `logback.access.tee-filter.max-payload-size` | Maximum payload size in bytes that appears in log output. Larger bodies are replaced with a sentinel. | `65536` |
-| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns allowed for body capture. When set, this list completely replaces the built-in defaults. | `text/*`, `application/json`, `application/xml`, `application/*+json`, `application/*+xml`, `application/x-www-form-urlencoded` |
+| `logback.access.tee-filter.allowed-content-types` | Content-Type patterns allowed for body capture. When set, this list completely replaces the built-in defaults. | Text, JSON, XML, and form-urlencoded types ([details](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced#teefilter)) |
 
 > **Security Warning**: Captured bodies can contain credentials, tokens, and personally identifiable information. Restrict the capture scope with `include-hosts` / `exclude-hosts`, and apply masking before the data leaves the host.
 >

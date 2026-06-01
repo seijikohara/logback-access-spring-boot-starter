@@ -60,7 +60,7 @@ flowchart TB
     F --> G[Appenders]
     G -->|Console| H[コンソール出力]
     G -->|File| I[ファイル出力]
-    G -->|JSON| J[Logstash/ELK]
+    G -->|JSON| J["Logstash/ELK"]
 
     subgraph optional["オプション連携"]
         K[Spring Security] -.->|リクエスト属性| E
