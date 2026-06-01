@@ -1,0 +1,9 @@
+public final class io/github/seijikohara/spring/boot/logback/access/autoconfigure/LogbackAccessAutoConfiguration {
+	public static final field Companion Lio/github/seijikohara/spring/boot/logback/access/autoconfigure/LogbackAccessAutoConfiguration$Companion;
+	public fun <init> ()V
+	public final fun logbackAccessContext (Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessProperties;Lorg/springframework/core/io/ResourceLoader;Lorg/springframework/core/env/Environment;)Lio/github/seijikohara/spring/boot/logback/access/LogbackAccessContext;
+}
+
+public final class io/github/seijikohara/spring/boot/logback/access/autoconfigure/LogbackAccessAutoConfiguration$Companion {
+}
+
