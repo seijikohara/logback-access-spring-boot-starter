@@ -12,6 +12,9 @@ export default withMermaid(
     // SEO: Clean URLs
     cleanUrls: true,
 
+    // Exclude internal planning documents from the published site
+    srcExclude: ['plans/**'],
+
     // SEO: Sitemap
     sitemap: {
       hostname: 'https://seijikohara.github.io/logback-access-spring-boot-starter'
