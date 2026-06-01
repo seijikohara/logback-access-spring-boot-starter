@@ -18,6 +18,11 @@ permissions:
   id-token: write
   attestations: write
 
+# Never run two releases concurrently, but do not cancel an in-flight release.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 env:
   JAVA_VERSION: '21'
   JAVA_DISTRIBUTION: 'temurin'
