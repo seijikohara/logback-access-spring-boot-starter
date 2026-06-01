@@ -6,8 +6,9 @@ plugins {
 }
 
 apiValidation {
+    // The published starter module is tracked so its public surface (the auto-configuration
+    // entry point and the deprecated compatibility alias) is enforced against drift.
     ignoredProjects += listOf(
-        "logback-access-spring-boot-starter",
         "common",
         "tomcat-mvc",
         "jetty-mvc",
