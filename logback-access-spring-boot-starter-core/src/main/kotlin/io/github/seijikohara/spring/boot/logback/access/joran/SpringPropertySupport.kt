@@ -60,7 +60,13 @@ internal class SpringPropertyModelHandler(
                 }
 
                 else -> {
-                    setProperty(ic, name, environment.getProperty(source, m.defaultValue.orEmpty()), stringToScope(m.scope))
+                    // Use defaultValue only when provided. When the source key is absent and no defaultValue is
+                    // given, getProperty(source) returns null and setProperty leaves the property undefined
+                    // (matching Spring Boot's SpringPropertyModelHandler), preserving Logback's ${name:-fallback}
+                    // substitution instead of forcing an empty string.
+                    val default = m.defaultValue
+                    val value = if (default != null) environment.getProperty(source, default) else environment.getProperty(source)
+                    setProperty(ic, name, value, stringToScope(m.scope))
                 }
             }
         }
