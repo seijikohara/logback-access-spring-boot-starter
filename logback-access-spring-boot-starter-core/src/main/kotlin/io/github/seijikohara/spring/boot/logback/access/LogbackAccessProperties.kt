@@ -46,8 +46,11 @@ public data class LogbackAccessProperties
          * TeeFilter properties for capturing request/response bodies.
          *
          * @property enabled Whether to enable the TeeFilter.
-         * @property includeHosts Comma-separated host names to activate. All hosts when not specified.
-         * @property excludeHosts Comma-separated host names to deactivate.
+         * @property includeHosts Comma-separated host names that activate the filter. Matched once at filter
+         *           initialization against the server's own resolved local host name (not the request Host
+         *           header), so it acts as a global on/off switch. All hosts when not specified.
+         * @property excludeHosts Comma-separated host names that deactivate the filter, matched the same way as
+         *           [includeHosts] (against the server's resolved local host name, evaluated once at init).
          * @property maxPayloadSize Maximum payload size in bytes to include in log output.
          *           Bodies exceeding this size are replaced with a sentinel value.
          *           Note: This does not limit TeeFilter's internal buffering — the full body

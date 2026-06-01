@@ -31,6 +31,10 @@ logback:
 | `max-payload-size` | Maximum payload size in bytes that appears in log output. Larger bodies are replaced with a sentinel. | `65536` |
 | `allowed-content-types` | Content-Type patterns allowed for body capture. When set, this list completely replaces the built-in defaults. | See below |
 
+::: tip Host matching
+`include-hosts` / `exclude-hosts` are matched once at filter initialization against the server's own resolved local host name (not the request `Host` header), so they act as a global on/off switch rather than per-request filtering.
+:::
+
 ### Accessing Body Content
 
 Reference the captured bodies with the `%requestContent` and `%responseContent` pattern variables:
