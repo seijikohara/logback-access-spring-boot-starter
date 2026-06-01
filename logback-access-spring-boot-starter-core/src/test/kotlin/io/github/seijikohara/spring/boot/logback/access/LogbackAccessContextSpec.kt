@@ -3,6 +3,7 @@ package io.github.seijikohara.spring.boot.logback.access
 import ch.qos.logback.access.common.spi.IAccessEvent
 import ch.qos.logback.core.read.ListAppender
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -11,6 +12,9 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.throwable.shouldHaveCauseInstanceOf
 import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.mock.env.MockEnvironment
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.regex.PatternSyntaxException
 
 class LogbackAccessContextSpec :
@@ -230,6 +234,49 @@ class LogbackAccessContextSpec :
                 context.close()
 
                 context.accessContext.iteratorForAppenders().hasNext() shouldBe false
+            }
+
+            test("is idempotent when called twice") {
+                val properties = createProperties()
+                val context = createContext(properties)
+
+                context.close()
+
+                shouldNotThrowAny { context.close() }
+                context.accessContext.isStarted shouldBe false
+            }
+        }
+
+        context("concurrency") {
+            test("emits events from many threads without losing any") {
+                val properties = createProperties()
+                val context = createContext(properties)
+
+                try {
+                    val threadCount = 8
+                    val eventsPerThread = 50
+                    val pool = Executors.newFixedThreadPool(threadCount)
+                    val startGate = CountDownLatch(1)
+                    try {
+                        val futures =
+                            (1..threadCount).map { thread ->
+                                pool.submit {
+                                    startGate.await()
+                                    repeat(eventsPerThread) { index ->
+                                        context.emit(createTestEvent("/api/users/$thread-$index"))
+                                    }
+                                }
+                            }
+                        startGate.countDown()
+                        futures.forEach { it.get(30, TimeUnit.SECONDS) }
+                    } finally {
+                        pool.shutdown()
+                    }
+
+                    getListAppender(context).list shouldHaveSize threadCount * eventsPerThread
+                } finally {
+                    context.close()
+                }
             }
         }
 
