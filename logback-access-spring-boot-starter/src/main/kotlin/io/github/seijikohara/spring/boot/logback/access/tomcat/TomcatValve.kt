@@ -42,14 +42,26 @@ internal class TomcatValve(
         response: Response,
     ): Unit = next.invoke(request, response)
 
+    /**
+     * Tomcat's [AccessLog] contract requires implementations to tolerate null or
+     * malformed request/response objects from early-rejected requests. Extraction
+     * runs before [LogbackAccessContext.emit] (which has its own guard), so wrap it
+     * here to ensure an extraction failure never escapes into the Tomcat engine.
+     */
+    @Suppress("TooGenericExceptionCaught")
     override fun log(
         request: Request,
         response: Response,
         time: Long,
-    ): Unit =
-        createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled, time)
-            .let(::LogbackAccessEvent)
-            .let(logbackAccessContext::emit)
+    ) {
+        try {
+            createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled, time)
+                .let(::LogbackAccessEvent)
+                .let(logbackAccessContext::emit)
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to capture Tomcat access event" }
+        }
+    }
 
     companion object {
         private val logger = KotlinLogging.logger {}
