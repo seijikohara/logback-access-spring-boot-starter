@@ -18,10 +18,12 @@ mavenPublishing {
 dependencies {
     api(platform(libs.spring.boot.dependencies))
     api(libs.logback.access.common)
-    api(libs.kotlin.reflect)
 
     implementation(libs.spring.boot.starter)
     implementation(libs.kotlin.logging)
+    // Runtime requirement for Spring Boot constructor binding of the @ConfigurationProperties
+    // data class. Not part of the public compile surface, so it is not an api dependency.
+    implementation(libs.kotlin.reflect)
 }
 
 kotlin {
