@@ -49,7 +49,7 @@ public abstract class AbstractReactiveLocalPortStrategyTest {
     @BeforeEach
     void setUpLocalPortAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
-        listAppender.list.clear();
+        AccessEventTestUtils.reset(listAppender);
     }
 
     /**

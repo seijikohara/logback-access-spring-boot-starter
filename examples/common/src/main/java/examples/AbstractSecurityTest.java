@@ -49,7 +49,7 @@ public abstract class AbstractSecurityTest {
     @BeforeEach
     void setUpAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
-        listAppender.list.clear();
+        AccessEventTestUtils.reset(listAppender);
     }
 
     protected ListAppender<IAccessEvent> getListAppender() {

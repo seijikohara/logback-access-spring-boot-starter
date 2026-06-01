@@ -40,7 +40,7 @@ public abstract class AbstractJsonLoggingTest {
     @BeforeEach
     void setUpJsonLoggingAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
-        listAppender.list.clear();
+        AccessEventTestUtils.reset(listAppender);
     }
 
     protected ListAppender<IAccessEvent> getListAppender() {

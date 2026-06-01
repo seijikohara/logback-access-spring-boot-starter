@@ -9,11 +9,19 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for testing access events.
+ *
+ * <p>{@link ListAppender#list} is a plain {@link java.util.ArrayList} mutated by logback's
+ * {@code AppenderBase.doAppend}, which holds the appender's intrinsic monitor. Server worker threads
+ * emit access events after the HTTP response returns, so they can mutate the list while a test thread
+ * reads it. All access to {@code appender.list} here is therefore guarded by {@code synchronized
+ * (appender)} to use the same monitor and avoid {@link java.util.ConcurrentModificationException} and
+ * stale reads.
  */
 public final class AccessEventTestUtils {
 
     private static final long DEFAULT_TIMEOUT_MS = 5000L;
     private static final long POLL_INTERVAL_MS = 50L;
+    private static final long QUIESCENCE_MS = 200L;
 
     private AccessEventTestUtils() {
     }
@@ -30,6 +38,17 @@ public final class AccessEventTestUtils {
             final LogbackAccessContext context,
             final String appenderName) {
         return (ListAppender<IAccessEvent>) context.getAccessContext().getAppender(appenderName);
+    }
+
+    /**
+     * Clears the appender under its own monitor, so the reset does not race with a concurrent emit.
+     *
+     * @param appender the ListAppender to reset
+     */
+    public static void reset(final ListAppender<IAccessEvent> appender) {
+        synchronized (appender) {
+            appender.list.clear();
+        }
     }
 
     /**
@@ -56,6 +75,9 @@ public final class AccessEventTestUtils {
     /**
      * Waits for the specified number of access events to be logged with a custom timeout.
      *
+     * <p>Once {@code count} events are observed, the method waits a short quiescence period and
+     * re-snapshots, so a caller asserting an exact size can detect a late duplicate or spurious event.
+     *
      * @param appender  the ListAppender to wait on
      * @param count     the number of events to wait for
      * @param timeoutMs the timeout in milliseconds
@@ -66,18 +88,18 @@ public final class AccessEventTestUtils {
             final int count,
             final long timeoutMs) {
         final var deadline = System.currentTimeMillis() + timeoutMs;
-        while (System.currentTimeMillis() < deadline) {
-            if (appender.list.size() >= count) {
-                return List.copyOf(appender.list);
-            }
-            try {
-                TimeUnit.MILLISECONDS.sleep(POLL_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+        var snapshot = snapshot(appender);
+        while (snapshot.size() < count && System.currentTimeMillis() < deadline) {
+            if (!sleep(POLL_INTERVAL_MS)) {
                 break;
             }
+            snapshot = snapshot(appender);
         }
-        return List.copyOf(appender.list);
+        if (snapshot.size() >= count) {
+            sleep(QUIESCENCE_MS);
+            snapshot = snapshot(appender);
+        }
+        return snapshot;
     }
 
     /**
@@ -98,14 +120,26 @@ public final class AccessEventTestUtils {
     public static void awaitNoEvents(
             final ListAppender<IAccessEvent> appender,
             final long timeoutMs) {
+        sleep(timeoutMs);
+        final var snapshot = snapshot(appender);
+        if (!snapshot.isEmpty()) {
+            throw new AssertionError("Expected no events but found " + snapshot.size());
+        }
+    }
+
+    private static List<IAccessEvent> snapshot(final ListAppender<IAccessEvent> appender) {
+        synchronized (appender) {
+            return List.copyOf(appender.list);
+        }
+    }
+
+    private static boolean sleep(final long millis) {
         try {
-            TimeUnit.MILLISECONDS.sleep(timeoutMs);
+            TimeUnit.MILLISECONDS.sleep(millis);
+            return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-        if (!appender.list.isEmpty()) {
-            throw new AssertionError(
-                    "Expected no events but found " + appender.list.size());
+            return false;
         }
     }
 }

@@ -38,7 +38,7 @@ public abstract class AbstractReactiveAccessLogTest {
     @BeforeEach
     void setUpReactiveAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
-        listAppender.list.clear();
+        AccessEventTestUtils.reset(listAppender);
     }
 
     protected ListAppender<IAccessEvent> getListAppender() {
