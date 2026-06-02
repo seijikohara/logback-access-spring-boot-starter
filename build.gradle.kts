@@ -41,4 +41,6 @@ version = scmVersion.version
 
 versionCatalogUpdate {
     sortByKey = true
+    // buildSrc-only libraries that the root update task sees as unused are retained via `# @keep`
+    // comments in gradle/libs.versions.toml, since the keep {} block only controls versions.
 }
