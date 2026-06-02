@@ -3,6 +3,7 @@ package examples.test.common;
 import ch.qos.logback.access.common.spi.IAccessEvent;
 import ch.qos.logback.core.read.ListAppender;
 import examples.AccessEventTestUtils;
+import examples.CapturingOutputStreamAppender;
 import examples.HttpClientTestUtils;
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext;
 import net.logstash.logback.encoder.LogstashAccessEncoder;
@@ -41,10 +42,15 @@ public abstract class AbstractJsonLoggingTest {
     void setUpJsonLoggingAppender() {
         listAppender = AccessEventTestUtils.getListAppender(getLogbackAccessContext(), "list");
         AccessEventTestUtils.reset(listAppender);
+        jsonCaptureAppender().resetCapture();
     }
 
     protected ListAppender<IAccessEvent> getListAppender() {
         return listAppender;
+    }
+
+    private CapturingOutputStreamAppender jsonCaptureAppender() {
+        return (CapturingOutputStreamAppender) getLogbackAccessContext().getAccessContext().getAppender("jsonCapture");
     }
 
     @Test
@@ -98,5 +104,22 @@ public abstract class AbstractJsonLoggingTest {
         assertThat(events).hasSize(1);
         final var event = events.get(0);
         assertThat(event.getQueryString()).isEqualTo("?name=JSON");
+    }
+
+    @Test
+    void jsonEncoderProducesStructuredJsonOutput() throws Exception {
+        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+        AccessEventTestUtils.awaitEvents(listAppender);
+
+        final var output = jsonCaptureAppender().getCapturedOutput().strip();
+        final var lines = output.split("\\R");
+        final var json = lines[lines.length - 1].strip();
+
+        // The LogstashAccessEncoder must emit a single JSON object carrying the request fields.
+        assertThat(json).startsWith("{").endsWith("}");
+        assertThat(json).contains("\"method\"").contains("\"GET\"");
+        assertThat(json).contains("\"status_code\"").contains("200");
+        assertThat(json).contains("\"requested_uri\"").contains("/api/hello");
+        assertThat(json).contains("\"@timestamp\"");
     }
 }

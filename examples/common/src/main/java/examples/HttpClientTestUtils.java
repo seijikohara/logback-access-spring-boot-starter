@@ -1,5 +1,7 @@
 package examples;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -30,6 +32,35 @@ public final class HttpClientTestUtils {
                 .GET()
                 .build();
         return CLIENT.send(request, BodyHandlers.ofString());
+    }
+
+    /**
+     * Sends a raw HTTP/1.1 GET with an explicit Host header.
+     *
+     * <p>The JDK HttpClient forbids overriding the restricted Host header, so this uses a plain
+     * socket to let tests exercise a Host that diverges from the actual connection (for example, to
+     * verify that the LOCAL port strategy ignores the Host header port).
+     *
+     * @param host       the TCP host to connect to
+     * @param port       the TCP port to connect to
+     * @param path       the request path (for example, "/api/hello")
+     * @param hostHeader the Host header value to send (for example, "example.invalid:1")
+     * @throws IOException if the request fails
+     */
+    public static void getWithHostHeader(
+            final String host,
+            final int port,
+            final String path,
+            final String hostHeader) throws IOException {
+        try (var socket = new Socket(host, port)) {
+            final var request = "GET " + path + " HTTP/1.1\r\n"
+                    + "Host: " + hostHeader + "\r\n"
+                    + "Connection: close\r\n\r\n";
+            socket.getOutputStream().write(request.getBytes(StandardCharsets.US_ASCII));
+            socket.getOutputStream().flush();
+            // Drain the response so the server completes the request and logs the access event.
+            socket.getInputStream().readAllBytes();
+        }
     }
 
     /**

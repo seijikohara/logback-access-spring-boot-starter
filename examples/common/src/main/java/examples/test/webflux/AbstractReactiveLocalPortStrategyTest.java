@@ -75,16 +75,16 @@ public abstract class AbstractReactiveLocalPortStrategyTest {
 
     @Test
     void localPortDoesNotChangeWithHostHeader() throws Exception {
-        // Even if the Host header specifies a different port,
-        // LOCAL strategy should still return the actual local port
-        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+        // Send a Host header advertising a divergent port. The LOCAL strategy must still report the
+        // actual connection port, not the port from the Host header.
+        HttpClientTestUtils.getWithHostHeader("localhost", getPort(), "/api/hello", "example.invalid:1");
 
         final var events = AccessEventTestUtils.awaitEvents(listAppender);
 
         assertThat(events).hasSize(1);
         final var event = events.get(0);
         assertThat(event.getLocalPort())
-                .as("LOCAL strategy should return actual connection port, not Host header port")
+                .as("LOCAL strategy should return the actual connection port, not the Host header port")
                 .isEqualTo(getPort());
     }
 }
