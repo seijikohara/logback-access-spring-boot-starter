@@ -188,5 +188,17 @@ class TomcatRequestAttributeResolverSpec :
 
                 resolver.buildRequestURL(request) shouldBe "POST /api/data HTTP/1.1"
             }
+
+            test("preserves encoded and unicode query string verbatim") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.method } returns "GET"
+                every { request.requestURI } returns "/api/items"
+                every { request.queryString } returns "q=caf%C3%A9&tag=日本語"
+                every { request.protocol } returns "HTTP/1.1"
+
+                resolver.buildRequestURL(request) shouldBe "GET /api/items?q=caf%C3%A9&tag=日本語 HTTP/1.1"
+            }
         }
     })
