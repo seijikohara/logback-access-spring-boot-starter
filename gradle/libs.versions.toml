@@ -23,8 +23,11 @@ version-catalog-update = "1.1.0"
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
+# @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-dokka-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+# @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+# @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
@@ -54,10 +57,7 @@ axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axi
 binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
 cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "error-prone-plugin" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 nullaway = { id = "net.ltgt.nullaway", version.ref = "nullaway-plugin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
