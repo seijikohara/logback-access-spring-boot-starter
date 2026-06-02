@@ -68,6 +68,26 @@ class JettyRequestDataExtractorSpec :
                 result shouldContainExactly mapOf("Accept" to "application/json", "Content-Type" to "text/html")
             }
 
+            test("preserves unicode and special-character header values") {
+                val field =
+                    mockk<HttpField> {
+                        every { name } returns "X-Note"
+                        every { value } returns "café/日本語; q=0.9"
+                    }
+                val headers =
+                    mockk<HttpFields> {
+                        every { iterator() } returns mutableListOf(field).iterator()
+                    }
+                val request =
+                    mockk<Request> {
+                        every { this@mockk.headers } returns headers
+                    }
+
+                val result = JettyRequestDataExtractor.extractHeaders(request)
+
+                result shouldContainExactly mapOf("X-Note" to "café/日本語; q=0.9")
+            }
+
             test("keeps first value for duplicate header names") {
                 val field1 =
                     mockk<HttpField> {
@@ -219,6 +239,26 @@ class JettyRequestDataExtractorSpec :
 
                 JettyRequestDataExtractor.buildRequestURL(request) shouldBe "POST /api/data HTTP/2.0"
             }
+
+            test("preserves encoded and unicode path and query verbatim") {
+                val httpURI =
+                    mockk<HttpURI> {
+                        every { path } returns "/api/ユーザー"
+                        every { query } returns "q=caf%C3%A9&tag=日本語"
+                    }
+                val connectionMetaData =
+                    mockk<ConnectionMetaData> {
+                        every { protocol } returns "HTTP/1.1"
+                    }
+                val request =
+                    mockk<Request> {
+                        every { method } returns "GET"
+                        every { this@mockk.httpURI } returns httpURI
+                        every { this@mockk.connectionMetaData } returns connectionMetaData
+                    }
+
+                JettyRequestDataExtractor.buildRequestURL(request) shouldBe "GET /api/ユーザー?q=caf%C3%A9&tag=日本語 HTTP/1.1"
+            }
         }
 
         context("extractCookies") {
@@ -240,6 +280,22 @@ class JettyRequestDataExtractorSpec :
                     val result = JettyRequestDataExtractor.extractCookies(request)
 
                     result shouldContainExactly mapOf("session" to "abc123", "lang" to "en")
+                }
+            }
+
+            test("preserves unicode cookie values") {
+                mockkStatic(Request::class) {
+                    val cookie =
+                        mockk<org.eclipse.jetty.http.HttpCookie> {
+                            every { name } returns "pref"
+                            every { value } returns "naïve-café-日本語"
+                        }
+                    val request = mockk<Request>()
+                    every { Request.getCookies(request) } returns listOf(cookie)
+
+                    val result = JettyRequestDataExtractor.extractCookies(request)
+
+                    result shouldContainExactly mapOf("pref" to "naïve-café-日本語")
                 }
             }
 
