@@ -8,6 +8,12 @@
     <!-- ListAppender for test verification -->
     <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
 
+    <!-- Capturing appender so tests can validate the actual encoded JSON output -->
+    <appender name="jsonCapture" class="examples.CapturingOutputStreamAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
+    </appender>
+
     <appender-ref ref="jsonConsole"/>
     <appender-ref ref="list"/>
+    <appender-ref ref="jsonCapture"/>
 </configuration>
