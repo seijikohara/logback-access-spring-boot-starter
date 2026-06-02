@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.ImportRuntimeHints
 import org.springframework.core.env.Environment
 import org.springframework.core.io.ResourceLoader
 
@@ -40,6 +41,7 @@ import org.springframework.core.io.ResourceLoader
     SecurityConfiguration::class,
     TeeFilterConfiguration::class,
 )
+@ImportRuntimeHints(LogbackAccessRuntimeHints::class)
 class LogbackAccessAutoConfiguration {
     /** Creates the [LogbackAccessContext] bean that manages the Logback-access lifecycle. */
     @Bean
