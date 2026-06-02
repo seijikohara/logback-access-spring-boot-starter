@@ -1,3 +1,0 @@
-logback:
-  access:
-    config-location: classpath:logback-access-spring-profile.xml
