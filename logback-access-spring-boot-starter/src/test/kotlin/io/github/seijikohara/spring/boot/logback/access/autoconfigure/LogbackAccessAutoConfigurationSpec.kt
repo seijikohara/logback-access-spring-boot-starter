@@ -198,13 +198,18 @@ class LogbackAccessAutoConfigurationSpec :
                     }
             }
 
-            test("does not create security filter in reactive web context") {
+            test("does not create servlet-only filters in reactive web context") {
                 ReactiveWebApplicationContextRunner()
                     .withConfiguration(autoConfiguration)
                     .withPropertyValues(
                         "logback.access.config-location=${LogbackAccessProperties.FALLBACK_CONFIG}",
+                        // Enabled, yet still must not register under WebFlux because both beans are
+                        // gated by @ConditionalOnWebApplication(type = SERVLET). This locks in the
+                        // documented Servlet-only contract: reactive access logs always render %u as "-".
+                        "logback.access.tee-filter.enabled=true",
                     ).run { context ->
                         assertThat(context).doesNotHaveBean("logbackAccessSecurityFilter")
+                        assertThat(context).doesNotHaveBean("logbackAccessTeeFilter")
                     }
             }
         }
