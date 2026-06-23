@@ -432,7 +432,6 @@ potential-bugs:
   Deprecation:
     active: false
     aliases: ['DEPRECATION']
-    excludeImportStatements: false
   DontDowncastCollectionTypes:
     active: false
   DoubleMutabilityForCollection:
@@ -747,7 +746,7 @@ style:
     active: true
   SerialVersionUIDInSerializableClass:
     active: true
-  SpacingAfterPackageDeclaration:
+  SpacingAfterPackageAndImports:
     active: false
   StringShouldBeRawString:
     active: false
