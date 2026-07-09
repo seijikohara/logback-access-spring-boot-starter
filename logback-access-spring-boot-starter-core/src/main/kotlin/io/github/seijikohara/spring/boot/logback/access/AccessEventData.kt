@@ -22,7 +22,7 @@ public data class AccessEventData(
     val sequenceNumber: Long?,
     /** Name of the thread that processed the request. */
     val threadName: String,
-    /** Server name from the Host header or server configuration. */
+    /** Server name from the Host header or server configuration, or null when unavailable (e.g., early-rejected requests). */
     val serverName: String?,
     /** Local port on which the request was received. */
     val localPort: Int,
@@ -32,9 +32,9 @@ public data class AccessEventData(
     val remoteHost: String?,
     /** Authenticated username, or null if not authenticated. */
     val remoteUser: String?,
-    /** Protocol and version (e.g., "HTTP/1.1"). */
+    /** Protocol and version (e.g., "HTTP/1.1"), or "-" when the request was rejected before parsing. */
     val protocol: String,
-    /** HTTP method (e.g., "GET", "POST"). */
+    /** HTTP method (e.g., "GET", "POST"), or "-" when the request was rejected before parsing. */
     val method: String,
     /** Request URI path without query string. */
     val requestURI: String?,

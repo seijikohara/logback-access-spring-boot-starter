@@ -52,15 +52,9 @@ public final class HttpClientTestUtils {
             final int port,
             final String path,
             final String hostHeader) throws IOException {
-        try (var socket = new Socket(host, port)) {
-            final var request = "GET " + path + " HTTP/1.1\r\n"
-                    + "Host: " + hostHeader + "\r\n"
-                    + "Connection: close\r\n\r\n";
-            socket.getOutputStream().write(request.getBytes(StandardCharsets.US_ASCII));
-            socket.getOutputStream().flush();
-            // Drain the response so the server completes the request and logs the access event.
-            socket.getInputStream().readAllBytes();
-        }
+        sendRawRequest(host, port, "GET " + path + " HTTP/1.1\r\n"
+                + "Host: " + hostHeader + "\r\n"
+                + "Connection: close\r\n\r\n");
     }
 
     /**
@@ -81,6 +75,8 @@ public final class HttpClientTestUtils {
             final int port,
             final String rawRequest) throws IOException {
         try (var socket = new Socket(host, port)) {
+            // Fail instead of hanging the build if the server ever stops closing the connection.
+            socket.setSoTimeout(5000);
             socket.getOutputStream().write(rawRequest.getBytes(StandardCharsets.US_ASCII));
             socket.getOutputStream().flush();
             // Drain the response so the server completes the exchange and logs the access event.

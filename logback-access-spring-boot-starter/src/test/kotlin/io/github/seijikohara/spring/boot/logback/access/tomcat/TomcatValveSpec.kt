@@ -14,11 +14,10 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
-import org.apache.catalina.connector.Connector
+import io.mockk.verify
+import org.apache.catalina.AccessLog
 import org.apache.catalina.connector.Request
 import org.apache.catalina.connector.Response
-import org.apache.coyote.Request as CoyoteRequest
-import org.apache.coyote.Response as CoyoteResponse
 
 class TomcatValveSpec :
     FunSpec({
@@ -31,6 +30,16 @@ class TomcatValveSpec :
                 teeFilter = LogbackAccessProperties.TeeFilterProperties(false, null, null, 65536L, null),
                 filter = LogbackAccessProperties.FilterProperties(null, null),
             )
+
+        test("log tolerates a null request and response from the AccessLog contract") {
+            val context = mockk<LogbackAccessContext>(relaxed = true)
+            // Call through the Java interface: its parameters are platform types, so Tomcat
+            // could hand over nulls that a Kotlin caller cannot express.
+            val accessLog: AccessLog = TomcatValve(context)
+
+            shouldNotThrowAny { accessLog.log(null, null, 0L) }
+            verify(exactly = 0) { context.emit(any()) }
+        }
 
         test("log does not propagate exceptions thrown while extracting access-event data") {
             val context = mockk<LogbackAccessContext>(relaxed = true)
@@ -59,26 +68,8 @@ class TomcatValveSpec :
                         }
                     every { emit(capture(emitted)) } just runs
                 }
-            // Mimic the objects Tomcat passes to AccessLog.log for early-rejected requests
-            // (AbstractProcessor.logAccess): a connector Request over an empty coyote request.
-            // A bare Connector skips lifecycle init, so set parseBodyMethods as a running
-            // connector would; a processor always installs an output buffer before logging.
-            val request = Request(Connector("HTTP/1.1").apply { parseBodyMethods = "POST" }, CoyoteRequest())
-            val response =
-                Response(
-                    CoyoteResponse().apply {
-                        status = 400
-                        setOutputBuffer(
-                            object : org.apache.coyote.OutputBuffer {
-                                override fun doWrite(chunk: java.nio.ByteBuffer): Int = 0
 
-                                override fun getBytesWritten(): Long = 0L
-                            },
-                        )
-                    },
-                )
-
-            TomcatValve(context).log(request, response, 0L)
+            TomcatValve(context).log(earlyRejectedRequest(), earlyRejectedResponse(), 0L)
 
             emitted.captured.serverName shouldBe NA
             emitted.captured.method shouldBe NA

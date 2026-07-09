@@ -43,8 +43,11 @@ internal class TomcatRequestAttributeResolver(
 
     fun resolveMethod(request: Request): String = request.method ?: NA
 
+    fun resolveRequestURI(request: Request): String? = request.requestURI
+
     fun buildRequestURL(request: Request): String =
-        "${resolveMethod(request)} ${request.requestURI ?: NA}${request.queryString?.let { "?$it" }.orEmpty()} ${resolveProtocol(request)}"
+        "${resolveMethod(request)} ${resolveRequestURI(request) ?: NA}" +
+            "${request.queryString?.let { "?$it" }.orEmpty()} ${resolveProtocol(request)}"
 
     private inline fun <reified T> Request.accessLogAttr(name: String): T? =
         if (requestAttributesEnabled) getAttribute(name) as? T else null

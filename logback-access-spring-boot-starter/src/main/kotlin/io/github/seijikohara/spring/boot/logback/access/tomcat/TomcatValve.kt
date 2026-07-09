@@ -44,16 +44,22 @@ internal class TomcatValve(
 
     /**
      * Tomcat's [AccessLog] contract requires implementations to tolerate null or
-     * malformed request/response objects from early-rejected requests. Extraction
-     * runs before [LogbackAccessContext.emit] (which has its own guard), so wrap it
-     * here to ensure an extraction failure never escapes into the Tomcat engine.
+     * malformed request/response objects from early-rejected requests. Parameters are
+     * declared nullable so the guard is reached instead of Kotlin's generated
+     * parameter null-check throwing first. Extraction runs before
+     * [LogbackAccessContext.emit] (which has its own guard), so wrap it here to
+     * ensure an extraction failure never escapes into the Tomcat engine.
      */
     @Suppress("TooGenericExceptionCaught")
     override fun log(
-        request: Request,
-        response: Response,
+        request: Request?,
+        response: Response?,
         time: Long,
     ) {
+        if (request == null || response == null) {
+            logger.debug { "Skipped a Tomcat access event with a null request or response" }
+            return
+        }
         try {
             createAccessEventData(logbackAccessContext, request, response, requestAttributesEnabled, time)
                 .let(::LogbackAccessEvent)

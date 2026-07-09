@@ -14,11 +14,8 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import org.apache.catalina.connector.Connector
 import org.apache.catalina.connector.Request
 import org.apache.catalina.connector.Response
-import org.apache.coyote.Request as CoyoteRequest
-import org.apache.coyote.Response as CoyoteResponse
 
 class TomcatEventSourceSpec :
     FunSpec({
@@ -49,26 +46,6 @@ class TomcatEventSourceSpec :
             }
 
         fun response(): Response = mockk(relaxed = true) { every { status } returns 200 }
-
-        // Mimic the objects Tomcat passes to AccessLog.log for early-rejected requests
-        // (AbstractProcessor.logAccess): a connector Request over an empty coyote request.
-        // A bare Connector skips lifecycle init, so set parseBodyMethods as a running
-        // connector would; a processor always installs an output buffer before logging.
-        fun earlyRejectedRequest(): Request = Request(Connector("HTTP/1.1").apply { parseBodyMethods = "POST" }, CoyoteRequest())
-
-        fun earlyRejectedResponse(): Response =
-            Response(
-                CoyoteResponse().apply {
-                    status = 400
-                    setOutputBuffer(
-                        object : org.apache.coyote.OutputBuffer {
-                            override fun doWrite(chunk: java.nio.ByteBuffer): Int = 0
-
-                            override fun getBytesWritten(): Long = 0L
-                        },
-                    )
-                },
-            )
 
         fun event(
             elapsedTimeNanos: Long,
@@ -110,8 +87,7 @@ class TomcatEventSourceSpec :
         test("applies null and NA fallbacks when Tomcat logs an early-rejected request") {
             // Tomcat access-logs failed TLS handshakes and unparseable request lines through
             // AbstractProcessor.logAccess(), which passes a connector Request backed by an empty
-            // coyote request whose getters return null (issue #205). Real Tomcat objects are used
-            // here because a relaxed mock returns "" instead of null and would mask the failure.
+            // coyote request whose getters return null (issue #205).
             val request = earlyRejectedRequest()
             val response = earlyRejectedResponse()
 

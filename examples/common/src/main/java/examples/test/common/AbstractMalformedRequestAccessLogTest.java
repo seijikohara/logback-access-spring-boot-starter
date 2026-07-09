@@ -52,10 +52,6 @@ public abstract class AbstractMalformedRequestAccessLogTest {
         AccessEventTestUtils.reset(listAppender);
     }
 
-    protected ListAppender<IAccessEvent> getListAppender() {
-        return listAppender;
-    }
-
     @Test
     void malformedRequestLineEmitsAccessEventWith400Status() throws Exception {
         final var response = HttpClientTestUtils.sendRawRequest("localhost", getPort(), "GARBAGE\r\n\r\n");

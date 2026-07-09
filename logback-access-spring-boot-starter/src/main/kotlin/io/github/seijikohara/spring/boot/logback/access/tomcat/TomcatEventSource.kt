@@ -40,7 +40,7 @@ internal fun createAccessEventData(
             remoteUser = resolver.resolveRemoteUser(request),
             protocol = resolver.resolveProtocol(request),
             method = resolver.resolveMethod(request),
-            requestURI = request.requestURI,
+            requestURI = resolver.resolveRequestURI(request),
             queryString = request.queryString?.let { "?$it" }.orEmpty(),
             requestURL = resolver.buildRequestURL(request),
             requestHeaderMap = TomcatRequestDataExtractor.extractHeaders(request),
