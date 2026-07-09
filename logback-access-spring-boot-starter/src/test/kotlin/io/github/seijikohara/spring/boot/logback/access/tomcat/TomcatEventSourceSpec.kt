@@ -1,6 +1,7 @@
 package io.github.seijikohara.spring.boot.logback.access.tomcat
 
 import ch.qos.logback.access.common.spi.AccessContext
+import ch.qos.logback.access.common.spi.IAccessEvent.NA
 import ch.qos.logback.core.spi.SequenceNumberGenerator
 import io.github.seijikohara.spring.boot.logback.access.AccessEventData
 import io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy
@@ -81,5 +82,24 @@ class TomcatEventSourceSpec :
             val data = event(elapsedTimeNanos = 0L, context = context(generator = generator))
 
             data.sequenceNumber shouldBe 42L
+        }
+
+        test("applies null and NA fallbacks when Tomcat logs an early-rejected request") {
+            // Tomcat access-logs failed TLS handshakes and unparseable request lines through
+            // AbstractProcessor.logAccess(), which passes a connector Request backed by an empty
+            // coyote request whose getters return null (issue #205).
+            val request = earlyRejectedRequest()
+            val response = earlyRejectedResponse()
+
+            val data = createAccessEventData(context(), request, response, requestAttributesEnabled = false, elapsedTimeNanos = 0L)
+
+            data.serverName.shouldBeNull()
+            data.remoteAddr.shouldBeNull()
+            data.remoteHost.shouldBeNull()
+            data.method shouldBe NA
+            data.protocol shouldBe NA
+            data.requestURI.shouldBeNull()
+            data.requestURL shouldBe "$NA $NA $NA"
+            data.statusCode shouldBe 400
         }
     })

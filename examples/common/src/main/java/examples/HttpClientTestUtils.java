@@ -52,14 +52,36 @@ public final class HttpClientTestUtils {
             final int port,
             final String path,
             final String hostHeader) throws IOException {
+        sendRawRequest(host, port, "GET " + path + " HTTP/1.1\r\n"
+                + "Host: " + hostHeader + "\r\n"
+                + "Connection: close\r\n\r\n");
+    }
+
+    /**
+     * Sends raw bytes over a plain socket and returns the full response text.
+     *
+     * <p>The JDK HttpClient always produces a well-formed request, so this uses a plain socket to
+     * let tests exercise server parse-failure paths (for example, a malformed request line that the
+     * server rejects before normal processing but still hands to the access log).
+     *
+     * @param host       the TCP host to connect to
+     * @param port       the TCP port to connect to
+     * @param rawRequest the raw request bytes to send, as an ASCII string
+     * @return the raw response text decoded as ISO-8859-1
+     * @throws IOException if the request fails
+     */
+    public static String sendRawRequest(
+            final String host,
+            final int port,
+            final String rawRequest) throws IOException {
         try (var socket = new Socket(host, port)) {
-            final var request = "GET " + path + " HTTP/1.1\r\n"
-                    + "Host: " + hostHeader + "\r\n"
-                    + "Connection: close\r\n\r\n";
-            socket.getOutputStream().write(request.getBytes(StandardCharsets.US_ASCII));
+            // Fail instead of hanging the build if the server ever stops closing the connection.
+            socket.setSoTimeout(5000);
+            socket.getOutputStream().write(rawRequest.getBytes(StandardCharsets.US_ASCII));
             socket.getOutputStream().flush();
-            // Drain the response so the server completes the request and logs the access event.
-            socket.getInputStream().readAllBytes();
+            // Drain the response so the server completes the exchange and logs the access event.
+            final var response = socket.getInputStream().readAllBytes();
+            return new String(response, StandardCharsets.ISO_8859_1);
         }
     }
 
