@@ -136,6 +136,32 @@ class LogbackAccessContextSpec :
                 }
             }
 
+            test("logs event when include patterns list is empty") {
+                val properties = createProperties(includeUrlPatterns = emptyList())
+                val context = createContext(properties)
+
+                try {
+                    context.emit(createTestEvent("/api/users"))
+
+                    getListAppender(context).list shouldHaveSize 1
+                } finally {
+                    context.close()
+                }
+            }
+
+            test("logs event when exclude patterns list is empty") {
+                val properties = createProperties(excludeUrlPatterns = emptyList())
+                val context = createContext(properties)
+
+                try {
+                    context.emit(createTestEvent("/api/users"))
+
+                    getListAppender(context).list shouldHaveSize 1
+                } finally {
+                    context.close()
+                }
+            }
+
             test("catches exceptions from appenders without propagating") {
                 val properties = createProperties()
                 val context = createContext(properties)
