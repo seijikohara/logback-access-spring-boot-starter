@@ -1,5 +1,6 @@
 package io.github.seijikohara.spring.boot.logback.access.jetty
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessEvent
 import org.eclipse.jetty.server.Request
@@ -22,11 +23,28 @@ import org.eclipse.jetty.server.Response
 internal class JettyRequestLog(
     private val logbackAccessContext: LogbackAccessContext,
 ) : RequestLog {
+    /**
+     * Jetty also logs rejected requests through a synthesized placeholder request, so the
+     * inputs are not guaranteed to be fully populated. Extraction runs before
+     * [LogbackAccessContext.emit] (which has its own guard), so wrap it here to ensure an
+     * extraction failure never escapes into Jetty's request-completion path, mirroring the
+     * Tomcat valve.
+     */
+    @Suppress("TooGenericExceptionCaught")
     override fun log(
         request: Request,
         response: Response,
-    ): Unit =
-        createAccessEventData(logbackAccessContext, request, response)
-            .let(::LogbackAccessEvent)
-            .let(logbackAccessContext::emit)
+    ) {
+        try {
+            createAccessEventData(logbackAccessContext, request, response)
+                .let(::LogbackAccessEvent)
+                .let(logbackAccessContext::emit)
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to capture Jetty access event" }
+        }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 }
