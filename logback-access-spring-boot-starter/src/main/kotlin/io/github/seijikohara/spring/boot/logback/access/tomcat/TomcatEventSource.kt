@@ -39,7 +39,7 @@ internal fun createAccessEventData(
             remoteHost = resolver.resolveRemoteHost(request),
             remoteUser = resolver.resolveRemoteUser(request),
             protocol = resolver.resolveProtocol(request),
-            method = request.method,
+            method = resolver.resolveMethod(request),
             requestURI = request.requestURI,
             queryString = request.queryString?.let { "?$it" }.orEmpty(),
             requestURL = resolver.buildRequestURL(request),

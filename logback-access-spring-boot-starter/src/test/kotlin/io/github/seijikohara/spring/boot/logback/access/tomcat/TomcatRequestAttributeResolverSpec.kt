@@ -1,5 +1,6 @@
 package io.github.seijikohara.spring.boot.logback.access.tomcat
 
+import ch.qos.logback.access.common.spi.IAccessEvent.NA
 import io.github.seijikohara.spring.boot.logback.access.AccessEventData.Companion.REMOTE_USER_ATTR
 import io.github.seijikohara.spring.boot.logback.access.LocalPortStrategy
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext
@@ -161,6 +162,58 @@ class TomcatRequestAttributeResolverSpec :
                 every { request.remoteUser } returns null
 
                 resolver.resolveRemoteUser(request) shouldBe null
+            }
+        }
+
+        context("early-rejected requests") {
+            // Tomcat access-logs failed TLS handshakes and unparseable requests with an
+            // unparsed Request whose getters return null (issue #205).
+            test("resolveServerName returns null when the request has no parsed server name") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.serverName } returns null
+
+                resolver.resolveServerName(request) shouldBe null
+            }
+
+            test("resolveRemoteAddr returns null when the request has no remote address") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.remoteAddr } returns null
+
+                resolver.resolveRemoteAddr(request) shouldBe null
+            }
+
+            test("resolveRemoteHost returns null when the request has no remote host") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.remoteHost } returns null
+
+                resolver.resolveRemoteHost(request) shouldBe null
+            }
+
+            test("resolveProtocol falls back to NA when the request has no protocol") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.protocol } returns null
+
+                resolver.resolveProtocol(request) shouldBe NA
+            }
+
+            test("buildRequestURL substitutes NA for missing method, URI, and protocol") {
+                val context = mockContext()
+                val resolver = TomcatRequestAttributeResolver(context, requestAttributesEnabled = false)
+                val request = mockk<Request>(relaxed = true)
+                every { request.method } returns null
+                every { request.requestURI } returns null
+                every { request.queryString } returns null
+                every { request.protocol } returns null
+
+                resolver.buildRequestURL(request) shouldBe "$NA $NA $NA"
             }
         }
 
