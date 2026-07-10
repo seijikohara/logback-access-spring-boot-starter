@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit
  *
  * @param elapsedTimeNanos the processing time in nanoseconds provided by the Tomcat AccessLog contract.
  *                         Converted to milliseconds before storing.
- *                         Falls back to computing from [Request.getCoyoteRequest] start time when negative.
+ *                         Falls back to computing from [Request.getCoyoteRequest] start time when negative
+ *                         or 0, which the contract defines as "not known".
  */
 internal fun createAccessEventData(
     context: LogbackAccessContext,
@@ -28,7 +29,7 @@ internal fun createAccessEventData(
             timeStamp = System.currentTimeMillis(),
             elapsedTime =
                 elapsedTimeNanos
-                    .takeIf { it >= 0 }
+                    .takeIf { it > 0 }
                     ?.let { TimeUnit.NANOSECONDS.toMillis(it) }
                     ?: (System.currentTimeMillis() - request.coyoteRequest.startTime).coerceAtLeast(0),
             sequenceNumber = context.accessContext.sequenceNumberGenerator?.nextSequenceNumber(),

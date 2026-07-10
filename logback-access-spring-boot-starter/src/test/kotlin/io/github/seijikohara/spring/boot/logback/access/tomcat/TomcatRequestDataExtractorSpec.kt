@@ -170,6 +170,65 @@ class TomcatRequestDataExtractorSpec :
 
                 content shouldBe "[BINARY CONTENT SUPPRESSED]"
             }
+
+            test("excludes query string parameters from reconstructed form data") {
+                val request = mockk<Request>(relaxed = true)
+                every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+                every { request.contentType } returns "application/x-www-form-urlencoded"
+                every { request.method } returns "POST"
+                every { request.characterEncoding } returns null
+                every { request.queryString } returns "token=abc"
+                every { request.parameterMap } returns
+                    mapOf("token" to arrayOf("abc"), "password" to arrayOf("secret"))
+
+                val formAllowed =
+                    defaultProperties.copy(
+                        allowedContentTypes = listOf("application/x-www-form-urlencoded"),
+                    )
+
+                val content = TomcatRequestDataExtractor.extractContent(request, formAllowed)
+
+                content shouldBe "password=secret"
+            }
+
+            test("keeps the body value when the same name appears in query and body") {
+                val request = mockk<Request>(relaxed = true)
+                every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+                every { request.contentType } returns "application/x-www-form-urlencoded"
+                every { request.method } returns "POST"
+                every { request.characterEncoding } returns null
+                every { request.queryString } returns "key=fromQuery"
+                every { request.parameterMap } returns mapOf("key" to arrayOf("fromQuery", "fromBody"))
+
+                val formAllowed =
+                    defaultProperties.copy(
+                        allowedContentTypes = listOf("application/x-www-form-urlencoded"),
+                    )
+
+                val content = TomcatRequestDataExtractor.extractContent(request, formAllowed)
+
+                content shouldBe "key=fromBody"
+            }
+
+            test("matches percent-encoded query parameters against decoded body parameters") {
+                val request = mockk<Request>(relaxed = true)
+                every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+                every { request.contentType } returns "application/x-www-form-urlencoded"
+                every { request.method } returns "POST"
+                every { request.characterEncoding } returns null
+                every { request.queryString } returns "name=%E3%83%86%E3%82%B9%E3%83%88"
+                every { request.parameterMap } returns
+                    mapOf("name" to arrayOf("テスト"), "body" to arrayOf("1"))
+
+                val formAllowed =
+                    defaultProperties.copy(
+                        allowedContentTypes = listOf("application/x-www-form-urlencoded"),
+                    )
+
+                val content = TomcatRequestDataExtractor.extractContent(request, formAllowed)
+
+                content shouldBe "body=1"
+            }
         }
 
         test("extractContent uses request character encoding for byte array conversion") {
