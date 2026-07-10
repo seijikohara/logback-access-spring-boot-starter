@@ -38,7 +38,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build and test
-        run: ./gradlew clean build
+        run: ./gradlew clean build -PtestJavaVersion=${{ matrix.java-version }}
 
       - name: Generate KDoc
         run: ./gradlew dokkaGenerateHtml
