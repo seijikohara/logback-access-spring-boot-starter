@@ -44,3 +44,19 @@ versionCatalogUpdate {
     // buildSrc-only libraries that the root update task sees as unused are retained via `# @keep`
     // comments in gradle/libs.versions.toml, since the keep {} block only controls versions.
 }
+
+// Every module pins its compile toolchain to Java 21, so without an override the CI
+// matrix would run tests on 21 regardless of the JDK installed on the runner. CI passes
+// -PtestJavaVersion so the compiled artifacts are exercised on each supported runtime.
+val testJavaVersion = providers.gradleProperty("testJavaVersion").map(JavaLanguageVersion::of)
+
+subprojects {
+    plugins.withType<JavaBasePlugin> {
+        val javaToolchains = extensions.getByType<JavaToolchainService>()
+        tasks.withType<Test>().configureEach {
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = testJavaVersion.orElse(JavaLanguageVersion.of(21))
+            }
+        }
+    }
+}
