@@ -25,7 +25,7 @@ paths:
 |-------|---------|
 | `api` | The core module (`api(project(":logback-access-spring-boot-starter-core"))`) and the Spring Boot platform BOM. |
 | `implementation` | Required runtime dependencies (e.g., `spring-boot-starter`, `kotlin-logging`). |
-| `compileOnly` | Optional server/framework dependencies (Tomcat, Jetty, Spring WebMVC, Spring WebFlux, Spring Security). |
+| `compileOnly` | Optional server/framework dependencies (Tomcat, Jetty, Spring Security). |
 | `testImplementation` | Full implementations of the `compileOnly` dependencies, plus Kotest, MockK, etc. |
 
 The `compileOnly` scope is critical: it lets the starter compile against multiple optional servers without dragging them onto user classpaths.

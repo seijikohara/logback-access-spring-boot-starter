@@ -1,5 +1,8 @@
 plugins {
     id("maven-publish-conventions")
+    // Applied per published module (not at the root) so the SBOM reflects only the
+    // released artifact's dependencies, not the example apps' test dependencies.
+    alias(libs.plugins.cyclonedx)
     alias(libs.plugins.detekt)
     alias(libs.plugins.spotless)
     `java-library`
@@ -22,8 +25,6 @@ dependencies {
     implementation(libs.spring.boot.starter)
     implementation(libs.kotlin.logging)
 
-    compileOnly(libs.spring.boot.starter.webmvc)
-    compileOnly(libs.spring.boot.starter.webflux)
     compileOnly(libs.spring.boot.starter.tomcat)
     compileOnly(libs.spring.boot.starter.jetty)
     compileOnly(libs.spring.boot.starter.security)
@@ -33,6 +34,13 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+// The SBOM describes what a consumer of the published artifact pulls in, so restrict it
+// to the runtime dependency graph; the default includes test configurations. The
+// aggregate cyclonedxBom task builds on this task's output.
+tasks.cyclonedxDirectBom {
+    includeConfigs = listOf("runtimeClasspath")
 }
 
 tasks.jar {
@@ -52,7 +60,7 @@ spotless {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        named<JvmTestSuite>("test") {
             useJUnitJupiter()
             dependencies {
                 implementation(platform(libs.kotest.bom))

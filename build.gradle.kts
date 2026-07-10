@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.axion.release)
     alias(libs.plugins.binary.compatibility.validator)
-    alias(libs.plugins.cyclonedx)
     alias(libs.plugins.version.catalog.update)
 }
 

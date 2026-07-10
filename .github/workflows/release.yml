@@ -248,8 +248,20 @@ jobs:
       - name: Build with release version
         run: ./gradlew clean build
 
+      # One invocation per module: a combined graph fails because the plugin cannot create
+      # its configuration on a project whose variants were already observed by a consumer
+      # (core is consumed by starter).
       - name: Generate SBOM
-        run: ./gradlew cyclonedxBom
+        run: |
+          ./gradlew :logback-access-spring-boot-starter-core:cyclonedxBom
+          ./gradlew :logback-access-spring-boot-starter:cyclonedxBom
+
+      # The per-module reports share the file name bom.json; rename them so both can be
+      # attached to the release as distinct assets.
+      - name: Collect SBOMs
+        run: |
+          cp logback-access-spring-boot-starter-core/build/reports/cyclonedx/bom.json logback-access-spring-boot-starter-core.cdx.json
+          cp logback-access-spring-boot-starter/build/reports/cyclonedx/bom.json logback-access-spring-boot-starter.cdx.json
 
       - name: Publish to Maven Central
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
@@ -280,7 +292,9 @@ jobs:
           draft: false
           prerelease: false
           token: ${{ steps.generate_token.outputs.token }}
-          files: build/reports/cyclonedx/bom.json
+          files: |
+            logback-access-spring-boot-starter-core.cdx.json
+            logback-access-spring-boot-starter.cdx.json
 
       - name: Release summary
         env:
