@@ -1,6 +1,6 @@
 package examples.jettymvc;
 
-import examples.test.common.AbstractMalformedRequestAccessLogTest;
+import examples.test.common.AbstractJsonLoggingTest;
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,11 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 /**
- * Malformed request access log tests for Jetty + MVC.
- * Jetty synthesizes a "BAD /badMessage HTTP/1.0" placeholder request for unparseable requests.
+ * Tests for JSON logging with LogstashAccessEncoder on Jetty.
+ * Verifies that access events are correctly captured and can be encoded as JSON.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class JettyMalformedRequestAccessLogTest extends AbstractMalformedRequestAccessLogTest {
+@SpringBootTest(
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = "logback.access.config-location=classpath:logback-access-json.xml"
+)
+class JsonLoggingTest extends AbstractJsonLoggingTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;
@@ -26,12 +29,7 @@ class JettyMalformedRequestAccessLogTest extends AbstractMalformedRequestAccessL
     }
 
     @Override
-    protected int getPort() {
-        return port;
-    }
-
-    @Override
-    protected String getExpectedMalformedMethod() {
-        return "BAD";
+    protected String getBaseUrl() {
+        return "http://localhost:" + port;
     }
 }

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for URL pattern filtering configuration on Jetty.
  */
-class JettyUrlFilteringTest {
+class UrlFilteringTest {
 
     /**
      * Tests exclude pattern filtering on Jetty.

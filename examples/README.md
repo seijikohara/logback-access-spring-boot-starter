@@ -111,7 +111,7 @@ classDiagram
     }
 
     BasicAccessLogTest --|> AbstractBasicAccessLogTest
-    JettyBasicAccessLogTest --|> AbstractBasicAccessLogTest
+    BasicAccessLogTest --|> AbstractBasicAccessLogTest
     SecurityIntegrationTest --|> AbstractSecurityTest
     ReactiveAccessLogTest --|> AbstractReactiveAccessLogTest
 ```
@@ -213,7 +213,7 @@ sequenceDiagram
     RL->>RL: Cannot read Servlet attributes
 ```
 
-The `JettyTeeFilterTest` class in `jetty-mvc` is annotated `@Disabled` to make this limitation explicit.
+The `TeeFilterTest` class in `jetty-mvc` is annotated `@Disabled` to make this limitation explicit.
 
 ## Test Classes by Module
 
@@ -237,15 +237,15 @@ Each example app composes the abstract base classes from `common` to cover the f
 
 | Test Class | Coverage |
 |------------|----------|
-| `JettyBasicAccessLogTest` | Access log emission for the standard HTTP methods. |
-| `JettySecurityTest` | Spring Security `%u` capture. |
-| `JettyTeeFilterTest` | `@Disabled` — TeeFilter is not supported on Jetty 12 (see [Jetty Limitations](#jetty-limitations)). |
-| `JettyLocalPortStrategyTest` | `local-port-strategy` resolution. |
-| `JettyUrlFilteringTest` | URL pattern filtering. |
-| `JettyJsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
-| `JettySpringProfileTest` | Profile-specific appenders. |
-| `JettySpringPropertyScopeTest` | `<springProperty>` scopes. |
-| `JettyDisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
+| `BasicAccessLogTest` | Access log emission for the standard HTTP methods. |
+| `SecurityIntegrationTest` | Spring Security `%u` capture. |
+| `TeeFilterTest` | `@Disabled` — TeeFilter is not supported on Jetty 12 (see [Jetty Limitations](#jetty-limitations)). |
+| `LocalPortStrategyTest` | `local-port-strategy` resolution. |
+| `UrlFilteringTest` | URL pattern filtering. |
+| `JsonLoggingTest` | JSON output via `LogstashAccessEncoder`. |
+| `SpringProfileTest` | Profile-specific appenders. |
+| `SpringPropertyScopeTest` | `<springProperty>` scopes. |
+| `DisabledAccessLogTest` | `logback.access.enabled=false` disables auto-configuration. |
 
 ### Tomcat WebFlux
 
