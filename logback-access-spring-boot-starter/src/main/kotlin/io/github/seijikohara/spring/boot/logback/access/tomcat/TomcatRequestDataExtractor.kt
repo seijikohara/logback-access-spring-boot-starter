@@ -6,7 +6,9 @@ import ch.qos.logback.access.common.servlet.Util.isFormUrlEncoded
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessProperties.TeeFilterProperties
 import io.github.seijikohara.spring.boot.logback.access.tee.BodyCapturePolicy
 import org.apache.catalina.connector.Request
+import java.net.URLDecoder.decode
 import java.net.URLEncoder.encode
+import java.nio.charset.Charset
 import java.util.Collections.unmodifiableList
 import java.util.Collections.unmodifiableMap
 
@@ -78,14 +80,47 @@ internal object TomcatRequestDataExtractor {
             ?.let { decodeBufferContent(request, it) ?: decodeFormDataContent(request, it) }
 
     private fun encodeFormDataIfApplicable(request: Request): String? =
-        BodyCapturePolicy.resolveCharset(request.characterEncoding).name().let { charsetName ->
+        BodyCapturePolicy.resolveCharset(request.characterEncoding).let { charset ->
             request
                 .takeIf { isFormUrlEncoded(it) }
-                ?.parameterMap
-                ?.asSequence()
-                ?.flatMap { (key, values) -> values.asSequence().map { key to it } }
+                ?.let { bodyParameterPairs(it, charset) }
                 ?.joinToString("&") { (key, value) ->
-                    "${encode(key, charsetName)}=${encode(value, charsetName)}"
+                    "${encode(key, charset.name())}=${encode(value, charset.name())}"
                 }
+        }
+
+    /**
+     * Rebuilds body parameter pairs from [Request.getParameterMap], which merges query-string
+     * and body parameters with no origin marker. Each pair that also appears in the query
+     * string is removed once so the result reflects only the body; a pair submitted
+     * identically in both places is attributed to the query string, which is already logged
+     * separately.
+     */
+    private fun bodyParameterPairs(
+        request: Request,
+        charset: Charset,
+    ): List<Pair<String, String>> {
+        val queryPairs = parseQueryPairs(request.queryString, charset).toMutableList()
+        return request.parameterMap
+            .asSequence()
+            .flatMap { (key, values) -> values.asSequence().map { key to it } }
+            .filterNot { queryPairs.remove(it) }
+            .toList()
+    }
+
+    // A malformed query string falls back to no subtraction instead of failing the event.
+    private fun parseQueryPairs(
+        queryString: String?,
+        charset: Charset,
+    ): List<Pair<String, String>> =
+        try {
+            queryString
+                ?.split('&')
+                ?.filter { it.isNotEmpty() }
+                ?.map { parameter ->
+                    decode(parameter.substringBefore('='), charset) to decode(parameter.substringAfter('=', ""), charset)
+                }.orEmpty()
+        } catch (_: IllegalArgumentException) {
+            emptyList()
         }
 }

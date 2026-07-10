@@ -70,6 +70,17 @@ class TomcatEventSourceSpec :
             data.elapsedTime.shouldNotBeNull().shouldBeGreaterThanOrEqual(0L)
         }
 
+        test("falls back to the coyote start time when elapsedTimeNanos is 0 (not-known sentinel)") {
+            // The AccessLog contract passes 0 nanoseconds when the duration is not known;
+            // reporting it as a measurement would log an instantaneous response.
+            val request = request()
+            every { request.coyoteRequest.startTime } returns System.currentTimeMillis() - 60_000L
+
+            val data = event(elapsedTimeNanos = 0L, request = request)
+
+            data.elapsedTime.shouldNotBeNull().shouldBeGreaterThanOrEqual(30_000L)
+        }
+
         test("produces a null sequence number when no generator is configured") {
             val data = event(elapsedTimeNanos = 0L, context = context(generator = null))
 
