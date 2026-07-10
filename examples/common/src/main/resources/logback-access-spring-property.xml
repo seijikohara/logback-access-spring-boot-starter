@@ -2,6 +2,8 @@
 <configuration>
     <springProperty name="appName" source="spring.application.name" defaultValue="default-app" scope="context"/>
     <springProperty name="customProperty" source="custom.property" defaultValue="default-value" scope="context"/>
+    <!-- No test sets missing.property; exercises the defaultValue fallback. -->
+    <springProperty name="missingProperty" source="missing.property" defaultValue="fallback-value" scope="context"/>
 
     <appender name="list" class="ch.qos.logback.core.read.ListAppender"/>
     <appender-ref ref="list"/>
