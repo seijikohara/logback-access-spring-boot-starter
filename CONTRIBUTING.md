@@ -111,16 +111,6 @@ Run all tests with:
 
 4. **Open a pull request against `main`**. CI must pass before review.
 
-## Dependency Verification
-
-The project enables [Gradle dependency verification](https://docs.gradle.org/current/userguide/dependency_verification.html) with SHA-256 checksums. After adding or upgrading a dependency, regenerate the verification metadata:
-
-```bash
-./gradlew --write-verification-metadata sha256 clean build
-```
-
-Commit the updated `gradle/verification-metadata.xml` alongside the dependency change.
-
 ## API Compatibility
 
 The core module's public API is tracked by `binary-compatibility-validator`:
