@@ -45,7 +45,7 @@ Reference the captured bodies with the `%requestContent` and `%responseContent` 
 
 ### Body Capture Policy
 
-Before captured bytes reach the log output, the starter evaluates a capture policy against the response's `Content-Type` and payload size. Binary content and oversized payloads are replaced with a sentinel.
+Before captured bytes reach the log output, the starter evaluates a capture policy against the response's `Content-Type` and payload size. Binary content and oversized payloads are replaced with a sentinel. Empty payloads are never replaced with a sentinel.
 
 **Default allowed content types:**
 
@@ -54,14 +54,16 @@ Before captured bytes reach the log output, the starter evaluates a capture poli
 - `application/xml`
 - `application/*+json` (application/vnd.api+json, etc.)
 - `application/*+xml` (application/atom+xml, etc.)
-- `application/x-www-form-urlencoded`
+
+`application/x-www-form-urlencoded` is deliberately not in the default list: login forms (for example Spring Security's `formLogin()`) post credentials with that content type. Add it to `allowed-content-types` explicitly when form bodies must be captured.
 
 **Sentinel values:**
 
 | Condition | Sentinel |
 |-----------|----------|
 | Image content (`image/*`) | `[IMAGE CONTENTS SUPPRESSED]` |
-| Other binary content | `[BINARY CONTENT SUPPRESSED]` |
+| Other binary or disallowed content | `[BINARY CONTENT SUPPRESSED]` |
+| Missing `Content-Type` header (non-empty payload) | `[BINARY CONTENT SUPPRESSED]` |
 | Payload exceeds `max-payload-size` | `[CONTENT TOO LARGE]` |
 
 **Custom content types:**
@@ -85,7 +87,7 @@ Supplying `allowed-content-types` completely replaces the built-in list (overrid
 :::
 
 ::: info
-When `tee-filter.enabled` is `false` (the default), `%requestContent` and `%responseContent` always render as empty. This also suppresses the form-data reconstruction path for `application/x-www-form-urlencoded` requests, so credentials submitted as form fields never leak into the access log unless TeeFilter is explicitly enabled.
+When `tee-filter.enabled` is `false` (the default), `%requestContent` and `%responseContent` always render as empty. This also suppresses the form-data reconstruction path for `application/x-www-form-urlencoded` requests. Even when TeeFilter is enabled, form bodies render as `[BINARY CONTENT SUPPRESSED]` unless `application/x-www-form-urlencoded` is explicitly added to `allowed-content-types`, so credentials submitted as form fields never leak into the access log by default.
 :::
 
 ### Character Encoding

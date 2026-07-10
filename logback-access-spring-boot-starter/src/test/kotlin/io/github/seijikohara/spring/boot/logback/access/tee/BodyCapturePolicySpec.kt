@@ -39,9 +39,20 @@ class BodyCapturePolicySpec :
             test("allows application/atom+xml") {
                 BodyCapturePolicy.evaluate("application/atom+xml", 100L, defaultProperties) shouldBe null
             }
+        }
 
-            test("allows application/x-www-form-urlencoded") {
-                BodyCapturePolicy.evaluate("application/x-www-form-urlencoded", 100L, defaultProperties) shouldBe null
+        context("evaluate — form data") {
+            test("suppresses application/x-www-form-urlencoded by default") {
+                BodyCapturePolicy.evaluate("application/x-www-form-urlencoded", 100L, defaultProperties) shouldBe
+                    "[BINARY CONTENT SUPPRESSED]"
+            }
+
+            test("allows form data when explicitly listed in allowed content types") {
+                val customProperties =
+                    defaultProperties.copy(
+                        allowedContentTypes = listOf("application/x-www-form-urlencoded"),
+                    )
+                BodyCapturePolicy.evaluate("application/x-www-form-urlencoded", 100L, customProperties) shouldBe null
             }
         }
 
@@ -113,8 +124,19 @@ class BodyCapturePolicySpec :
         }
 
         context("evaluate — null content type") {
-            test("allows null content type (treated as text)") {
-                BodyCapturePolicy.evaluate(null, 100L, defaultProperties) shouldBe null
+            test("suppresses null content type when a payload is present") {
+                BodyCapturePolicy.evaluate(null, 100L, defaultProperties) shouldBe
+                    "[BINARY CONTENT SUPPRESSED]"
+            }
+        }
+
+        context("evaluate — empty payload") {
+            test("allows empty payload with null content type") {
+                BodyCapturePolicy.evaluate(null, 0L, defaultProperties) shouldBe null
+            }
+
+            test("allows empty payload with a disallowed content type") {
+                BodyCapturePolicy.evaluate("application/octet-stream", 0L, defaultProperties) shouldBe null
             }
         }
 

@@ -140,7 +140,7 @@ class TomcatRequestDataExtractorSpec :
         }
 
         context("extractContent — form data normal path") {
-            test("returns URL-encoded form data when buffer is absent") {
+            test("returns URL-encoded form data when buffer is absent and form capture is allowed") {
                 val request = mockk<Request>(relaxed = true)
                 every { request.getAttribute(LB_INPUT_BUFFER) } returns null
                 every { request.contentType } returns "application/x-www-form-urlencoded"
@@ -148,9 +148,27 @@ class TomcatRequestDataExtractorSpec :
                 every { request.characterEncoding } returns null
                 every { request.parameterMap } returns mapOf("key" to arrayOf("value"))
 
-                val content = TomcatRequestDataExtractor.extractContent(request, defaultProperties)
+                val formAllowed =
+                    defaultProperties.copy(
+                        allowedContentTypes = listOf("application/x-www-form-urlencoded"),
+                    )
+
+                val content = TomcatRequestDataExtractor.extractContent(request, formAllowed)
 
                 content shouldBe "key=value"
+            }
+
+            test("suppresses form data with default allowed content types") {
+                val request = mockk<Request>(relaxed = true)
+                every { request.getAttribute(LB_INPUT_BUFFER) } returns null
+                every { request.contentType } returns "application/x-www-form-urlencoded"
+                every { request.method } returns "POST"
+                every { request.characterEncoding } returns null
+                every { request.parameterMap } returns mapOf("username" to arrayOf("admin"), "password" to arrayOf("secret"))
+
+                val content = TomcatRequestDataExtractor.extractContent(request, defaultProperties)
+
+                content shouldBe "[BINARY CONTENT SUPPRESSED]"
             }
         }
 
