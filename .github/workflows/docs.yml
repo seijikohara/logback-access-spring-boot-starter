@@ -8,10 +8,9 @@ on:
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
+# Least privilege for all jobs; the deploy job declares the write scopes it needs.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -20,6 +19,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # configure-pages reads the Pages site configuration.
+      pages: read
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -55,6 +58,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
