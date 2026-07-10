@@ -28,7 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *                 defaultValue="default-app" scope="context"/&gt;
  * &lt;springProperty name="customProperty" source="custom.property"
  *                 defaultValue="default-value" scope="context"/&gt;
+ * &lt;springProperty name="missingProperty" source="missing.property"
+ *                 defaultValue="fallback-value" scope="context"/&gt;
  * </pre>
+ * No test sets {@code missing.property}, so {@code missingProperty} must resolve to its default value.
  */
 public abstract class AbstractSpringPropertyScopeTest {
 
@@ -53,11 +56,9 @@ public abstract class AbstractSpringPropertyScopeTest {
 
     @Test
     void contextScopePropertyUsesDefaultWhenSourceMissing() {
-        // Start a new context without setting spring.application.name
-        // This test verifies the existing context has the configured value
-        final var appName = getLogbackAccessContext().getAccessContext().getProperty("appName");
-        assertThat(appName)
-                .as("Property should be set from spring.application.name")
-                .isNotEqualTo("default-app");
+        final var missingProperty = getLogbackAccessContext().getAccessContext().getProperty("missingProperty");
+        assertThat(missingProperty)
+                .as("springProperty must fall back to defaultValue when its source is not set")
+                .isEqualTo("fallback-value");
     }
 }

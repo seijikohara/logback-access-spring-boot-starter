@@ -171,4 +171,18 @@ public abstract class AbstractReactiveAccessLogTest {
         final var event = events.get(0);
         assertThat(event.getStatusCode()).isEqualTo(404);
     }
+
+    @Test
+    void remoteUserRendersAsNotAvailableOnReactiveStacks() throws Exception {
+        // Spring Security username capture is Servlet-only, so %u must always render as "-"
+        // on WebFlux regardless of authentication state.
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        assertThat(events.get(0).getRemoteUser()).isEqualTo("-");
+    }
 }
