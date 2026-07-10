@@ -12,6 +12,12 @@ internal object BodyCapturePolicy {
     private const val BINARY_CONTENT_SUPPRESSED = "[BINARY CONTENT SUPPRESSED]"
     private const val CONTENT_TOO_LARGE = "[CONTENT TOO LARGE]"
 
+    /**
+     * Form submissions (application/x-www-form-urlencoded) are deliberately excluded:
+     * login forms (for example Spring Security's formLogin) post credentials with that
+     * content type, so capturing it by default would write plaintext credentials to the
+     * access log. Operators opt in via allowed-content-types.
+     */
     private val DEFAULT_ALLOWED_CONTENT_TYPES =
         listOf(
             "text/*",
@@ -19,11 +25,14 @@ internal object BodyCapturePolicy {
             "application/xml",
             "application/*+json",
             "application/*+xml",
-            "application/x-www-form-urlencoded",
         )
 
     /**
      * Evaluates whether body content should be suppressed.
+     *
+     * Empty payloads are always allowed because there is nothing to expose.
+     * Non-empty payloads without a Content-Type are suppressed because the
+     * allowlist cannot classify them.
      *
      * @return null if capture is allowed, or a sentinel string if suppressed.
      */
@@ -34,6 +43,7 @@ internal object BodyCapturePolicy {
     ): String? =
         when {
             payloadSize > properties.maxPayloadSize -> CONTENT_TOO_LARGE
+            payloadSize == 0L -> null
             !isAllowedContentType(contentType, properties) -> selectBinarySentinel(contentType)
             else -> null
         }
@@ -62,7 +72,7 @@ internal object BodyCapturePolicy {
             ?.let { mimeType ->
                 (properties.allowedContentTypes ?: DEFAULT_ALLOWED_CONTENT_TYPES)
                     .any { matchesMimePattern(mimeType, it.lowercase()) }
-            } ?: true
+            } ?: false
 
     private fun selectBinarySentinel(contentType: String?): String =
         contentType

@@ -45,7 +45,7 @@ logback:
 
 ### ボディキャプチャポリシー
 
-キャプチャしたバイト列をログ出力に含める前に、スターターはレスポンスの`Content-Type`とペイロードサイズに基づきキャプチャポリシーを評価します。バイナリコンテンツや巨大なペイロードはセンチネル値に置換されます。
+キャプチャしたバイト列をログ出力に含める前に、スターターはレスポンスの`Content-Type`とペイロードサイズに基づきキャプチャポリシーを評価します。バイナリコンテンツや巨大なペイロードはセンチネル値に置換されます。空のペイロードがセンチネル値に置換されることはありません。
 
 **デフォルトで許可されるコンテンツタイプ:**
 
@@ -54,14 +54,16 @@ logback:
 - `application/xml`
 - `application/*+json`（application/vnd.api+jsonなど）
 - `application/*+xml`（application/atom+xmlなど）
-- `application/x-www-form-urlencoded`
+
+`application/x-www-form-urlencoded`はデフォルト一覧に意図的に含まれていません。ログインフォーム（例: Spring Securityの`formLogin()`）はこのコンテンツタイプで認証情報を送信するためです。フォームボディのキャプチャが必要な場合は`allowed-content-types`に明示的に追加してください。
 
 **センチネル値:**
 
 | 条件 | センチネル |
 |------|-----------|
 | 画像コンテンツ（`image/*`） | `[IMAGE CONTENTS SUPPRESSED]` |
-| その他のバイナリコンテンツ | `[BINARY CONTENT SUPPRESSED]` |
+| その他のバイナリ・非許可コンテンツ | `[BINARY CONTENT SUPPRESSED]` |
+| `Content-Type`ヘッダーなし（空でないペイロード） | `[BINARY CONTENT SUPPRESSED]` |
 | ペイロードが`max-payload-size`を超過 | `[CONTENT TOO LARGE]` |
 
 **カスタムコンテンツタイプ:**
@@ -85,7 +87,7 @@ logback:
 :::
 
 ::: info
-`tee-filter.enabled`が`false`（デフォルト）の場合、`%requestContent`と`%responseContent`は常に空を返します。これにより、`application/x-www-form-urlencoded`リクエストのフォームデータ再構成パスも抑制されます。TeeFilterを明示的に有効化しない限り、フォームに送信された認証情報などがアクセスログに漏洩することはありません。
+`tee-filter.enabled`が`false`（デフォルト）の場合、`%requestContent`と`%responseContent`は常に空を返します。これにより、`application/x-www-form-urlencoded`リクエストのフォームデータ再構成パスも抑制されます。TeeFilterを有効化した場合でも、`allowed-content-types`に`application/x-www-form-urlencoded`を明示的に追加しない限りフォームボディは`[BINARY CONTENT SUPPRESSED]`として出力されるため、フォームに送信された認証情報がデフォルト設定でアクセスログに漏洩することはありません。
 :::
 
 ### 文字エンコーディング

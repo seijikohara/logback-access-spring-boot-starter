@@ -49,9 +49,11 @@ Access logs record attacker-controlled request data. Configure logging defensive
 - **Secrets in patterns.** Avoid `%{Authorization}i`, `%{Cookie}i`, `%{Set-Cookie}o`, individual
   cookie values, and the session ID in production patterns. These can expose bearer tokens,
   credentials, and session identifiers.
-- **Request/response bodies.** TeeFilter is disabled by default. Enable it only when body capture is
-  required, restrict it with `allowed-content-types` and `include-hosts` / `exclude-hosts`, and note
-  that it buffers full bodies in memory regardless of `max-payload-size`.
+- **Request/response bodies.** TeeFilter is disabled by default. Even when enabled, form submissions
+  (`application/x-www-form-urlencoded`) and non-empty payloads without a `Content-Type` are suppressed
+  unless explicitly added to `allowed-content-types`. Enable it only when body capture is required,
+  restrict it with `allowed-content-types` and `include-hosts` / `exclude-hosts`, and note that it
+  buffers full bodies in memory regardless of `max-payload-size`.
 
 See the [advanced guide](https://seijikohara.github.io/logback-access-spring-boot-starter/guide/advanced) for body-capture configuration and platform behavior.
 
