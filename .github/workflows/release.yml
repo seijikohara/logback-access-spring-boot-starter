@@ -13,10 +13,9 @@ on:
         type: boolean
         default: true
 
+# Least privilege for all jobs; the release job declares the write scopes it needs.
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 # Never run two releases concurrently, but do not cancel an in-flight release.
 concurrency:
@@ -156,6 +155,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+
       - name: Set up JDK
         uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
         with:
@@ -197,6 +199,11 @@ jobs:
     needs: [validate, build-and-dry-run]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # The only job that uploads attestations; the tag push and release creation use the app token.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     if: ${{ !inputs.dry-run }}
     environment:
       name: maven-central
@@ -217,6 +224,9 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
 
       - name: Set up JDK
         uses: actions/setup-java@1bcf9fb12cf4aa7d266a90ae39939e61372fe520 # v5
