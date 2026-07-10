@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for Spring Profile integration with logback-access configuration on Jetty.
  * Uses logback-access-spring-profile.xml which defines profile-specific appenders.
  */
-class JettySpringProfileTest {
+class SpringProfileTest {
 
     @Nested
     @SpringBootTest(

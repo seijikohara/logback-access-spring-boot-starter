@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
                 "custom.property=custom-test-value"
         }
 )
-class JettySpringPropertyScopeTest extends AbstractSpringPropertyScopeTest {
+class SpringPropertyScopeTest extends AbstractSpringPropertyScopeTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;

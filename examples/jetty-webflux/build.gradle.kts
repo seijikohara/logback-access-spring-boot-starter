@@ -20,7 +20,7 @@ nullaway {
 }
 
 configurations.all {
-    exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+    exclude(group = "org.springframework.boot", module = "spring-boot-starter-reactor-netty")
 }
 
 dependencies {

@@ -1,6 +1,6 @@
 package examples.jettymvc;
 
-import examples.test.mvc.AbstractLocalPortStrategyTest;
+import examples.AbstractBasicAccessLogTest;
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,17 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 /**
- * Tests the localPortStrategy=LOCAL configuration on Jetty.
- * <p>
- * When LOCAL strategy is used, the access event captures the actual
- * local port that received the connection, rather than the server port
- * from the Host header or X-Forwarded-Port.
+ * Basic access log tests for Jetty + MVC.
+ * Extends AbstractBasicAccessLogTest for common HTTP method tests.
  */
-@SpringBootTest(
-        webEnvironment = WebEnvironment.RANDOM_PORT,
-        properties = "logback.access.local-port-strategy=LOCAL"
-)
-class JettyLocalPortStrategyTest extends AbstractLocalPortStrategyTest {
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+class BasicAccessLogTest extends AbstractBasicAccessLogTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;
@@ -34,10 +28,5 @@ class JettyLocalPortStrategyTest extends AbstractLocalPortStrategyTest {
     @Override
     protected String getBaseUrl() {
         return "http://localhost:" + port;
-    }
-
-    @Override
-    protected int getPort() {
-        return port;
     }
 }

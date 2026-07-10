@@ -1,6 +1,6 @@
 package examples.jettymvc;
 
-import examples.AbstractBasicAccessLogTest;
+import examples.AbstractSecurityTest;
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,11 +8,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 /**
- * Basic access log tests for Jetty + MVC.
- * Extends AbstractBasicAccessLogTest for common HTTP method tests.
+ * Tests for Spring Security integration with Jetty access logging.
+ * Extends AbstractSecurityTest for common security tests.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class JettyBasicAccessLogTest extends AbstractBasicAccessLogTest {
+class SecurityIntegrationTest extends AbstractSecurityTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;
@@ -28,5 +28,15 @@ class JettyBasicAccessLogTest extends AbstractBasicAccessLogTest {
     @Override
     protected String getBaseUrl() {
         return "http://localhost:" + port;
+    }
+
+    @Override
+    protected String getAuthenticatedUsername() {
+        return "user";
+    }
+
+    @Override
+    protected String getAuthenticatedPassword() {
+        return "password";
     }
 }

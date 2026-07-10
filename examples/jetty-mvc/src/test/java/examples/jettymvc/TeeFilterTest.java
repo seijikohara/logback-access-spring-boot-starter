@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("teefilter")
 @Disabled("TeeFilter does not work on Jetty 12 - RequestLog API cannot access Servlet request attributes")
-class JettyTeeFilterTest extends AbstractTeeFilterTest {
+class TeeFilterTest extends AbstractTeeFilterTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;

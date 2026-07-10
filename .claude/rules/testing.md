@@ -38,7 +38,7 @@ Prefer behavioral test names (`"returns ..."`, `"throws ... when ..."`) over gen
 - **Framework**: JUnit 5 with AssertJ assertions.
 - **Pattern**: `@SpringBootTest(webEnvironment = RANDOM_PORT)` against a real embedded server, plus the project's `HttpClientTestUtils` to issue requests.
 - **Coverage matrix**: four runnable apps — `tomcat-mvc`, `tomcat-webflux`, `jetty-mvc`, `jetty-webflux` — exercise the cross product of server (Tomcat / Jetty) and stack (Servlet MVC / reactive WebFlux).
-- **TeeFilter tests** are Tomcat-only. The Jetty equivalent (`JettyTeeFilterTest`) is annotated `@Disabled` because Jetty 12's `RequestLog` API runs below the Servlet layer and cannot see attributes that TeeFilter writes to the Servlet request.
+- **TeeFilter tests** are Tomcat-only. The Jetty equivalent (`TeeFilterTest` in `jetty-mvc`) is annotated `@Disabled` because Jetty 12's `RequestLog` API runs below the Servlet layer and cannot see attributes that TeeFilter writes to the Servlet request.
 - **Shared utilities** (`HttpClientTestUtils`, `AccessEventTestUtils`, abstract base classes) live in `examples/common`.
 
 ## Running Tests

@@ -1,6 +1,6 @@
 package examples.jettymvc;
 
-import examples.AbstractSecurityTest;
+import examples.test.mvc.AbstractLocalPortStrategyTest;
 import io.github.seijikohara.spring.boot.logback.access.LogbackAccessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,11 +8,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 /**
- * Tests for Spring Security integration with Jetty access logging.
- * Extends AbstractSecurityTest for common security tests.
+ * Tests the localPortStrategy=LOCAL configuration on Jetty.
+ * <p>
+ * When LOCAL strategy is used, the access event captures the actual
+ * local port that received the connection, rather than the server port
+ * from the Host header or X-Forwarded-Port.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class JettySecurityTest extends AbstractSecurityTest {
+@SpringBootTest(
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = "logback.access.local-port-strategy=LOCAL"
+)
+class LocalPortStrategyTest extends AbstractLocalPortStrategyTest {
 
     @Autowired
     LogbackAccessContext logbackAccessContext;
@@ -31,12 +37,7 @@ class JettySecurityTest extends AbstractSecurityTest {
     }
 
     @Override
-    protected String getAuthenticatedUsername() {
-        return "user";
-    }
-
-    @Override
-    protected String getAuthenticatedPassword() {
-        return "password";
+    protected int getPort() {
+        return port;
     }
 }

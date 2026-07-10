@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationContext;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = "logback.access.enabled=false"
 )
-class JettyDisabledAccessLogTest extends AbstractDisabledAccessLogTest {
+class DisabledAccessLogTest extends AbstractDisabledAccessLogTest {
 
     @Autowired
     ApplicationContext applicationContext;
