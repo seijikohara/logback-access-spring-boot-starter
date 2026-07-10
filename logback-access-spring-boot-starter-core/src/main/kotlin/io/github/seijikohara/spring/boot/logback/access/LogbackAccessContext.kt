@@ -28,13 +28,23 @@ public class LogbackAccessContext(
     /** The underlying Logback-access context. */
     public val accessContext: AccessContext = AccessContext()
 
-    /** Compiled regex patterns for URL filtering, cached for performance. */
+    /**
+     * Compiled regex patterns for URL filtering, cached for performance.
+     *
+     * An empty list is normalized to null (no filtering): relaxed binding produces an
+     * empty, non-null list from an empty property value, and matching against an empty
+     * list would silently drop every event.
+     */
     private val includePatterns: List<Regex>? =
-        properties.filter.includeUrlPatterns?.map { it.toValidRegex("include") }
+        properties.filter.includeUrlPatterns
+            ?.takeIf { it.isNotEmpty() }
+            ?.map { it.toValidRegex("include") }
 
-    /** Compiled regex patterns for URL exclusion, cached for performance. */
+    /** Compiled regex patterns for URL exclusion, cached for performance. Empty lists are normalized like [includePatterns]. */
     private val excludePatterns: List<Regex>? =
-        properties.filter.excludeUrlPatterns?.map { it.toValidRegex("exclude") }
+        properties.filter.excludeUrlPatterns
+            ?.takeIf { it.isNotEmpty() }
+            ?.map { it.toValidRegex("exclude") }
 
     init {
         val (name, resource) = resolveConfig(properties, resourceLoader)
