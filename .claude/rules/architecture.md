@@ -18,7 +18,7 @@ paths:
 ### Starter module (`logback-access-spring-boot-starter`)
 
 - Depends on the core module via `api(project(":logback-access-spring-boot-starter-core"))`.
-- Treats server libraries (Tomcat, Jetty, Spring WebMVC, Spring WebFlux, Spring Security) as `compileOnly` dependencies; runtime presence is detected with `@ConditionalOnClass`.
+- Treats server libraries (Tomcat, Jetty, Spring Security) as `compileOnly` dependencies; runtime presence is detected with `@ConditionalOnClass`, and the Servlet/reactive split with `@ConditionalOnWebApplication`.
 - Auto-configuration entry point: `LogbackAccessAutoConfiguration`. Per-server integrations are imported via `@Import`.
 
 ## Conditional Configuration Pattern

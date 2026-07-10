@@ -35,7 +35,7 @@ mavenPublishing {
             }
         }
         scm {
-            connection = "scm:git:git://github.com/seijikohara/logback-access-spring-boot-starter.git"
+            connection = "scm:git:https://github.com/seijikohara/logback-access-spring-boot-starter.git"
             developerConnection = "scm:git:ssh://github.com/seijikohara/logback-access-spring-boot-starter.git"
             url = "https://github.com/seijikohara/logback-access-spring-boot-starter"
         }

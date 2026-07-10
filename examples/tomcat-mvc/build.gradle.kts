@@ -39,7 +39,7 @@ tasks.named<Jar>("jar") {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        named<JvmTestSuite>("test") {
             useJUnitJupiter()
             dependencies {
                 implementation(project(":examples:common"))
