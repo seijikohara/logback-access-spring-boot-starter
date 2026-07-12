@@ -1,5 +1,6 @@
 package examples.mvc;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,11 @@ public class MvcExampleController {
     @PostMapping("/echo")
     public Map<String, Object> echo(@RequestBody Map<String, Object> body) {
         return body;
+    }
+
+    @PostMapping(path = "/form", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public Map<String, String> form(@RequestParam Map<String, String> params) {
+        return params;
     }
 
     @PutMapping("/items/{id}")

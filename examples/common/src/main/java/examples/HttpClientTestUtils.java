@@ -115,6 +115,22 @@ public final class HttpClientTestUtils {
     }
 
     /**
+     * Sends a POST request with an application/x-www-form-urlencoded body.
+     *
+     * @param url  the URL to send the request to
+     * @param body the URL-encoded form body (for example, "a=1&b=2")
+     * @return the HTTP response
+     * @throws Exception if an error occurs
+     */
+    public static HttpResponse<String> postForm(final String url, final String body) throws Exception {
+        final var request = HttpRequest.newBuilder(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+        return CLIENT.send(request, BodyHandlers.ofString());
+    }
+
+    /**
      * Sends a PUT request with a JSON body.
      *
      * @param url  the URL to send the request to
