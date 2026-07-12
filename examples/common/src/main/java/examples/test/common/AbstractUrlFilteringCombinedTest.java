@@ -47,7 +47,9 @@ public abstract class AbstractUrlFilteringCombinedTest {
 
     @Test
     void includedButNotExcludedUrlEmitsEvent() throws Exception {
-        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+
+        assertThat(response.statusCode()).isEqualTo(200);
 
         final var events = AccessEventTestUtils.awaitEvents(listAppender);
 
@@ -57,16 +59,23 @@ public abstract class AbstractUrlFilteringCombinedTest {
 
     @Test
     void excludedUrlDoesNotEmitEvent() throws Exception {
-        HttpClientTestUtils.get(getBaseUrl() + "/api/health");
+        // Assert the request was served (200) so the absent event proves exclusion,
+        // not a request that never reached the application.
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/health");
+
+        assertThat(response.statusCode()).isEqualTo(200);
 
         AccessEventTestUtils.awaitNoEvents(listAppender);
     }
 
     @Test
     void urlOutsideIncludePatternsDoesNotEmitEvent() throws Exception {
-        // A 404 response emits an access event by default (see the basic tests), so an
-        // absent event here proves the include-pattern miss suppressed it.
-        HttpClientTestUtils.get(getBaseUrl() + "/nonexistent");
+        // A 404 response emits an access event by default (see the basic tests), so
+        // asserting the 404 and then an absent event proves the include-pattern miss
+        // suppressed it, not a request that never reached the application.
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/nonexistent");
+
+        assertThat(response.statusCode()).isEqualTo(404);
 
         AccessEventTestUtils.awaitNoEvents(listAppender);
     }

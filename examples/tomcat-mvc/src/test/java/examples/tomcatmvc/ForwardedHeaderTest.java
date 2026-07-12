@@ -14,9 +14,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
         webEnvironment = WebEnvironment.RANDOM_PORT,
         properties = {
                 "server.tomcat.remoteip.remote-ip-header=x-forwarded-for",
-                // Trust both loopback forms so the JDK client's connection is accepted
-                // as coming from an internal proxy regardless of IPv4/IPv6 resolution.
-                "server.tomcat.remoteip.internal-proxies=127\\.0\\.0\\.1|0:0:0:0:0:0:0:1"
+                // Trust the loopback forms the JDK client may present so the connection is
+                // accepted as an internal proxy regardless of IPv4/IPv6 resolution, including
+                // the compressed IPv6 loopback (::1) some environments report.
+                "server.tomcat.remoteip.internal-proxies=127\\.0\\.0\\.1|0:0:0:0:0:0:0:1|::1"
         }
 )
 class ForwardedHeaderTest extends AbstractForwardedHeaderTest {
