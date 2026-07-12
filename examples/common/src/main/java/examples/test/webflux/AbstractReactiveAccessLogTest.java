@@ -101,7 +101,28 @@ public abstract class AbstractReactiveAccessLogTest {
 
         assertThat(events).hasSize(1);
         final var event = events.get(0);
-        assertThat(event.getRequestURI()).isEqualTo("/api/delayed");
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(event.getRequestURI()).isEqualTo("/api/delayed");
+            // The endpoint delays 100 ms, so a correctly measured elapsed time cannot be
+            // 0 (guards the AccessLog contract's "0 nanos means unknown" fallback, PR #212).
+            softly.assertThat(event.getElapsedTime()).isGreaterThan(0L);
+        });
+    }
+
+    @Test
+    void streamingResponseEmitsAccessEvent() throws Exception {
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/stream");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        final var event = events.get(0);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(event.getRequestURI()).isEqualTo("/api/stream");
+            softly.assertThat(event.getStatusCode()).isEqualTo(200);
+        });
     }
 
     @Test
@@ -184,5 +205,18 @@ public abstract class AbstractReactiveAccessLogTest {
 
         assertThat(events).hasSize(1);
         assertThat(events.get(0).getRemoteUser()).isEqualTo("-");
+    }
+
+    @Test
+    void reactiveEventCapturesRequestHeaders() throws Exception {
+        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        // Compare header names case-insensitively: servers differ in the casing they
+        // report for header names.
+        assertThat(events.get(0).getRequestHeaderMap().keySet())
+                .anySatisfy(name -> assertThat(name).isEqualToIgnoringCase("Host"));
     }
 }

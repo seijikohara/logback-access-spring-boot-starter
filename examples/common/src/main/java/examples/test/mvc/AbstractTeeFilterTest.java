@@ -119,4 +119,24 @@ public abstract class AbstractTeeFilterTest {
             );
         });
     }
+
+    @Test
+    void formPostBodyIsNotCapturedByDefault() throws Exception {
+        // The default allowlist deliberately excludes application/x-www-form-urlencoded
+        // so form-login credential submissions never reach the access log (PR #209).
+        final var response = HttpClientTestUtils.postForm(
+                getBaseUrl() + "/api/form",
+                "username=alice&password=hunter2");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        final var event = events.get(0);
+        assertThat(event.getRequestContent()).satisfiesAnyOf(
+                content -> assertThat(content).isNull(),
+                content -> assertThat(content).doesNotContain("hunter2")
+        );
+    }
 }

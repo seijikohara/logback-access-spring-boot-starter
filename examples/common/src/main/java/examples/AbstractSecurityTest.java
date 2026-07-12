@@ -117,4 +117,20 @@ public abstract class AbstractSecurityTest {
         final var event = events.get(0);
         assertThat(event.getStatusCode()).isEqualTo(401);
     }
+
+    @Test
+    void adminUserIsLoggedInAccessEvent() throws Exception {
+        // Credentials come from the shared MvcSecurityConfig in-memory user store.
+        final var response = HttpClientTestUtils.getWithBasicAuth(
+                getBaseUrl() + "/api/secure",
+                "admin",
+                "admin");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        assertThat(events.get(0).getRemoteUser()).isEqualTo("admin");
+    }
 }
