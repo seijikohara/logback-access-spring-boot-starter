@@ -185,4 +185,17 @@ public abstract class AbstractReactiveAccessLogTest {
         assertThat(events).hasSize(1);
         assertThat(events.get(0).getRemoteUser()).isEqualTo("-");
     }
+
+    @Test
+    void reactiveEventCapturesRequestHeaders() throws Exception {
+        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        // Compare header names case-insensitively: servers differ in the casing they
+        // report for header names.
+        assertThat(events.get(0).getRequestHeaderMap().keySet())
+                .anySatisfy(name -> assertThat(name).isEqualToIgnoringCase("Host"));
+    }
 }

@@ -143,4 +143,29 @@ public abstract class AbstractBasicAccessLogTest {
         final var event = events.get(0);
         assertThat(event.getStatusCode()).isEqualTo(404);
     }
+
+    @Test
+    void getRequestWithPathVariableEmitsAccessEvent() throws Exception {
+        final var response = HttpClientTestUtils.get(getBaseUrl() + "/api/items/42");
+
+        assertThat(response.statusCode()).isEqualTo(200);
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        assertThat(events.get(0).getRequestURI()).isEqualTo("/api/items/42");
+    }
+
+    @Test
+    void eventCapturesRequestHeaders() throws Exception {
+        HttpClientTestUtils.get(getBaseUrl() + "/api/hello");
+
+        final var events = AccessEventTestUtils.awaitEvents(listAppender);
+
+        assertThat(events).hasSize(1);
+        // Compare header names case-insensitively: servers differ in the casing they
+        // report for header names.
+        assertThat(events.get(0).getRequestHeaderMap().keySet())
+                .anySatisfy(name -> assertThat(name).isEqualToIgnoringCase("Host"));
+    }
 }
