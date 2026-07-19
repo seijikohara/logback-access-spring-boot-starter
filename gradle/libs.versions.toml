@@ -1,7 +1,7 @@
 [versions]
 axion-release = "1.21.2"
 binary-compatibility-validator = "0.18.1"
-cyclonedx = "3.2.4"
+cyclonedx = "3.3.0"
 detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
 error-prone = "2.50.0"
