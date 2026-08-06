@@ -2,7 +2,7 @@
 axion-release = "1.21.2"
 binary-compatibility-validator = "0.18.1"
 cyclonedx = "3.3.0"
-detekt = "2.0.0-alpha.5"
+detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
 error-prone = "2.50.0"
 error-prone-plugin = "5.1.0"
