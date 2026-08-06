@@ -1,5 +1,5 @@
 [versions]
-axion-release = "1.21.2"
+axion-release = "1.21.3"
 binary-compatibility-validator = "0.18.1"
 cyclonedx = "3.3.0"
 detekt = "2.0.0-alpha.5"
