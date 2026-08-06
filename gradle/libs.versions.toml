@@ -18,7 +18,7 @@ nullaway = "0.13.8"
 nullaway-plugin = "3.1.0"
 spotless = "8.9.0"
 spring-boot = "4.1.0"
-version-catalog-update = "1.1.0"
+version-catalog-update = "1.1.1"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core" }
