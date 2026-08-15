@@ -24,6 +24,19 @@
   automergeStrategy: "rebase",
   // Hold every release for 3 days so a hijacked publish cannot ride automerge on day zero.
   minimumReleaseAge: "3 days",
+  // A lock file refresh changes no declared version range, so automerge it like a patch
+  // update. The `matchUpdateTypes` rule below cannot cover it: Renovate treats
+  // `lockFileMaintenance` as its own update type.
+  //
+  // `rebaseWhen: "conflicted"` overrides the inherited "behind-base-branch". Otherwise every
+  // merge to main regenerates the lock file, which restarts the `minimumReleaseAge` countdown.
+  // main moves almost daily, so the countdown never completed and the lock file pull request
+  // stayed open for 53 days. The main ruleset does not require branches to be up to date, so a
+  // slightly stale lock file branch still merges.
+  lockFileMaintenance: {
+    automerge: true,
+    rebaseWhen: "conflicted",
+  },
   packageRules: [
     {
       description: "Auto-merge non-major updates once CI passes",
