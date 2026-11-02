@@ -1,61 +1,16 @@
 {
-  // Shared Renovate policy across seijikohara repositories.
-  // Schema: https://docs.renovatebot.com/renovate-schema.json
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: [
-    // Maintainer-recommended superset of config:recommended. Pins GitHub Action
-    // and Docker digests, enables config migration, dev-dependency pinning,
-    // weekly lock file maintenance, and the npm minimum-release-age cooldown.
-    "config:best-practices",
-    // Conventional Commits with a unified `chore(deps): ...` subject.
-    ":semanticCommits",
-    ":semanticCommitTypeAll(chore)",
-    ":semanticCommitScope(deps)",
-    // Keep npm semver ranges (the committed lockfile gives reproducibility); overrides
-    // best-practices dev-dependency pinning. Action digest pinning is unaffected.
-    ":preserveSemverRanges",
-  ],
-  timezone: "Asia/Tokyo",
-  schedule: ["before 9am on monday"],
-  labels: ["dependencies"],
-  // Keep update branches rebased on main and merge via rebase once CI passes.
-  rebaseWhen: "behind-base-branch",
-  platformAutomerge: true,
-  automergeStrategy: "rebase",
-  // Hold every release for 3 days so a hijacked publish cannot ride automerge on day zero.
-  minimumReleaseAge: "3 days",
-  // A lock file refresh changes no declared version range, so automerge it like a patch
-  // update. The `matchUpdateTypes` rule below cannot cover it: Renovate treats
-  // `lockFileMaintenance` as its own update type.
-  //
+  // Shared policy: https://github.com/seijikohara/renovate-config
+  extends: ["github>seijikohara/renovate-config:default.json5"],
   // `rebaseWhen: "conflicted"` overrides the inherited "behind-base-branch". Otherwise every
   // merge to main regenerates the lock file, which restarts the `minimumReleaseAge` countdown.
   // main moves almost daily, so the countdown never completed and the lock file pull request
   // stayed open for 53 days. The main ruleset does not require branches to be up to date, so a
   // slightly stale lock file branch still merges.
   lockFileMaintenance: {
-    automerge: true,
     rebaseWhen: "conflicted",
   },
   packageRules: [
-    {
-      description: "Auto-merge non-major updates once CI passes",
-      matchUpdateTypes: ["minor", "patch", "pin", "pinDigest", "digest"],
-      automerge: true,
-    },
-    {
-      description: "Hold major updates for manual review via the dependency dashboard",
-      matchUpdateTypes: ["major"],
-      automerge: false,
-      dependencyDashboardApproval: true,
-      addLabels: ["major"],
-    },
-    {
-      description: "Group and label GitHub Actions updates",
-      matchManagers: ["github-actions"],
-      groupName: "github-actions",
-      addLabels: ["github-actions"],
-    },
     {
       description: "Group the Spring ecosystem",
       groupName: "spring",
@@ -64,14 +19,7 @@
     {
       description: "Group the test frameworks to reduce PR churn",
       groupName: "test frameworks",
-      matchPackageNames: ["/^org\\.junit/", "/^org\\.spockframework/", "/^io\\.kotest/", "/^org\\.assertj/"],
+      matchPackageNames: ["/^org\\.junit/", "/^io\\.kotest/", "/^org\\.assertj/"],
     },
   ],
-  vulnerabilityAlerts: {
-    description: "Raise security fixes immediately and require manual review",
-    schedule: ["at any time"],
-    minimumReleaseAge: null,
-    addLabels: ["security"],
-    automerge: false,
-  },
 }
