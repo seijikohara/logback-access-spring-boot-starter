@@ -1,11 +1,18 @@
 [versions]
 axion-release = "1.21.4"
 binary-compatibility-validator = "0.18.2"
+bouncycastle = "1.85"
+commons-lang3 = "3.18.0"
 cyclonedx = "3.4.1"
 detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
 error-prone = "2.51.0"
 error-prone-plugin = "5.1.1"
+freemarker = "2.3.35"
+guava = "33.7.2-jre"
+jackson-cyclonedx = "2.22.3"
+jackson-dokka = "2.18.11"
+jsoup = "1.23.2"
 jspecify = "1.0.1"
 kotest = "6.2.6"
 kotlin = "2.4.21"
@@ -22,13 +29,22 @@ version-catalog-update = "1.1.2"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core" }
+bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 error-prone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "error-prone" }
+freemarker = { module = "org.freemarker:freemarker", version.ref = "freemarker" }
 # @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-dokka-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 # @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 # @keep consumed only by the separate buildSrc build, invisible to the root version-catalog update
 gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+jackson-core-cyclonedx = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-cyclonedx" }
+jackson-core-dokka = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson-dokka" }
+jackson-databind-cyclonedx = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-cyclonedx" }
+jackson-databind-dokka = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-dokka" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
