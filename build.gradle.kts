@@ -49,6 +49,29 @@ versionCatalogUpdate {
 // -PtestJavaVersion so the compiled artifacts are exercised on each supported runtime.
 val testJavaVersion = providers.gradleProperty("testJavaVersion").map(JavaLanguageVersion::of)
 
+// Each subproject requests its plugins in its own plugins {} block and resolves its own build
+// classpath, so a root buildscript constraint would not reach those classpaths. These floors lift
+// vulnerable transitive dependencies of the plugins until the plugins ship patched versions; a
+// constraint has no effect on a classpath that does not contain the module. The root catalog is
+// captured first because `libs` inside subprojects {} would look up each subproject's extension.
+val catalog = libs
+subprojects {
+    buildscript.dependencies.constraints {
+        add("classpath", catalog.guava) {
+            because("the CycloneDX plugin pulls Guava 33.6.0 (GHSA-xxph-c9ww-hj94)")
+        }
+        add("classpath", catalog.jackson.core.cyclonedx) {
+            because("the CycloneDX plugin pulls Jackson 2.22.1 (GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf)")
+        }
+        add("classpath", catalog.jackson.databind.cyclonedx) {
+            because("the CycloneDX plugin pulls Jackson 2.22.1 (GHSA-wv8q-qhhj-9h54, GHSA-cxp5-3px4-pw24)")
+        }
+        add("classpath", catalog.commons.lang3) {
+            because("the Spring Boot plugin pulls commons-lang3 3.16.0 (GHSA-j288-q9x7-2f5v)")
+        }
+    }
+}
+
 subprojects {
     plugins.withType<JavaBasePlugin> {
         val javaToolchains = extensions.getByType<JavaToolchainService>()
