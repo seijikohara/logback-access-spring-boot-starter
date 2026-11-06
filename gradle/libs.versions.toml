@@ -2,7 +2,7 @@
 axion-release = "1.21.4"
 binary-compatibility-validator = "0.18.2"
 bouncycastle = "1.85"
-commons-lang3 = "3.18.0"
+commons-lang3 = "3.21.0"
 cyclonedx = "3.4.1"
 detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
