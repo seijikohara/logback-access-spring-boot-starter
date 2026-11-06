@@ -23,7 +23,7 @@ maven-publish = "0.37.0"
 mockk = "1.14.11"
 nullaway = "0.14.3"
 nullaway-plugin = "3.3.0"
-spotless = "8.10.4"
+spotless = "8.11.0"
 spring-boot = "4.1.2"
 version-catalog-update = "1.1.2"
 
